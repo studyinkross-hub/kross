@@ -642,6 +642,12 @@
 </div>
 
 <script>
+// ================================================================
+// ⚙️ GAS 연동 설정
+// ================================================================
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxN3GjL-yQz4KinAS-Pil669-PuDhPytsJVuC_S_FLHycdP1gcWXLXCBAjJUqukVoIK/exec";
+const GAS_ENABLED = GAS_URL && !GAS_URL.includes("여기에");
+
 // ---------------------------------------------------------------
 // 상수 및 상태
 // ---------------------------------------------------------------
@@ -1896,13 +1902,6 @@ function renderRecordsList(){
 // — 단어장, 오답노트, 성적기록, 숙제체크, 학생이름 모두 보존
 // =================================================================
 // ================================================================
-// ⚙️ GAS 연동 설정 — 배포 URL을 여기에 붙여넣으세요
-// ================================================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbykehYa9Y1MckuqM1x6kEzqItMbuzwNKqo1RG6n0R-mcUMzJ6fUOb9781DQFDW3QvBe/exec";
-// GAS가 설정되지 않은 경우 localStorage 전용 모드로 동작합니다.
-const GAS_ENABLED = GAS_URL && !GAS_URL.includes("여기에");
-
-// ================================================================
 // 💾 데이터 저장소 (localStorage + GAS 이중 구조)
 // ================================================================
 const STORAGE_KEYS = {
@@ -1963,32 +1962,15 @@ function loadAll(){
 
 // ── GAS API 호출 헬퍼 ─────────────────────────────────────────
 async function gasGet(action){
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000); // 8초 타임아웃
-  try{
-    const res = await fetch(`${GAS_URL}?action=${action}`, { signal: controller.signal });
-    clearTimeout(timer);
-    return res.json();
-  }catch(e){
-    clearTimeout(timer);
-    throw e;
-  }
+  const res = await fetch(`${GAS_URL}?action=${action}`);
+  return res.json();
 }
 async function gasPost(body){
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
-  try{
-    const res = await fetch(GAS_URL, {
-      method:"POST",
-      body: JSON.stringify(body),
-      signal: controller.signal,
-    });
-    clearTimeout(timer);
-    return res.json();
-  }catch(e){
-    clearTimeout(timer);
-    throw e;
-  }
+  const res = await fetch(GAS_URL, {
+    method:"POST",
+    body: JSON.stringify(body),
+  });
+  return res.json();
 }
 
 // ── GAS에서 단어 + 명단 로드 (앱 시작 시) ────────────────────
@@ -2081,33 +2063,24 @@ switchStudentSub("study");
 
 // GAS에서 최신 데이터 로드 (비동기 — 화면 표시 후 백그라운드로)
 if(GAS_ENABLED){
-  // 로딩 배너 (건너뛰기 버튼 포함)
-  const banner = document.createElement("div");
-  banner.id = "gasBanner";
-  banner.style.cssText = "position:fixed;top:0;left:0;right:0;background:var(--green);color:#fff;padding:10px 16px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between;z-index:9999;";
-  banner.innerHTML = `<span>🔄 서버에서 최신 데이터 불러오는 중...</span><button onclick="document.getElementById('gasBanner').remove()" style="background:rgba(255,255,255,0.25);border:none;color:#fff;padding:4px 10px;border-radius:8px;cursor:pointer;font-size:12px;">건너뛰기 ✕</button>`;
-  document.body.prepend(banner);
-
+  showToast("🔄 서버에서 최신 데이터 불러오는 중...");
   loadFromGAS().then(success => {
-    const b = document.getElementById("gasBanner");
-    if(b) b.remove();
     if(success){
       renderTable();
       renderRosterPreview();
       renderHomeworkGrid();
+      // 이름 모달 자동 표시
       if(!studentName && manualRoster.length > 0){
         setTimeout(() => openNameModal(), 600);
       }
       showToast(`✅ 최신 데이터 로드 완료 — ${words.length}개 단어`);
     } else {
-      if(words.length > 0){
-        showToast(`📦 오프라인 모드 — ${words.length}개 단어 (캐시)`);
-      } else {
-        showToast("⚠️ GAS 연결 실패 — 선생님 모드에서 단어를 업로드해주세요");
-      }
+      // GAS 실패 시 localStorage 데이터로 동작
+      if(words.length > 0) showToast(`📦 오프라인 모드 — ${words.length}개 단어 (캐시)`);
     }
   });
 } else {
+  // GAS 미설정: localStorage 전용 모드
   if(!studentName && manualRoster.length > 0){
     setTimeout(() => openNameModal(), 500);
   }
