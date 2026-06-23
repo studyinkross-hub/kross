@@ -266,7 +266,48 @@
   }
   .roster-name-chip .del-btn:hover{ color:var(--rose); }
 
-  /* ── 모달 공통 ── */
+  /* ── 모바일 최적화 ── */
+  @media(max-width:600px){
+    body{ padding:20px 12px 60px; }
+    .modal-box{ padding:24px 18px; }
+    .modal-title{ font-size:16px; }
+    .card{ padding:20px 16px; margin-bottom:14px; }
+    .subtabs{ gap:2px; padding:3px; }
+    .subtab{ font-size:11px; padding:9px 3px; border-radius:9px; }
+    .level-grid{ grid-template-columns:repeat(2,1fr); gap:8px; }
+    .level-card{ padding:14px 8px; }
+    .level-card .lv-name{ font-size:12px; }
+    .type-input{ font-size:17px; padding:14px; }
+    .flash-ko{ font-size:clamp(24px,6vw,34px); }
+    .flash-card{ min-height:180px; padding:24px 16px; }
+    .name-chip{ padding:10px 14px; font-size:13px; }
+    .btn{ padding:11px 14px; font-size:13px; }
+    .header img.logo{ width:90px; height:90px; }
+    .stats-summary{ grid-template-columns:1fr 1fr 1fr; gap:6px; }
+    .stat-box .n{ font-size:18px; }
+    .wrongnote-word{ font-size:14px; }
+  }
+
+  /* ── 이름 검색창 ── */
+  .name-search{
+    width:100%; padding:11px 14px; border-radius:12px; border:1.5px solid var(--border);
+    background:var(--surface-soft); color:var(--text); font-size:14px; margin-bottom:12px;
+  }
+  .name-search:focus{ outline:none; border-color:var(--green); }
+  .name-empty{ font-size:13px; color:var(--text-dim); text-align:center; padding:16px 0; }
+
+  /* ── 모달 박스 모바일 ── */
+  @media(max-width:600px){
+    .modal-overlay{ align-items:flex-end; padding:0; }
+    .modal-box{
+      border-radius:22px 22px 0 0;
+      max-height:85vh;
+      overflow-y:auto;
+      padding:24px 18px 32px;
+      width:100%;
+      max-width:100%;
+    }
+  }
   .modal-overlay{
     position:fixed; inset:0; background:rgba(30,50,20,0.45); backdrop-filter:blur(4px);
     display:flex; align-items:center; justify-content:center; z-index:1000; padding:20px;
@@ -356,6 +397,7 @@
       <!-- 2단계: 이름 선택 -->
       <div id="namePickStep" class="hidden">
         <div class="back-chip" id="btnBackToClass">← Chọn lớp khác</div>
+        <input type="text" class="name-search" id="nameSearch" placeholder="🔍 Tìm tên...">
         <div class="name-grid" id="nameGrid"></div>
       </div>
 
@@ -643,10 +685,10 @@
 
 <script>
 // ================================================================
-// ⚙️ GAS 연동 설정
+// ⚙️ GAS 연동 설정 — 항상 최상단에 위치해야 함
 // ================================================================
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxN3GjL-yQz4KinAS-Pil669-PuDhPytsJVuC_S_FLHycdP1gcWXLXCBAjJUqukVoIK/exec";
-const GAS_ENABLED = GAS_URL && !GAS_URL.includes("여기에");
+const GAS_ENABLED = !!(GAS_URL && !GAS_URL.includes("여기에"));
 
 // ---------------------------------------------------------------
 // 상수 및 상태
@@ -844,24 +886,42 @@ function showNamePickStep(cls){
     .map(r => r.name)
     .sort();
 
-  const grid = el("nameGrid");
+  const searchInput = el("nameSearch");
+  searchInput.value = "";
+
+  function renderNames(filter){
+    const filtered = filter
+      ? roster.filter(n => n.toLowerCase().includes(filter.toLowerCase()))
+      : roster;
+    const grid = el("nameGrid");
+
+    if(filtered.length === 0){
+      grid.innerHTML = `<div class="name-empty">Không tìm thấy tên nào.</div>`;
+      return;
+    }
+    grid.innerHTML = filtered.map(name => `
+      <div class="name-chip${name===selectedName?' selected':''}" data-name="${escapeHtml(name)}">${escapeHtml(name)}</div>
+    `).join("");
+    grid.querySelectorAll(".name-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        selectedName = chip.dataset.name;
+        grid.querySelectorAll(".name-chip").forEach(c =>
+          c.classList.toggle("selected", c.dataset.name===selectedName)
+        );
+      });
+    });
+  }
+
   if(roster.length === 0){
-    grid.innerHTML = `<div style="font-size:13px;color:var(--text-dim);">Lớp này chưa có học viên nào.</div>`;
+    el("nameGrid").innerHTML = `<div class="name-empty">Lớp này chưa có học viên nào.</div>`;
+    searchInput.style.display = "none";
     return;
   }
 
-  grid.innerHTML = roster.map(name => `
-    <div class="name-chip${name===selectedName?' selected':''}" data-name="${escapeHtml(name)}">${escapeHtml(name)}</div>
-  `).join("");
-
-  grid.querySelectorAll(".name-chip").forEach(chip => {
-    chip.addEventListener("click", () => {
-      selectedName = chip.dataset.name;
-      grid.querySelectorAll(".name-chip").forEach(c =>
-        c.classList.toggle("selected", c.dataset.name===selectedName)
-      );
-    });
-  });
+  searchInput.style.display = "";
+  searchInput.oninput = (e) => renderNames(e.target.value.trim());
+  renderNames("");
+  setTimeout(() => searchInput.focus(), 100);
 }
 
 el("btnBackToClass").addEventListener("click", () => showClassPickStep());
