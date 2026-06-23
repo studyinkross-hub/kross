@@ -356,31 +356,7 @@
       <!-- 2단계: 이름 선택 -->
       <div id="namePickStep" class="hidden">
         <div class="back-chip" id="btnBackToClass">← Chọn lớp khác</div>
-
-        <!-- 검색창 크게 강조 -->
-        <div style="position:relative; margin-bottom:14px;">
-          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;pointer-events:none;">🔍</span>
-          <input type="text" id="nameSearch"
-            placeholder="Nhập tên của bạn..."
-            autocomplete="off"
-            style="width:100%;padding:15px 15px 15px 44px;border-radius:14px;border:2px solid var(--green);background:var(--surface-soft);color:var(--text);font-size:16px;font-weight:600;outline:none;">
-        </div>
-
-        <!-- 안내 문구 (타이핑 전) -->
-        <div id="nameHint" style="text-align:center;padding:24px 0;color:var(--text-dim);font-size:13px;">
-          <div style="font-size:32px;margin-bottom:8px;">👆</div>
-          위 검색창에 이름을 입력하세요.<br>
-          <span style="font-size:12px;opacity:0.7;">Nhập tên bạn vào ô tìm kiếm phía trên</span>
-        </div>
-
-        <!-- 검색 결과 (타이핑 후) -->
-        <div id="nameSearchResult" class="hidden">
-          <div class="name-grid" id="nameGrid"></div>
-          <div id="nameNoResult" class="hidden" style="text-align:center;padding:16px 0;color:var(--text-dim);font-size:13px;">
-            이름을 찾을 수 없습니다.<br>
-            <span style="font-size:12px;">Không tìm thấy tên này</span>
-          </div>
-        </div>
+        <div class="name-grid" id="nameGrid"></div>
       </div>
 
       <div class="modal-error" id="nameError"></div>
@@ -667,7 +643,7 @@
 
 <script>
 // ================================================================
-// ⚙️ GAS 연동 설정 — 항상 최상단
+// ⚙️ GAS 설정 — 항상 최상단
 // ================================================================
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxN3GjL-yQz4KinAS-Pil669-PuDhPytsJVuC_S_FLHycdP1gcWXLXCBAjJUqukVoIK/exec";
 const GAS_ENABLED = !!(GAS_URL && !GAS_URL.includes("여기에"));
@@ -859,99 +835,33 @@ function showClassPickStep(){
 function showNamePickStep(cls){
   el("classPickStep").classList.add("hidden");
   el("namePickStep").classList.remove("hidden");
-  el("btnNameConfirm").classList.add("hidden"); // 이름 선택 전엔 숨김
+  el("btnNameConfirm").classList.remove("hidden");
   el("nameModalTitle").textContent = `📋 ${cls}`;
-  el("nameModalSub").textContent = "Nhập tên của bạn để bắt đầu.";
+  el("nameModalSub").textContent = "이름을 선택하세요.";
 
   const roster = manualRoster
     .filter(r => (r.class || "Chưa phân lớp") === cls)
     .map(r => r.name)
     .sort();
 
-  const searchInput = el("nameSearch");
-  const hint       = el("nameHint");
-  const resultBox  = el("nameSearchResult");
-  const noResult   = el("nameNoResult");
-  const grid       = el("nameGrid");
-
-  // 초기화
-  searchInput.value = "";
-  hint.classList.remove("hidden");
-  resultBox.classList.add("hidden");
-  el("btnNameConfirm").classList.add("hidden");
-
+  const grid = el("nameGrid");
   if(roster.length === 0){
-    hint.innerHTML = `<div style="font-size:28px;margin-bottom:8px;">😅</div>Lớp này chưa có học viên nào.<br><span style="font-size:12px;opacity:0.7;">Liên hệ giáo viên để được thêm tên</span>`;
-    searchInput.style.display = "none";
+    grid.innerHTML = `<div style="font-size:13px;color:var(--text-dim);">Lớp này chưa có học viên nào.</div>`;
     return;
   }
-  searchInput.style.display = "";
 
-  function renderResults(query){
-    const q = query.trim().toLowerCase();
+  grid.innerHTML = roster.map(name => `
+    <div class="name-chip${name===selectedName?' selected':''}" data-name="${escapeHtml(name)}">${escapeHtml(name)}</div>
+  `).join("");
 
-    if(!q){
-      // 입력 없으면 힌트만 표시
-      hint.classList.remove("hidden");
-      resultBox.classList.add("hidden");
-      el("btnNameConfirm").classList.add("hidden");
-      return;
-    }
-
-    // 타이핑 시작하면 힌트 숨기고 결과 표시
-    hint.classList.add("hidden");
-    resultBox.classList.remove("hidden");
-
-    const filtered = roster.filter(n => n.toLowerCase().includes(q));
-
-    if(filtered.length === 0){
-      grid.innerHTML = "";
-      noResult.classList.remove("hidden");
-      el("btnNameConfirm").classList.add("hidden");
-      return;
-    }
-
-    noResult.classList.add("hidden");
-    grid.innerHTML = filtered.map(name => `
-      <div class="name-chip${name===selectedName?' selected':''}" data-name="${escapeHtml(name)}"
-        style="width:100%;text-align:left;padding:13px 16px;font-size:15px;font-weight:600;border-radius:12px;">
-        ${escapeHtml(name)}
-      </div>
-    `).join("");
-
-    grid.querySelectorAll(".name-chip").forEach(chip => {
-      chip.addEventListener("click", () => {
-        selectedName = chip.dataset.name;
-        grid.querySelectorAll(".name-chip").forEach(c =>
-          c.classList.toggle("selected", c.dataset.name===selectedName)
-        );
-        el("btnNameConfirm").classList.remove("hidden");
-        // 선택 즉시 확인 버튼 강조
-        el("btnNameConfirm").textContent = `${selectedName} — Bắt đầu học →`;
-      });
+  grid.querySelectorAll(".name-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      selectedName = chip.dataset.name;
+      grid.querySelectorAll(".name-chip").forEach(c =>
+        c.classList.toggle("selected", c.dataset.name===selectedName)
+      );
     });
-
-    // 결과가 정확히 1개면 자동 선택
-    if(filtered.length === 1){
-      selectedName = filtered[0];
-      grid.querySelector(".name-chip").classList.add("selected");
-      el("btnNameConfirm").classList.remove("hidden");
-      el("btnNameConfirm").textContent = `${selectedName} — Bắt đầu học →`;
-    }
-  }
-
-  searchInput.oninput = (e) => renderResults(e.target.value);
-  searchInput.onkeydown = (e) => {
-    // Enter 누르면 바로 확인
-    if(e.key === "Enter" && selectedName){
-      studentName = selectedName;
-      updateNameDisplay();
-      closeNameModal();
-      saveAll();
-    }
-  };
-
-  setTimeout(() => searchInput.focus(), 150);
+  });
 }
 
 el("btnBackToClass").addEventListener("click", () => showClassPickStep());
@@ -2052,47 +1962,68 @@ function loadAll(){
 
 // ── GAS API 호출 헬퍼 ─────────────────────────────────────────
 async function gasGet(action){
-  const res = await fetch(`${GAS_URL}?action=${action}`);
-  return res.json();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000); // 30초 타임아웃
+  try{
+    const res = await fetch(`${GAS_URL}?action=${action}`, { signal: controller.signal });
+    clearTimeout(timer);
+    return res.json();
+  }catch(e){
+    clearTimeout(timer);
+    throw e;
+  }
 }
 async function gasPost(body){
-  const res = await fetch(GAS_URL, {
-    method:"POST",
-    body: JSON.stringify(body),
-  });
-  return res.json();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000);
+  try{
+    const res = await fetch(GAS_URL, {
+      method:"POST",
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    return res.json();
+  }catch(e){
+    clearTimeout(timer);
+    throw e;
+  }
 }
 
-// ── GAS에서 단어 + 명단 로드 (앱 시작 시) ────────────────────
+// ── GAS에서 단어 + 명단 로드 (앱 시작 시, 재시도 포함) ─────────
 async function loadFromGAS(){
   if(!GAS_ENABLED) return false;
-  try{
-    const [wRes, rRes] = await Promise.all([
-      gasGet("getWords"),
-      gasGet("getRoster"),
-    ]);
-    if(wRes.ok && wRes.data.length > 0){
-      words = wRes.data.map(r => ({
-        급수: String(r["급수"]||""),
-        과:   String(r["과"]||"1"),
-        단어: String(r["단어"]||""),
-        뜻:   String(r["뜻"]||""),
-        예문: String(r["예문"]||""),
-      }));
-      localStorage.setItem(STORAGE_KEYS.words, JSON.stringify(words));
+  // 최대 2번 시도 (cold start 대응)
+  for(let attempt = 1; attempt <= 2; attempt++){
+    try{
+      const [wRes, rRes] = await Promise.all([
+        gasGet("getWords"),
+        gasGet("getRoster"),
+      ]);
+      if(wRes.ok && wRes.data.length > 0){
+        words = wRes.data.map(r => ({
+          급수: String(r["급수"]||""),
+          과:   String(r["과"]||"1"),
+          단어: String(r["단어"]||""),
+          뜻:   String(r["뜻"]||""),
+          예문: String(r["예문"]||""),
+        }));
+        localStorage.setItem(STORAGE_KEYS.words, JSON.stringify(words));
+      }
+      if(rRes.ok && rRes.data.length > 0){
+        manualRoster = rRes.data.map(r => ({
+          name:  String(r["이름"]||""),
+          class: String(r["반"]||""),
+        }));
+        localStorage.setItem(STORAGE_KEYS.manualRoster, JSON.stringify(manualRoster));
+      }
+      return true;
+    }catch(e){
+      console.warn(`GAS 로드 실패 (시도 ${attempt}/2):`, e);
+      if(attempt < 2) await new Promise(r => setTimeout(r, 3000)); // 3초 후 재시도
     }
-    if(rRes.ok && rRes.data.length > 0){
-      manualRoster = rRes.data.map(r => ({
-        name:  String(r["이름"]||""),
-        class: String(r["반"]||""),
-      }));
-      localStorage.setItem(STORAGE_KEYS.manualRoster, JSON.stringify(manualRoster));
-    }
-    return true;
-  }catch(e){
-    console.warn("GAS 로드 실패 (오프라인 모드로 전환):", e);
-    return false;
   }
+  return false;
 }
 
 // ── GAS로 단어 저장 (선생님 업로드 시) ───────────────────────
