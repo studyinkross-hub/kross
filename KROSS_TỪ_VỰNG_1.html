@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Học Từ Vựng Tiếng Hàn · KROSS</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F9F2;
+    --surface:#FFFFFF;
+    --surface-soft:#EEF5E6;
+    --border:#E1E8D8;
+    --text:#22301B;
+    --text-dim:#7C8770;
+    --green-dark:#2F5E22;
+    --green:#5C9A2E;
+    --green-light:#8DC63F;
+    --green-soft:#E6F1DA;
+    --gold:#F0B429;
+    --gold-soft:#FCEFC7;
+    --copper:#C98A4B;
+    --rose:#D9685A;
+    --rose-soft:#FBE6E2;
+    --radius:18px;
+    --shadow:0 6px 20px rgba(60,90,40,0.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif;
+    min-height:100vh; padding:36px 18px 70px;
+  }
+  .app{ width:100%; max-width:720px; margin:0 auto; }
+
+  .header{ text-align:center; margin-bottom:30px; }
+  .header img.logo{ width:120px; height:120px; object-fit:contain; }
+  .header .tagline{
+    font-size:13px; color:var(--text-dim); margin-top:2px; letter-spacing:0.02em;
+  }
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:26px 24px; margin-bottom:18px; box-shadow:var(--shadow);
+  }
+  .section-title{ font-weight:700; font-size:16px; margin-bottom:6px; color:var(--text); }
+  .section-sub{ font-size:13px; color:var(--text-dim); margin-bottom:18px; line-height:1.6; }
+
+  .upload-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+  .file-label{
+    flex:1; min-width:200px; padding:16px; border-radius:14px; border:1.5px dashed var(--border);
+    text-align:center; cursor:pointer; font-size:13px; color:var(--text-dim); background:var(--surface-soft);
+  }
+  .file-label:hover{ border-color:var(--green); color:var(--green-dark); }
+  input[type=file]{ display:none; }
+  .btn{
+    padding:12px 18px; border-radius:12px; border:1px solid var(--border);
+    background:var(--surface); color:var(--text); font-weight:600; font-size:13px; cursor:pointer;
+    white-space:nowrap;
+  }
+  .btn:hover{ border-color:var(--green); color:var(--green-dark); }
+  .btn.primary{ background:var(--green); color:#fff; border-color:var(--green); }
+  .btn.primary:hover{ background:var(--green-dark); border-color:var(--green-dark); color:#fff; }
+  .btn.small{ padding:9px 13px; font-size:12px; }
+
+  table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
+  th, td{ text-align:left; padding:9px 8px; border-bottom:1px solid var(--border); }
+  th{ font-family:'JetBrains Mono',monospace; font-size:10.5px; text-transform:uppercase; color:var(--text-dim); letter-spacing:0.05em; }
+  td input{
+    width:100%; background:transparent; border:none; color:var(--text); font-size:13px;
+    font-family:'Inter',sans-serif; padding:4px;
+  }
+  td input:focus{ outline:1px solid var(--green); border-radius:6px; }
+  .row-del{ cursor:pointer; color:var(--rose); font-size:13px; }
+  .table-wrap{ max-height:340px; overflow-y:auto; border-radius:10px; }
+  .empty-state{ text-align:center; padding:30px 10px; color:var(--text-dim); font-size:13px; }
+
+  /* 이름 입력 */
+  .name-row{
+    display:flex; align-items:center; gap:10px; margin-bottom:14px;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:13px 16px;
+    box-shadow:var(--shadow);
+  }
+  .name-row label{ font-size:12px; color:var(--text-dim); white-space:nowrap; font-weight:600; }
+  .name-row input{
+    flex:1; background:transparent; border:none; color:var(--text); font-size:14px; font-weight:600;
+    padding:6px 4px; border-bottom:1px solid var(--border);
+  }
+  .name-row input:focus{ outline:none; border-color:var(--green); }
+
+  /* 서브탭 */
+  .subtabs{
+    display:flex; gap:4px; margin-bottom:18px; background:var(--surface-soft);
+    border-radius:14px; padding:4px;
+  }
+  .subtab{
+    flex:1; padding:11px 4px; text-align:center; border-radius:11px; font-size:12.5px; font-weight:700;
+    color:var(--text-dim); cursor:pointer;
+  }
+  .subtab.active{ background:var(--surface); color:var(--green-dark); box-shadow:0 2px 8px rgba(60,90,40,0.10); }
+
+  .lesson-grid{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:8px; }
+  .lesson-chip{
+    padding:10px 16px; border-radius:100px; border:1px solid var(--border);
+    background:var(--surface-soft); cursor:pointer; font-size:13px; font-weight:600; color:var(--text);
+  }
+  .lesson-chip.active{ background:var(--green); border-color:var(--green); color:#fff; }
+
+  .quiz-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .quiz-progress{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-dim); }
+  .quiz-score{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--green-dark); font-weight:700; }
+
+  .question-box{ text-align:center; padding:14px 10px 8px; }
+  .q-meaning{ font-size:19px; color:var(--text); font-weight:600; }
+
+  .example-hint{ margin-top:16px; font-size:12.5px; color:var(--text-dim); font-style:italic; text-align:center; min-height:18px; }
+
+  .result-score{ text-align:center; padding:14px 0 20px; }
+  .result-num{ font-family:'JetBrains Mono',monospace; font-weight:800; font-size:46px; color:var(--green-dark); }
+  .result-label{ color:var(--text-dim); font-size:13px; margin-top:4px; }
+  .wrong-list{ margin-top:10px; }
+  .wrong-item{
+    display:flex; justify-content:space-between; padding:10px 12px; border-radius:10px;
+    background:var(--rose-soft); margin-bottom:6px; font-size:13px;
+  }
+
+  .notice{ font-size:12px; color:var(--text-dim); line-height:1.7; }
+  .hidden{ display:none !important; }
+
+  /* 플래시카드 */
+  .flash-progress{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-dim); margin-bottom:14px; text-align:center; }
+  .flash-card{
+    min-height:220px; border-radius:18px; border:1px solid var(--border);
+    background:var(--surface-soft); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; padding:30px 20px; text-align:center; cursor:pointer;
+  }
+  .flash-vi{ font-size:21px; font-weight:600; color:var(--text); margin-bottom:8px; }
+  .flash-tap-hint{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); margin-top:14px; }
+  .flash-ko{ font-family:'Noto Serif KR',serif; font-weight:700; font-size:clamp(28px,7vw,38px); margin-bottom:10px; color:var(--green-dark); }
+  .flash-example{ font-size:13px; color:var(--text-dim); margin-top:6px; }
+  .flash-nav{ display:flex; gap:10px; margin-top:16px; }
+  .flash-nav .btn{ flex:1; }
+  .speak-btn{
+    width:56px; height:56px; border-radius:50%; border:none;
+    background:var(--green); color:#fff;
+    font-size:20px; cursor:pointer; margin:6px auto 0; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 16px rgba(92,154,46,0.30);
+  }
+  .speak-btn:hover{ background:var(--green-dark); }
+
+  /* 타이핑 퀴즈 */
+  .type-input{
+    width:100%; padding:16px 16px; border-radius:14px; border:1.5px solid var(--border);
+    background:var(--surface-soft); color:var(--text); font-size:20px;
+    font-family:'Noto Serif KR',serif; text-align:center; margin-top:18px;
+  }
+  .type-input:focus{ outline:none; border-color:var(--green); background:#fff; }
+  .type-input.correct{ border-color:var(--green); background:var(--green-soft); }
+  .type-input.wrong{ border-color:var(--rose); background:var(--rose-soft); }
+  .type-feedback{ text-align:center; font-size:13px; margin-top:10px; min-height:18px; font-weight:600; }
+  .type-feedback.correct{ color:var(--green-dark); }
+  .type-feedback.wrong{ color:var(--rose); }
+  .type-actions{ display:flex; gap:10px; margin-top:16px; }
+  .type-actions .btn{ flex:1; }
+
+  /* 오답노트 */
+  .wrongnote-item{
+    display:flex; justify-content:space-between; align-items:center; padding:13px 14px; border-radius:12px;
+    background:var(--surface-soft); margin-bottom:8px; gap:10px;
+  }
+  .wrongnote-word{ font-family:'Noto Serif KR',serif; font-weight:700; font-size:16px; color:var(--green-dark); }
+  .wrongnote-meaning{ font-size:12.5px; color:var(--text-dim); }
+  .wrongnote-count{
+    font-family:'JetBrains Mono',monospace; font-size:11px; padding:3px 8px; border-radius:100px;
+    background:var(--rose-soft); color:var(--rose); white-space:nowrap; font-weight:700;
+  }
+  .wrongnote-actions{ display:flex; gap:6px; }
+  .icon-btn{
+    border:1px solid var(--border); background:#fff; color:var(--text-dim); border-radius:8px;
+    width:30px; height:30px; cursor:pointer; font-size:13px;
+  }
+  .icon-btn:hover{ border-color:var(--green); color:var(--green-dark); }
+
+  /* 내 기록 */
+  .stats-summary{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:18px; }
+  .stat-box{ text-align:center; padding:14px 4px; border-radius:12px; background:var(--surface-soft); }
+  .stat-box .n{ font-family:'JetBrains Mono',monospace; font-weight:800; font-size:22px; color:var(--green-dark); }
+  .stat-box .l{ font-size:10.5px; color:var(--text-dim); margin-top:4px; }
+  .record-item{
+    display:flex; justify-content:space-between; align-items:center; padding:11px 12px; border-radius:10px;
+    background:var(--surface-soft); margin-bottom:6px; font-size:13px;
+  }
+  .record-pct{ font-family:'JetBrains Mono',monospace; font-weight:800; }
+  .record-pct.good{ color:var(--green-dark); } .record-pct.mid{ color:var(--copper); } .record-pct.low{ color:var(--rose); }
+  .record-meta{ font-size:11px; color:var(--text-dim); }
+
+  /* 교사 모드 진입/복귀 */
+  .teacher-toggle{ text-align:center; margin-top:24px; }
+  .teacher-toggle button{
+    background:none; border:none; color:var(--text-dim); font-size:12.5px; cursor:pointer;
+    text-decoration:underline; text-underline-offset:3px;
+  }
+  .teacher-toggle button:hover{ color:var(--green-dark); }
+  .back-row{ margin-bottom:18px; }
+  .back-btn{
+    background:none; border:none; color:var(--text-dim); font-size:13px; cursor:pointer; font-weight:600;
+  }
+  .back-btn:hover{ color:var(--green-dark); }
+
+  /* 선생님 - 숙제 관리 */
+  .hw-table-wrap{ overflow-x:auto; }
+  table.hw-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.hw-table th, table.hw-table td{ text-align:center; padding:8px 10px; border-bottom:1px solid var(--border); white-space:nowrap; }
+  table.hw-table th{ font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-dim); text-transform:uppercase; }
+  table.hw-table td:first-child, table.hw-table th:first-child{ text-align:left; position:sticky; left:0; background:var(--surface); }
+  table.hw-table input[type=checkbox]{ width:18px; height:18px; accent-color:var(--green); cursor:pointer; }
+  .roster-add{ display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+  .roster-add input{
+    flex:1; min-width:160px; padding:10px 12px; border-radius:10px; border:1px solid var(--border);
+    background:var(--surface-soft); color:var(--text); font-size:13px;
+  }
+  #sheetUrlInput{
+    flex:2; min-width:240px; padding:13px 14px; border-radius:12px; border:1px solid var(--border);
+    background:var(--surface-soft); color:var(--text); font-size:13px;
+  }
+
+  /* ── 레벨 선택 카드 ── */
+  .level-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:8px;
+  }
+  @media(max-width:480px){ .level-grid{ grid-template-columns:repeat(2,1fr); } }
+  .level-card{
+    padding:16px 10px; border-radius:14px; border:1.5px solid var(--border);
+    background:var(--surface-soft); cursor:pointer; text-align:center; transition:all 0.12s;
+  }
+  .level-card:hover{ border-color:var(--green); background:#f0f8e8; }
+  .level-card.active{ background:var(--green); color:#fff; border-color:var(--green); }
+  .level-card .lv-name{ font-weight:800; font-size:13px; line-height:1.3; }
+  .level-card .lv-count{ font-size:11px; color:var(--text-dim); margin-top:3px; }
+  .level-card.active .lv-count{ color:rgba(255,255,255,0.75); }
+  .level-card.empty{ opacity:0.4; cursor:default; pointer-events:none; }
+
+  /* ── 뒤로가기 칩 ── */
+  .back-chip{
+    display:inline-flex; align-items:center; gap:5px; margin-bottom:12px; font-size:12.5px;
+    font-weight:600; color:var(--text-dim); cursor:pointer; background:var(--surface);
+    border:1px solid var(--border); border-radius:100px; padding:6px 12px;
+  }
+  .back-chip:hover{ color:var(--green-dark); border-color:var(--green); }
+
+  /* ── 학생 명단 미리보기 ── */
+  .roster-preview{ margin-top:14px; }
+  .roster-group{ margin-bottom:12px; }
+  .roster-group-title{
+    font-family:'JetBrains Mono',monospace; font-size:10px; text-transform:uppercase;
+    color:var(--text-dim); letter-spacing:0.08em; margin-bottom:6px;
+  }
+  .roster-name-chip{
+    display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:8px;
+    background:var(--surface-soft); font-size:12.5px; margin:2px 4px 2px 0; border:1px solid var(--border);
+  }
+  .roster-name-chip .del-btn{
+    background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:11px; padding:0;
+  }
+  .roster-name-chip .del-btn:hover{ color:var(--rose); }
+
+  /* ── 모달 공통 ── */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(30,50,20,0.45); backdrop-filter:blur(4px);
+    display:flex; align-items:center; justify-content:center; z-index:1000; padding:20px;
+  }
+  .modal-box{
+    background:var(--surface); border-radius:22px; padding:32px 28px; width:100%; max-width:420px;
+    box-shadow:0 20px 60px rgba(30,50,20,0.22);
+  }
+  .modal-box .modal-title{
+    font-size:18px; font-weight:800; margin-bottom:6px; color:var(--green-dark);
+  }
+  .modal-box .modal-sub{
+    font-size:13px; color:var(--text-dim); margin-bottom:20px; line-height:1.5;
+  }
+  .modal-input{
+    width:100%; padding:14px 16px; border-radius:12px; border:1.5px solid var(--border);
+    background:var(--surface-soft); color:var(--text); font-size:16px; margin-bottom:14px;
+  }
+  .modal-input:focus{ outline:none; border-color:var(--green); }
+  .modal-actions{ display:flex; gap:10px; }
+  .modal-actions .btn{ flex:1; padding:13px; }
+  .modal-error{
+    font-size:12.5px; color:var(--rose); margin-bottom:10px; min-height:18px; font-weight:600;
+  }
+
+  /* ── 이름 선택 그리드 ── */
+  .name-grid{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px; }
+  .name-chip{
+    padding:12px 18px; border-radius:12px; border:1.5px solid var(--border);
+    background:var(--surface-soft); cursor:pointer; font-size:14px; font-weight:700; color:var(--text);
+    transition:all 0.12s;
+  }
+  .name-chip:hover{ background:var(--green); color:#fff; border-color:var(--green); }
+  .name-chip.selected{ background:var(--green-dark); color:#fff; border-color:var(--green-dark); }
+
+  /* ── 현재 학생 이름 표시 ── */
+  .name-row{
+    display:flex; align-items:center; gap:10px; margin-bottom:14px;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:13px 16px;
+    box-shadow:var(--shadow); cursor:pointer;
+  }
+  .name-row:hover{ border-color:var(--green); }
+  .name-row label{ font-size:12px; color:var(--text-dim); white-space:nowrap; font-weight:600; cursor:pointer; }
+  .name-row .name-display{ flex:1; font-size:14px; font-weight:700; color:var(--text); }
+  .name-row .name-change{ font-size:11px; color:var(--text-dim); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <img class="logo" src="data:image/png;base64,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" alt="KROSS">
+    <div class="tagline">Ứng dụng học từ vựng tiếng Hàn</div>
+  </div>
+
+  <!-- ── 비밀번호 모달 (선생님 입장용) ── -->
+  <div class="modal-overlay hidden" id="pwModal">
+    <div class="modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div class="modal-title">🔒 Khu vực Giáo viên</div>
+        <button id="btnPwClose" style="background:none;border:none;font-size:20px;color:var(--text-dim);cursor:pointer;line-height:1;padding:0 0 0 12px;">✕</button>
+      </div>
+      <div class="modal-sub">Vui lòng nhập mật khẩu để tiếp tục. Chỉ giáo viên mới có quyền truy cập.</div>
+      <input type="password" class="modal-input" id="pwInput" placeholder="Nhập mật khẩu">
+      <div class="modal-error" id="pwError"></div>
+      <div class="modal-actions">
+        <button class="btn" id="btnPwCancel">Hủy</button>
+        <button class="btn primary" id="btnPwConfirm">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 이름 선택 모달 (학생용) ── -->
+  <div class="modal-overlay hidden" id="nameModal">
+    <div class="modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div class="modal-title" id="nameModalTitle">👋 Xin chào!</div>
+        <button id="btnNameClose" style="background:none;border:none;font-size:20px;color:var(--text-dim);cursor:pointer;line-height:1;padding:0 0 0 12px;">✕</button>
+      </div>
+      <div class="modal-sub" id="nameModalSub">Chọn lớp của bạn.</div>
+
+      <!-- 1단계: 반 선택 -->
+      <div id="classPickStep">
+        <div class="name-grid" id="classGrid"></div>
+      </div>
+
+      <!-- 2단계: 이름 선택 -->
+      <div id="namePickStep" class="hidden">
+        <div class="back-chip" id="btnBackToClass">← Chọn lớp khác</div>
+        <div class="name-grid" id="nameGrid"></div>
+      </div>
+
+      <div class="modal-error" id="nameError"></div>
+      <div class="modal-actions">
+        <button class="btn" id="btnNameSkip">Bỏ qua</button>
+        <button class="btn primary hidden" id="btnNameConfirm">Bắt đầu học →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== HỌC VIÊN ===================== -->
+  <div id="studentView">
+
+    <div class="name-row" id="nameRow">
+      <label>Học viên</label>
+      <div class="name-display" id="nameDisplay">Chưa chọn tên</div>
+      <div class="name-change">▼ Đổi</div>
+    </div>
+
+    <div class="subtabs">
+      <div class="subtab active" data-sub="study">📖 Học từ</div>
+      <div class="subtab" data-sub="quiz">✍️ Kiểm tra</div>
+      <div class="subtab" data-sub="wrong">📕 Từ sai (<span id="wrongCount">0</span>)</div>
+      <div class="subtab" data-sub="stats">📊 Kết quả</div>
+    </div>
+
+    <!-- ---------- Học từ ---------- -->
+    <div id="studySection">
+      <div class="card" id="studyLevelCard">
+        <div class="section-title">Chọn cấp độ</div>
+        <div class="section-sub">Xem nghĩa tiếng Việt và thử nhớ lại từ tiếng Hàn. Nhấn vào thẻ để xem đáp án.</div>
+        <div class="level-grid" id="studyLevelGrid"></div>
+      </div>
+
+      <div class="card hidden" id="studyLessonCard">
+        <div class="back-chip" id="btnStudyBackLevel">← Chọn cấp độ khác</div>
+        <div class="section-title" id="studyLevelTitle">Sơ cấp 1</div>
+        <div class="section-sub">Chọn bài học</div>
+        <div class="lesson-grid" id="studyLessonGrid"></div>
+      </div>
+
+      <div class="card hidden" id="studyCardArea">
+        <div class="flash-progress" id="flashProgress">1 / 10</div>
+        <div class="flash-card" id="flashCard">
+          <div class="flash-vi" id="flashVi">Xin chào</div>
+          <div class="flash-tap-hint" id="flashHint">Nhấn để xem đáp án</div>
+        </div>
+        <div class="flash-nav">
+          <button class="btn" id="btnFlashPrev">← Trước</button>
+          <button class="btn" id="btnFlashMark">🔖 Thêm vào từ sai</button>
+          <button class="btn primary" id="btnFlashNext">Tiếp →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- Kiểm tra ---------- -->
+    <div id="quizSection" class="hidden">
+      <div class="card" id="quizLevelCard">
+        <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>Chọn cấp độ</span>
+          <button class="btn small hidden" id="btnRefreshSheet">🔄 Cập nhật mới nhất</button>
+        </div>
+        <div class="section-sub">Khi thấy nghĩa tiếng Việt, hãy nhập từ tiếng Hàn tương ứng.</div>
+        <div class="level-grid" id="quizLevelGrid"></div>
+      </div>
+
+      <div class="card hidden" id="quizLessonCard">
+        <div class="back-chip" id="btnQuizBackLevel">← Chọn cấp độ khác</div>
+        <div class="section-title" id="quizLevelTitle">Sơ cấp 1</div>
+        <div class="section-sub">Chọn bài học</div>
+        <div class="lesson-grid" id="quizLessonGrid"></div>
+      </div>
+
+      <div class="card hidden" id="quizCard">
+        <div class="quiz-header">
+          <span class="quiz-progress" id="quizProgress">1 / 10</span>
+          <span class="quiz-score" id="quizScore">Đúng 0</span>
+        </div>
+        <div class="question-box">
+          <div id="qMeaning" class="q-meaning"></div>
+        </div>
+        <input type="text" class="type-input" id="typeInput" placeholder="Nhập bằng tiếng Hàn" autocomplete="off">
+        <div class="type-feedback" id="typeFeedback"></div>
+        <div class="type-actions">
+          <button class="btn primary" id="btnTypeSubmit" style="flex:2;">Xác nhận (Enter)</button>
+          <button class="btn" id="btnTypeSpeak">🔊</button>
+        </div>
+        <div class="example-hint" id="exampleHint"></div>
+      </div>
+
+      <div class="card hidden" id="resultCard">
+        <div class="result-score">
+          <div class="result-num" id="resultNum">0%</div>
+          <div class="result-label">Tỷ lệ đúng</div>
+        </div>
+        <div class="wrong-list" id="wrongList"></div>
+        <div class="upload-row" style="margin-top:18px;">
+          <button class="btn primary" id="btnRetry">Làm lại bài này</button>
+          <button class="btn" id="btnBackLesson">Chọn bài khác</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- Từ sai ---------- -->
+    <div id="wrongSection" class="hidden">
+      <div class="card">
+        <div class="section-title">Sổ từ sai</div>
+        <div class="section-sub">Những từ bạn làm sai hoặc tự thêm sẽ xuất hiện ở đây. Hãy xóa khi bạn đã thuộc.</div>
+        <div class="upload-row">
+          <button class="btn primary" id="btnReviewWrong">📕 Bắt đầu ôn tập từ sai</button>
+          <button class="btn small" id="btnClearWrong">Xóa tất cả</button>
+        </div>
+      </div>
+      <div class="card">
+        <div id="wrongNoteList"></div>
+      </div>
+
+      <div class="card hidden" id="reviewQuizCard">
+        <div class="quiz-header">
+          <span class="quiz-progress" id="reviewProgress">1 / 10</span>
+          <span class="quiz-score" id="reviewScore">Đúng 0</span>
+        </div>
+        <div class="question-box">
+          <div id="rqMeaning" class="q-meaning"></div>
+        </div>
+        <input type="text" class="type-input" id="reviewInput" placeholder="Nhập bằng tiếng Hàn" autocomplete="off">
+        <div class="type-feedback" id="reviewFeedback"></div>
+        <div class="type-actions">
+          <button class="btn primary" id="btnReviewSubmit" style="flex:2;">Xác nhận (Enter)</button>
+          <button class="btn" id="btnReviewSpeak">🔊</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- Kết quả ---------- -->
+    <div id="statsSection" class="hidden">
+      <div class="card">
+        <div class="section-title">Kết quả học tập của tôi</div>
+        <div class="section-sub" id="statsNameHint">Nhập tên để xem kết quả các bài kiểm tra của bạn.</div>
+        <div class="stats-summary">
+          <div class="stat-box"><div class="n" id="statAttempts">0</div><div class="l">Số lần làm bài</div></div>
+          <div class="stat-box"><div class="n" id="statAvg">0%</div><div class="l">Tỷ lệ đúng TB</div></div>
+          <div class="stat-box"><div class="n" id="statBest">0%</div><div class="l">Cao nhất</div></div>
+        </div>
+        <div id="statsList"></div>
+      </div>
+    </div>
+
+    <div class="teacher-toggle">
+      <button id="btnGoTeacher">👩‍🏫 Dành cho giáo viên</button>
+    </div>
+  </div>
+
+  <!-- ===================== GIÁO VIÊN ===================== -->
+  <div id="teacherView" class="hidden">
+    <div class="back-row">
+      <button class="back-btn" id="btnBackStudent">← Quay lại học viên</button>
+    </div>
+
+    <!-- GAS 연결 상태 -->
+    <div class="card" style="padding:14px 18px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="gasStatusDot" style="width:10px;height:10px;border-radius:50%;background:var(--text-dim);flex-shrink:0;"></span>
+        <span id="gasStatusText" style="font-size:13px;color:var(--text-dim);">
+          GAS 미설정 — localStorage 전용 모드 (데이터가 이 브라우저에만 저장됩니다)
+        </span>
+        <button id="btnGasCheck" class="btn small" style="margin-left:auto;">연결 확인</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">🔒 Bảo mật</div>
+      <div class="section-sub">Thay đổi mật khẩu giáo viên. Mật khẩu mặc định: <b>kross1234</b></div>
+      <div class="upload-row">
+        <input type="password" id="pwCurrentInput" placeholder="Mật khẩu hiện tại" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface-soft);color:var(--text);font-size:13px;">
+        <input type="password" id="pwNewInput" placeholder="Mật khẩu mới" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface-soft);color:var(--text);font-size:13px;">
+        <button class="btn small primary" id="btnChangePw">변경</button>
+      </div>
+      <div id="pwChangeMsg" style="font-size:12.5px;min-height:18px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Tải lên từ vựng (Excel)</div>
+      <div class="section-sub">Tải file Excel (.xlsx) theo định dạng: <b>Cấp độ | Bài | Từ (Tiếng Hàn) | Nghĩa (Tiếng Việt) | Câu ví dụ</b>.</div>
+      <div class="upload-row">
+        <label class="file-label" id="fileLabel">
+          📂 Chọn file Excel hoặc kéo thả vào đây
+          <input type="file" id="fileInput" accept=".xlsx,.xls">
+        </label>
+        <button class="btn" id="btnTemplate">Xem định dạng mẫu</button>
+      </div>
+      <div class="upload-row">
+        <button class="btn small" id="btnAddRow">+ Thêm từ thủ công</button>
+        <button class="btn small" id="btnExportXlsx">Xuất ra Excel</button>
+        <button class="btn small" id="btnExportJson">Lưu JSON</button>
+        <label class="btn small" style="cursor:pointer;">
+          Tải JSON lên
+          <input type="file" id="jsonInput" accept=".json" style="display:none;">
+        </label>
+        <button class="btn small" id="btnClear">Xóa tất cả</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">🔗 Liên kết Google Sheet (kho lưu trữ chung)</div>
+      <div class="section-sub">
+        Giáo viên nhập từ vào cùng một Google Sheet, học viên sẽ luôn thấy phiên bản mới nhất.
+        Dòng đầu của Sheet cần có dạng: <b>Bài / Từ / Nghĩa (Tiếng Việt) / Câu ví dụ (tùy chọn) / Cấp độ (tùy chọn)</b>.
+      </div>
+      <div class="upload-row">
+        <input type="text" id="sheetUrlInput" placeholder="Dán liên kết Google Sheet (link Chia sẻ, quyền Người xem)">
+        <button class="btn primary" id="btnSheetLoad">Tải lên</button>
+      </div>
+      <div id="sheetStatus" class="notice" style="margin-top:4px;"></div>
+      <div class="notice" style="margin-top:12px;">
+        <b>Cách thiết lập (khuyên dùng)</b> — Trong Google Sheet, nhấn nút <code>Chia sẻ</code> ở góc trên bên phải,
+        chọn <b>"Bất kỳ ai có liên kết" → Người xem</b>, rồi sao chép liên kết và dán vào ô trên.
+        Không cần dùng "Xuất bản lên web" — cách đó hay bị lỗi do trình duyệt chặn (CORS).
+        Nếu Sheet ở chế độ riêng tư, việc tải lên sẽ thất bại.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Danh sách từ (<span id="wordCount">0</span> từ)</div>
+      <div class="table-wrap">
+        <table id="wordTable">
+          <thead>
+            <tr><th>Cấp độ</th><th>Bài</th><th>Từ</th><th>Nghĩa (VN)</th><th>Ví dụ</th><th></th></tr>
+          </thead>
+          <tbody id="wordTbody"></tbody>
+        </table>
+        <div class="empty-state" id="emptyState">Chưa có từ nào. Hãy tải file Excel lên hoặc thêm thủ công.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">👥 Danh sách học viên</div>
+      <div class="section-sub">Tải lên file Excel danh sách học viên. Hệ thống sẽ dùng danh sách này để học viên đăng nhập và để phân loại kết quả theo lớp.</div>
+      <div class="upload-row">
+        <label class="file-label">
+          📂 Tải lên danh sách học viên (.xlsx)
+          <input type="file" id="studentFileInput" accept=".xlsx,.xls">
+        </label>
+        <button class="btn small" id="btnDownloadRosterTemplate">⬇ Tải mẫu</button>
+      </div>
+      <div class="upload-row">
+        <input type="text" id="rosterNameInput" placeholder="Thêm tên học viên thủ công" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface-soft);color:var(--text);font-size:13px;">
+        <select id="rosterClassInput" style="padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface-soft);color:var(--text);font-size:13px;">
+          <option value="">-- Chọn lớp --</option>
+          <option>Sơ cấp 1</option><option>Sơ cấp 2</option>
+          <option>Trung cấp 1</option><option>Trung cấp 2</option>
+          <option>Topik 1</option><option>Topik 2</option>
+        </select>
+        <button class="btn small" id="btnRosterAdd">+ Thêm</button>
+        <button class="btn small" id="btnClearRoster" style="color:var(--rose);">Xóa danh sách</button>
+      </div>
+      <div id="rosterPreview"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">👩‍🏫 Quản lý điểm & bài tập về nhà</div>
+      <div class="section-sub">Khi học viên chọn tên và làm bài kiểm tra, kết quả sẽ tự động được lưu theo từng lớp.</div>
+      <div class="upload-row">
+        <button class="btn small" id="btnExportRecords">Xuất ra Excel</button>
+        <button class="btn small" id="btnClearRecords">Xóa tất cả kết quả</button>
+      </div>
+
+      <div class="section-title" style="font-size:13px; margin-top:10px;">Kiểm tra bài tập (theo từng bài)</div>
+      <div class="hw-table-wrap">
+        <table class="hw-table" id="hwTable"></table>
+      </div>
+
+      <div class="section-title" style="font-size:13px; margin-top:18px;">Kết quả làm bài gần đây</div>
+      <div id="recordsList"></div>
+    </div>
+
+    <div class="notice">
+      Dữ liệu sẽ bị mất khi tải lại trang. Sau khi nhập xong từ vựng, hãy <b>"Lưu JSON"</b> để sao lưu,
+      và lần sau dùng <b>"Tải JSON lên"</b> để tiếp tục chỉnh sửa. Kết quả học viên / bài tập về nhà cũng vậy —
+      hãy <b>"Xuất ra Excel"</b> sau mỗi buổi học để lưu lại.
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------
+// 상수 및 상태
+// ---------------------------------------------------------------
+const LEVELS = ["Sơ cấp 1","Sơ cấp 2","Trung cấp 1","Trung cấp 2","Topik 1","Topik 2"];
+const LEVEL_ICON = {"Sơ cấp 1":"🌱","Sơ cấp 2":"🌿","Trung cấp 1":"📘","Trung cấp 2":"📗","Topik 1":"🏅","Topik 2":"🏆"};
+
+let words = []; // {급수, 과, 단어, 뜻, 예문}
+let studentSub = "study";
+
+let studyLevel = null, studyLesson = null, studyIdx = 0, studyRevealed = false;
+let quizLevel = null, quizLesson = null;
+let quizQueue = [], quizIndex = 0, quizCorrect = 0, wrongAnswers = [];
+
+let wrongNote = [];
+let reviewQueue = [], reviewIndex = 0, reviewCorrect = 0;
+
+let studentName = "";
+let studentRecords = [];
+let manualRoster = []; // [{name, class}]
+let homeworkMap = {};
+let teacherPassword = "kross1234";
+
+const el = id => document.getElementById(id);
+const shuffle = arr => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
+const norm = s => String(s).trim().replace(/\s+/g,"");
+function escapeHtml(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// GAS 연결 상태 UI 업데이트
+function updateGasStatusUI(status){
+  const dot  = el("gasStatusDot");
+  const text = el("gasStatusText");
+  if(status === "connected"){
+    dot.style.background  = "var(--green)";
+    text.style.color      = "var(--green-dark)";
+    text.textContent      = "✅ GAS 연결됨 — 데이터가 구글 시트에 실시간 저장됩니다";
+  } else if(status === "error"){
+    dot.style.background  = "var(--rose)";
+    text.style.color      = "var(--rose)";
+    text.textContent      = "❌ GAS 연결 실패 — URL을 확인해주세요";
+  } else {
+    dot.style.background  = "var(--text-dim)";
+    text.style.color      = "var(--text-dim)";
+    text.textContent      = "GAS 미설정 — localStorage 전용 모드 (데이터가 이 브라우저에만 저장됩니다)";
+  }
+}
+
+el("btnGasCheck").addEventListener("click", async () => {
+  el("btnGasCheck").textContent = "확인 중...";
+  el("btnGasCheck").disabled = true;
+  if(!GAS_ENABLED){
+    updateGasStatusUI("none");
+    el("btnGasCheck").textContent = "연결 확인";
+    el("btnGasCheck").disabled = false;
+    alert("GAS_URL이 설정되지 않았습니다.\nword-quiz.html 상단의 GAS_URL 값을 채워주세요.");
+    return;
+  }
+  try{
+    const res = await gasGet("");
+    if(res.ok){
+      updateGasStatusUI("connected");
+    } else {
+      updateGasStatusUI("error");
+    }
+  }catch(e){
+    updateGasStatusUI("error");
+  }
+  el("btnGasCheck").textContent = "연결 확인";
+  el("btnGasCheck").disabled = false;
+});
+
+// 초기 상태 표시
+if(GAS_ENABLED) updateGasStatusUI("connected");
+
+// ---------------------------------------------------------------
+// 🔒 비밀번호 모달 (선생님 입장)
+// ---------------------------------------------------------------
+el("btnGoTeacher").addEventListener("click", () => {
+  el("pwInput").value = "";
+  el("pwError").textContent = "";
+  el("pwModal").classList.remove("hidden");
+  setTimeout(() => el("pwInput").focus(), 100);
+});
+
+function closePwModal(){ el("pwModal").classList.add("hidden"); }
+el("btnPwCancel").addEventListener("click", closePwModal);
+el("btnPwClose").addEventListener("click", closePwModal);
+el("pwModal").addEventListener("click", (e) => { if(e.target === el("pwModal")) closePwModal(); });
+el("btnPwConfirm").addEventListener("click", checkPassword);
+el("pwInput").addEventListener("keydown", e => {
+  if(e.key === "Enter") checkPassword();
+  if(e.key === "Escape") closePwModal();
+});
+
+function checkPassword(){
+  const val = el("pwInput").value;
+  if(val === teacherPassword){
+    el("pwModal").classList.add("hidden");
+    el("studentView").classList.add("hidden");
+    el("teacherView").classList.remove("hidden");
+    window.scrollTo(0,0);
+  } else {
+    el("pwError").textContent = "Mật khẩu không đúng. Vui lòng thử lại.";
+    el("pwInput").value = "";
+    el("pwInput").focus();
+  }
+}
+
+// 비밀번호 변경
+el("btnChangePw").addEventListener("click", () => {
+  const cur = el("pwCurrentInput").value;
+  const nw = el("pwNewInput").value;
+  const msg = el("pwChangeMsg");
+  if(cur !== teacherPassword){
+    msg.style.color = "var(--rose)";
+    msg.textContent = "Mật khẩu hiện tại không đúng.";
+    return;
+  }
+  if(nw.length < 4){
+    msg.style.color = "var(--rose)";
+    msg.textContent = "Mật khẩu mới phải có ít nhất 4 ký tự.";
+    return;
+  }
+  teacherPassword = nw;
+  localStorage.setItem("kross_pw", teacherPassword);
+  el("pwCurrentInput").value = "";
+  el("pwNewInput").value = "";
+  msg.style.color = "var(--green-dark)";
+  msg.textContent = "✓ Đã đổi mật khẩu thành công.";
+  setTimeout(() => { msg.textContent = ""; }, 2500);
+});
+
+// ---------------------------------------------------------------
+// 👤 이름 선택 모달 (반 선택 → 이름 선택 2단계)
+// ---------------------------------------------------------------
+let selectedName = "";
+let selectedClass = "";
+
+function openNameModal(){
+  selectedName = studentName;
+  selectedClass = manualRoster.find(r => r.name === studentName)?.class || "";
+  el("nameError").textContent = "";
+  el("nameModal").classList.remove("hidden");
+  showClassPickStep();
+}
+
+// 1단계: 반 선택
+function showClassPickStep(){
+  el("classPickStep").classList.remove("hidden");
+  el("namePickStep").classList.add("hidden");
+  el("btnNameConfirm").classList.add("hidden");
+  el("nameModalTitle").textContent = "👋 Xin chào!";
+  el("nameModalSub").textContent = "Chọn lớp của bạn.";
+
+  const grid = el("classGrid");
+  // 반 목록: manualRoster에 있는 반 + "미분류" 처리
+  const classes = [...new Set(manualRoster.map(r => r.class || "Chưa phân lớp"))].sort();
+
+  if(classes.length === 0){
+    grid.innerHTML = `<div style="font-size:13px;color:var(--text-dim);width:100%;">Giáo viên chưa thêm danh sách học viên.<br>Vui lòng liên hệ giáo viên.</div>`;
+    return;
+  }
+
+  grid.innerHTML = classes.map(cls => {
+    const cnt = manualRoster.filter(r => (r.class || "Chưa phân lớp") === cls).length;
+    const icon = {"Sơ cấp 1":"🌱","Sơ cấp 2":"🌿","Trung cấp 1":"📘","Trung cấp 2":"📗","Topik 1":"🏅","Topik 2":"🏆"}[cls] || "📋";
+    const isActive = cls === selectedClass;
+    return `<div class="name-chip${isActive?' selected':''}" data-class="${escapeHtml(cls)}" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 12px;">
+      <span style="font-size:20px;">${icon}</span>
+      <span style="font-weight:700;">${escapeHtml(cls)}</span>
+      <span style="font-size:11px;opacity:0.65;">${cnt}명</span>
+    </div>`;
+  }).join("");
+
+  grid.querySelectorAll(".name-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      selectedClass = chip.dataset.class;
+      showNamePickStep(selectedClass);
+    });
+  });
+}
+
+// 2단계: 해당 반의 이름 선택
+function showNamePickStep(cls){
+  el("classPickStep").classList.add("hidden");
+  el("namePickStep").classList.remove("hidden");
+  el("btnNameConfirm").classList.remove("hidden");
+  el("nameModalTitle").textContent = `📋 ${cls}`;
+  el("nameModalSub").textContent = "이름을 선택하세요.";
+
+  const roster = manualRoster
+    .filter(r => (r.class || "Chưa phân lớp") === cls)
+    .map(r => r.name)
+    .sort();
+
+  const grid = el("nameGrid");
+  if(roster.length === 0){
+    grid.innerHTML = `<div style="font-size:13px;color:var(--text-dim);">Lớp này chưa có học viên nào.</div>`;
+    return;
+  }
+
+  grid.innerHTML = roster.map(name => `
+    <div class="name-chip${name===selectedName?' selected':''}" data-name="${escapeHtml(name)}">${escapeHtml(name)}</div>
+  `).join("");
+
+  grid.querySelectorAll(".name-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      selectedName = chip.dataset.name;
+      grid.querySelectorAll(".name-chip").forEach(c =>
+        c.classList.toggle("selected", c.dataset.name===selectedName)
+      );
+    });
+  });
+}
+
+el("btnBackToClass").addEventListener("click", () => showClassPickStep());
+el("nameRow").addEventListener("click", () => openNameModal());
+
+function closeNameModal(){
+  el("nameModal").classList.add("hidden");
+  el("nameError").textContent = "";
+}
+
+el("btnNameClose").addEventListener("click", closeNameModal);
+el("btnNameSkip").addEventListener("click", closeNameModal);
+el("nameModal").addEventListener("click", (e) => { if(e.target === el("nameModal")) closeNameModal(); });
+
+el("btnNameConfirm").addEventListener("click", () => {
+  if(!selectedName){
+    el("nameError").textContent = "Vui lòng chọn tên của bạn.";
+    return;
+  }
+  studentName = selectedName;
+  updateNameDisplay();
+  closeNameModal();
+  saveAll();
+});
+
+el("btnBackStudent").addEventListener("click", () => {
+  el("teacherView").classList.add("hidden");
+  el("studentView").classList.remove("hidden");
+  switchStudentSub(studentSub);
+  window.scrollTo(0,0);
+});
+
+// ESC 키로 열려있는 모달 모두 닫기 (전역)
+document.addEventListener("keydown", (e) => {
+  if(e.key === "Escape"){
+    if(typeof closePwModal === "function") closePwModal();
+    if(typeof closeNameModal === "function") closeNameModal();
+  }
+});
+
+// ---------------------------------------------------------------
+// 학생 ↔ 교사 화면 전환 (뒤로가기)
+// ---------------------------------------------------------------
+el("btnBackStudent").addEventListener("click", () => {
+  el("teacherView").classList.add("hidden");
+  el("studentView").classList.remove("hidden");
+  switchStudentSub(studentSub);
+  window.scrollTo(0,0);
+});
+
+document.querySelectorAll(".subtab").forEach(t => {
+  t.addEventListener("click", () => switchStudentSub(t.dataset.sub));
+});
+
+function switchStudentSub(sub){
+  studentSub = sub;
+  document.querySelectorAll(".subtab").forEach(t => t.classList.toggle("active", t.dataset.sub===sub));
+  el("studySection").classList.toggle("hidden", sub!=="study");
+  el("quizSection").classList.toggle("hidden", sub!=="quiz");
+  el("wrongSection").classList.toggle("hidden", sub!=="wrong");
+  el("statsSection").classList.toggle("hidden", sub!=="stats");
+
+  if(sub==="study") renderStudyLessonPicker();
+  if(sub==="quiz") renderQuizLessonPicker();
+  if(sub==="wrong") renderWrongNote();
+  if(sub==="stats") renderMyStats();
+}
+
+// 이름 표시 갱신
+function updateNameDisplay(){
+  el("nameDisplay").textContent = studentName || "Chưa chọn tên — nhấn để chọn";
+}
+
+// ---------------------------------------------------------------
+// 컬럼 매칭 헬퍼 (한국어/베트남어 헤더 모두 인식)
+// ---------------------------------------------------------------
+// NFC 정규화 적용 - 베트남어 NFD/NFC 불일치 문제 해결
+function nfc(s){ return s ? String(s).normalize("NFC") : ""; }
+
+function findCol(headers, patterns){
+  return headers.findIndex(h =>
+    patterns.some(p => nfc(h).toLowerCase().includes(nfc(p).toLowerCase()))
+  );
+}
+function getField(row, patterns){
+  const keys = Object.keys(row);
+  const key = keys.find(k =>
+    patterns.some(p => nfc(k).toLowerCase().includes(nfc(p).toLowerCase()))
+  );
+  return key ? row[key] : "";
+}
+const PAT = {
+  급수: ["cấp độ","급수","cap do","capdo","cap_do"],
+  과: ["bài","과","lesson","bai"],
+  단어: ["단어","từ","word","tu"],
+  뜻: ["뜻","nghĩa","nghia","meaning"],
+  예문: ["예문","ví dụ","vi du","example","câu"],
+};
+
+// ---------------------------------------------------------------
+// 구글 시트 연동
+// ---------------------------------------------------------------
+let lastSheetUrl = null;
+
+el("btnSheetLoad").addEventListener("click", () => loadFromGoogleSheet(el("sheetUrlInput").value.trim()));
+el("btnRefreshSheet").addEventListener("click", () => {
+  if(lastSheetUrl) loadFromGoogleSheet(lastSheetUrl, true);
+});
+
+function parseCsv(text){
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for(let i=0; i<text.length; i++){
+    const c = text[i], next = text[i+1];
+    if(inQuotes){
+      if(c === '"' && next === '"'){ field += '"'; i++; }
+      else if(c === '"'){ inQuotes = false; }
+      else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ row.push(field); field = ""; }
+      else if(c === '\n'){ row.push(field); rows.push(row); row = []; field = ""; }
+      else if(c === '\r'){ /* skip */ }
+      else field += c;
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r => r.some(c => c.trim() !== ""));
+}
+
+function buildCsvCandidates(raw){
+  const candidates = [];
+  if(!raw) return candidates;
+
+  if(raw.includes("tqx=out:csv")){ candidates.push(raw); return candidates; }
+
+  // 실제 스프레드시트 ID는 보통 30자 이상. "/d/e/2PACX..." 같은 게시 링크는
+  // 진짜 ID가 아니므로 길이 조건으로 걸러낸다.
+  const idMatch = raw.match(/\/d\/([a-zA-Z0-9-_]{15,})/);
+  const gidMatch = raw.match(/[?#&]gid=([0-9]+)/);
+  const gid = gidMatch ? gidMatch[1] : "0";
+
+  if(idMatch){
+    const sheetId = idMatch[1];
+    // gviz 엔드포인트가 CORS를 가장 안정적으로 지원함 (우선 시도)
+    candidates.push(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&gid=${gid}`);
+    candidates.push(`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`);
+  }
+
+  if(raw.includes("output=csv") || raw.includes("format=csv")){
+    candidates.push(raw); // "웹에 게시" 링크도 마지막으로 한 번 시도
+  }
+  return [...new Set(candidates)];
+}
+
+async function loadFromGoogleSheet(rawUrl, silent){
+  const status = el("sheetStatus");
+  const candidates = buildCsvCandidates(rawUrl);
+  if(candidates.length === 0){
+    status.textContent = "Liên kết Google Sheet không hợp lệ. Vui lòng kiểm tra lại.";
+    status.style.color = "var(--rose)";
+    return;
+  }
+  status.textContent = "Đang tải...";
+  status.style.color = "var(--text-dim)";
+
+  let lastError = null;
+  for(const csvUrl of candidates){
+    try{
+      const res = await fetch(csvUrl, { cache:"no-store" });
+      if(!res.ok) throw new Error("Lỗi phản hồi: " + res.status);
+      const text = await res.text();
+      const rows = parseCsv(text);
+      if(rows.length < 2) throw new Error("Dữ liệu trống.");
+
+      const headers = rows[0].map(h => h.trim());
+      const idx = {
+        과: findCol(headers, PAT.과),
+        단어: findCol(headers, PAT.단어),
+        뜻: findCol(headers, PAT.뜻),
+        예문: findCol(headers, PAT.예문),
+        레벨: findCol(headers, PAT.레벨),
+      };
+      if(idx.과 === -1 || idx.단어 === -1 || idx.뜻 === -1){
+        throw new Error("Không tìm thấy các cột bắt buộc (Bài/Từ/Nghĩa). Vui lòng kiểm tra dòng tiêu đề đầu tiên.");
+      }
+
+      const newWords = [];
+      for(let i=1; i<rows.length; i++){
+        const r = rows[i];
+        const 과 = (r[idx.과] || "").trim();
+        const 단어 = (r[idx.단어] || "").trim();
+        const 뜻 = (r[idx.뜻] || "").trim();
+        if(!과 || !단어 || !뜻) continue;
+        newWords.push({
+          과, 단어, 뜻,
+          예문: idx.예문 > -1 ? (r[idx.예문] || "").trim() : "",
+          레벨: idx.레벨 > -1 ? (r[idx.레벨] || "").trim() : ""
+        });
+      }
+      if(newWords.length === 0) throw new Error("Không tìm thấy từ nào.");
+
+      words = newWords;
+      lastSheetUrl = rawUrl;
+      renderTable();
+      el("btnRefreshSheet").classList.remove("hidden");
+      status.textContent = `Đã tải ${newWords.length} từ từ Google Sheet. (${new Date().toLocaleTimeString()})`;
+      status.style.color = "var(--green-dark)";
+      return; // 성공하면 종료
+    } catch(err){
+      lastError = err;
+      // 다음 후보 URL로 계속 시도
+    }
+  }
+
+  status.innerHTML = `Tải lên thất bại: ${lastError ? lastError.message : "Lỗi không xác định"}<br>
+    Vui lòng kiểm tra: (1) Sheet đã bật chia sẻ "Bất kỳ ai có liên kết" → Người xem,
+    (2) dòng đầu tiên có đủ cột Bài/Từ/Nghĩa, (3) thử dán link "Chia sẻ" thông thường thay vì link "Xuất bản lên web".`;
+  status.style.color = "var(--rose)";
+}
+
+// ---------------------------------------------------------------
+// 선생님 모드: 엑셀 업로드 / 파싱
+// ---------------------------------------------------------------
+el("fileInput").addEventListener("change", handleExcelUpload);
+
+function handleExcelUpload(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, { type:"array" });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+
+      // 1차: 헤더 자동 감지 (NFC 정규화 적용)
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval:"" });
+      let added = 0;
+      rows.forEach(r => {
+        const 급수v = getField(r, PAT.급수);
+        const 과v   = getField(r, PAT.과);
+        const 단어v  = getField(r, PAT.단어);
+        const 뜻v   = getField(r, PAT.뜻);
+        if(!단어v || !뜻v) return;
+        words.push({
+          급수: String(급수v || ""),
+          과:   String(과v || "1").replace(/\.0$/,""),
+          단어: String(단어v),
+          뜻:   String(뜻v),
+          예문: String(getField(r, PAT.예문) || ""),
+        });
+        added++;
+      });
+
+      // 2차 폴백: 위치 기반 파싱
+      // 새 템플릿: col0=Cấp độ, col1=Bài, col2=Từ, col3=Nghĩa, col4=Ví dụ
+      // 구 템플릿: col0=Bài, col1=Từ, col2=Nghĩa, col3=Ví dụ
+      if(added === 0){
+        const arr = XLSX.utils.sheet_to_json(sheet, { header:1, defval:"" });
+        if(arr.length < 2){
+          alert("Không tìm thấy dữ liệu. Vui lòng kiểm tra file Excel.");
+          return;
+        }
+        // 첫 행으로 컬럼 구조 감지
+        const header0 = arr[0] || [];
+        const isNewFormat = LEVELS.some(lv =>
+          header0.some(h => nfc(String(h)).toLowerCase().includes("c"))
+        ) && header0.length >= 4;
+
+        for(let i = 1; i < arr.length; i++){
+          const row = arr[i];
+          let 급수v, 과v, 단어v, 뜻v, 예문v;
+          if(isNewFormat && header0.length >= 4){
+            // Cấp độ | Bài | Từ | Nghĩa | Ví dụ
+            급수v = row[0]; 과v = row[1]; 단어v = row[2]; 뜻v = row[3]; 예문v = row[4];
+          } else {
+            // Bài | Từ | Nghĩa | Ví dụ (구 형식)
+            급수v = ""; 과v = row[0]; 단어v = row[1]; 뜻v = row[2]; 예문v = row[3];
+          }
+          if(!단어v || !뜻v) continue;
+          words.push({
+            급수: String(급수v || ""),
+            과:   String(과v || "1").replace(/\.0$/,""),
+            단어: String(단어v),
+            뜻:   String(뜻v),
+            예문: String(예문v || ""),
+          });
+          added++;
+        }
+      }
+
+      renderTable();
+      el("fileInput").value = "";
+      if(added === 0){
+        alert("Không tìm thấy từ nào.\nKiểm tra định dạng: Cấp độ | Bài | Từ | Nghĩa | Ví dụ");
+      } else {
+        showToast(`✓ Đã tải ${added} từ`);
+      }
+    }catch(err){
+      alert("Lỗi đọc file: " + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── 학생 명단 엑셀 업로드 ──────────────────────────────────────
+el("studentFileInput").addEventListener("change", handleStudentUpload);
+
+function handleStudentUpload(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, { type:"array" });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const arr = XLSX.utils.sheet_to_json(sheet, { header:1, defval:"" });
+      if(arr.length < 2){ alert("Không có dữ liệu."); return; }
+
+      let added = 0;
+      for(let i = 1; i < arr.length; i++){
+        const row = arr[i];
+        const name = String(row[0] || "").trim();
+        const cls  = String(row[1] || "").trim();
+        if(!name) continue;
+        if(!manualRoster.find(r => r.name === name)){
+          manualRoster.push({ name, class: cls });
+          added++;
+        }
+      }
+      el("studentFileInput").value = "";
+      renderRosterPreview();
+      saveAll();
+      if(GAS_ENABLED) syncRosterToGAS();
+      showToast(`✓ Đã thêm ${added} học viên`);
+    }catch(err){
+      alert("Lỗi đọc file: " + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function showToast(msg){
+  const t = document.createElement("div");
+  t.style.cssText = "position:fixed;bottom:18px;right:18px;background:var(--green);color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(60,90,40,0.25);z-index:999;";
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+el("btnTemplate").addEventListener("click", () => {
+  alert("Định dạng cột Excel (mới):\n\nCấp độ | Bài | Từ (Tiếng Hàn) | Nghĩa (Tiếng Việt) | Câu ví dụ\n\nCấp độ hợp lệ: Sơ cấp 1 / Sơ cấp 2 / Trung cấp 1 / Trung cấp 2 / Topik 1 / Topik 2");
+});
+
+el("btnAddRow").addEventListener("click", () => {
+  words.push({ 과:"1", 단어:"", 뜻:"", 예문:"", 레벨:"" });
+  renderTable();
+});
+
+el("btnClear").addEventListener("click", () => {
+  if(words.length && !confirm("Bạn có chắc muốn xóa tất cả từ không?")) return;
+  words = [];
+  renderTable();
+});
+
+el("btnExportXlsx").addEventListener("click", () => {
+  if(words.length===0){ alert("Không có từ nào để xuất."); return; }
+  const sheetData = words.map(w => ({
+    "Bài": w.과, "Từ": w.단어, "Nghĩa (Tiếng Việt)": w.뜻, "Câu ví dụ": w.예문, "Cấp độ": w.레벨
+  }));
+  const ws = XLSX.utils.json_to_sheet(sheetData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "DanhSachTu");
+  XLSX.writeFile(wb, "danh_sach_tu.xlsx");
+});
+
+el("btnExportJson").addEventListener("click", () => {
+  if(words.length===0){ alert("Không có từ nào để xuất."); return; }
+  const blob = new Blob([JSON.stringify(words, null, 2)], { type:"application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "danh_sach_tu.json";
+  a.click();
+});
+
+el("jsonInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try{
+      const data = JSON.parse(evt.target.result);
+      if(Array.isArray(data)){
+        words = data;
+        renderTable();
+      }
+    }catch(err){ alert("Không thể đọc file JSON."); }
+  };
+  reader.readAsText(file);
+  el("jsonInput").value = "";
+});
+
+function renderTable(){
+  const tbody = el("wordTbody");
+  tbody.innerHTML = "";
+  el("wordCount").textContent = words.length;
+  el("emptyState").classList.toggle("hidden", words.length>0);
+
+  const levelOptions = LEVELS.map(lv =>
+    `<option value="${escapeHtml(lv)}">${escapeHtml(lv)}</option>`
+  ).join("");
+
+  words.forEach((w, idx) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>
+        <select data-idx="${idx}" data-field="급수" style="width:100px;padding:3px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--surface-soft);color:var(--text);">
+          <option value="">-- 급수 --</option>
+          ${LEVELS.map(lv => `<option value="${escapeHtml(lv)}"${w.급수===lv?' selected':''}>${escapeHtml(lv)}</option>`).join("")}
+        </select>
+      </td>
+      <td><input value="${escapeHtml(w.과)}" data-idx="${idx}" data-field="과" style="width:40px"></td>
+      <td><input value="${escapeHtml(w.단어)}" data-idx="${idx}" data-field="단어"></td>
+      <td><input value="${escapeHtml(w.뜻)}" data-idx="${idx}" data-field="뜻"></td>
+      <td><input value="${escapeHtml(w.예문)}" data-idx="${idx}" data-field="예문"></td>
+      <td><span class="row-del" data-idx="${idx}">✕</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll("input,select").forEach(inp => {
+    inp.addEventListener("input", (e) => {
+      const idx = e.target.dataset.idx, field = e.target.dataset.field;
+      words[idx][field] = e.target.value;
+    });
+    inp.addEventListener("change", (e) => {
+      const idx = e.target.dataset.idx, field = e.target.dataset.field;
+      if(idx !== undefined) words[idx][field] = e.target.value;
+    });
+  });
+  tbody.querySelectorAll(".row-del").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      words.splice(Number(e.target.dataset.idx), 1);
+      renderTable();
+    });
+  });
+
+  if(typeof renderHomeworkGrid === "function") renderHomeworkGrid();
+  saveAll();
+  // GAS 동기화 (단어가 변경된 경우)
+  if(GAS_ENABLED) syncWordsToGAS();
+}
+
+// ---------------------------------------------------------------
+// 공통: 과 목록 칩 렌더링
+// ---------------------------------------------------------------
+// renderLessonGrid: 특정 급수 내 Bài 목록
+function renderLessonGrid(gridEl, level, selected, onPick){
+  const lessons = [...new Set(words.filter(w=>w.급수===level).map(w=>w.과))]
+    .sort((a,b) => Number(a)-Number(b));
+  gridEl.innerHTML = "";
+  if(lessons.length===0){
+    gridEl.innerHTML = `<div class="empty-state">Chưa có bài học nào trong cấp độ này.</div>`;
+    return;
+  }
+  lessons.forEach(l => {
+    const cnt = words.filter(w=>w.급수===level && w.과===l).length;
+    const chip = document.createElement("div");
+    chip.className = "lesson-chip" + (l===selected ? " active" : "");
+    chip.innerHTML = `Bài ${l} <span style="font-size:11px;opacity:0.7;">(${cnt})</span>`;
+    chip.addEventListener("click", () => onPick(l));
+    gridEl.appendChild(chip);
+  });
+}
+
+// renderLevelGrid: 6개 레벨 선택 카드
+function renderLevelGrid(gridEl, onPick){
+  gridEl.innerHTML = "";
+  if(words.length===0){
+    gridEl.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Giáo viên chưa thêm từ vựng nào. Vui lòng liên hệ giáo viên.</div>`;
+    return;
+  }
+  LEVELS.forEach(lv => {
+    const cnt = words.filter(w=>w.급수===lv).length;
+    const card = document.createElement("div");
+    card.className = "level-card" + (cnt===0 ? " empty" : "");
+    card.innerHTML = `<div>${LEVEL_ICON[lv]||""}</div><div class="lv-name">${escapeHtml(lv)}</div><div class="lv-count">${cnt} từ</div>`;
+    if(cnt > 0) card.addEventListener("click", () => onPick(lv));
+    gridEl.appendChild(card);
+  });
+}
+
+function speak(text){
+  if(!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "ko-KR"; u.rate = 0.88;
+  speechSynthesis.speak(u);
+}
+
+function addToWrongNote(w){
+  const existing = wrongNote.find(x => x.단어===w.단어 && x.뜻===w.뜻);
+  if(existing) existing.count++;
+  else wrongNote.push({ 단어:w.단어, 뜻:w.뜻, 예문:w.예문, count:1 });
+  el("wrongCount").textContent = wrongNote.length;
+  saveAll();
+}
+
+function recordAttempt(lesson, type, correct, total, pct){
+  if(!studentName) return;
+  const cls = manualRoster.find(r=>r.name===studentName)?.class || "";
+  const record = {
+    name: studentName, class: cls, lesson: lesson || "-", type,
+    correct, total, pct, time: new Date().toLocaleString()
+  };
+  studentRecords.unshift(record);
+  renderHomeworkGrid();
+  renderRecordsList();
+  saveAll();
+  // GAS에 성적 기록 전송
+  if(GAS_ENABLED) pushRecordToGAS(record);
+}
+
+function getRosterNames(){
+  const fromRecords = studentRecords.map(r => r.name);
+  const fromRoster = manualRoster.map(r => r.name);
+  return [...new Set([...fromRoster, ...fromRecords])].sort();
+}
+
+function renderRosterPreview(){
+  const preview = el("rosterPreview");
+  if(manualRoster.length===0){ preview.innerHTML=""; return; }
+  const byClass = {};
+  manualRoster.forEach(r => {
+    const cls = r.class || "Chưa phân lớp";
+    if(!byClass[cls]) byClass[cls] = [];
+    byClass[cls].push(r.name);
+  });
+  preview.innerHTML = Object.keys(byClass).sort().map(cls => `
+    <div class="roster-group">
+      <div class="roster-group-title">${escapeHtml(cls)} (${byClass[cls].length})</div>
+      ${byClass[cls].map(name => `
+        <span class="roster-name-chip">
+          ${escapeHtml(name)}
+          <button class="del-btn" data-name="${escapeHtml(name)}">✕</button>
+        </span>`).join("")}
+    </div>
+  `).join("");
+  preview.querySelectorAll(".del-btn").forEach(b => {
+    b.addEventListener("click", () => {
+      manualRoster = manualRoster.filter(r => r.name !== b.dataset.name);
+      renderRosterPreview();
+      saveAll();
+    });
+  });
+}
+
+// =================================================================
+// 1) 단어공부 (레벨 → Bài → 플래시카드)
+// =================================================================
+let studyWords = [];
+
+function renderStudyLessonPicker(){
+  el("studyCardArea").classList.add("hidden");
+  el("studyLessonCard").classList.add("hidden");
+  el("studyLevelCard").classList.remove("hidden");
+  renderLevelGrid(el("studyLevelGrid"), (lv) => {
+    studyLevel = lv;
+    el("studyLevelCard").classList.add("hidden");
+    el("studyLessonCard").classList.remove("hidden");
+    el("studyLevelTitle").textContent = LEVEL_ICON[lv] + " " + lv;
+    renderLessonGrid(el("studyLessonGrid"), lv, studyLesson, (l) => {
+      studyLesson = l;
+      studyWords = shuffle(words.filter(w => w.급수===lv && w.과===l));
+      studyIdx = 0; studyRevealed = false;
+      el("studyLessonCard").classList.add("hidden");
+      el("studyCardArea").classList.remove("hidden");
+      renderFlashcard();
+    });
+  });
+}
+
+el("btnStudyBackLevel").addEventListener("click", () => {
+  studyLesson = null;
+  el("studyLessonCard").classList.add("hidden");
+  el("studyCardArea").classList.add("hidden");
+  el("studyLevelCard").classList.remove("hidden");
+  renderLevelGrid(el("studyLevelGrid"), (lv) => {
+    studyLevel = lv;
+    el("studyLevelCard").classList.add("hidden");
+    el("studyLessonCard").classList.remove("hidden");
+    el("studyLevelTitle").textContent = LEVEL_ICON[lv] + " " + lv;
+    renderLessonGrid(el("studyLessonGrid"), lv, studyLesson, (l) => {
+      studyLesson = l;
+      studyWords = shuffle(words.filter(w => w.급수===lv && w.과===l));
+      studyIdx = 0; studyRevealed = false;
+      el("studyLessonCard").classList.add("hidden");
+      el("studyCardArea").classList.remove("hidden");
+      renderFlashcard();
+    });
+  });
+});
+
+function renderFlashcard(){
+  const w = studyWords[studyIdx];
+  el("flashProgress").textContent = `${studyIdx+1} / ${studyWords.length}`;
+  const card = el("flashCard");
+
+  if(!studyRevealed){
+    card.innerHTML = `<div class="flash-vi" id="flashVi">${escapeHtml(w.뜻)}</div><div class="flash-tap-hint">Nhấn để xem đáp án</div>`;
+  } else {
+    card.innerHTML = `
+      <div class="flash-ko">${escapeHtml(w.단어)}</div>
+      <button class="speak-btn" id="flashSpeakBtn">🔊</button>
+      ${w.예문 ? `<div class="flash-example">${escapeHtml(w.예문)}</div>` : ""}
+      <div class="flash-tap-hint">Nhấn để ẩn lại</div>
+    `;
+    setTimeout(() => speak(w.단어), 150);
+  }
+}
+
+el("flashCard").addEventListener("click", (e) => {
+  if(e.target.id === "flashSpeakBtn") return;
+  studyRevealed = !studyRevealed;
+  renderFlashcard();
+});
+document.addEventListener("click", (e) => {
+  if(e.target.id === "flashSpeakBtn") speak(studyWords[studyIdx].단어);
+});
+
+el("btnFlashPrev").addEventListener("click", () => {
+  studyIdx = (studyIdx - 1 + studyWords.length) % studyWords.length;
+  studyRevealed = false;
+  renderFlashcard();
+});
+el("btnFlashNext").addEventListener("click", () => {
+  studyIdx = (studyIdx + 1) % studyWords.length;
+  studyRevealed = false;
+  renderFlashcard();
+});
+el("btnFlashMark").addEventListener("click", () => {
+  addToWrongNote(studyWords[studyIdx]);
+  el("btnFlashMark").textContent = "✓ Đã thêm";
+  setTimeout(() => { el("btnFlashMark").textContent = "🔖 Thêm vào từ sai"; }, 1000);
+});
+
+// =================================================================
+// 2) 퀴즈 (타이핑, 베트남어 → 한국어)
+// =================================================================
+// =================================================================
+// 2) 퀴즈 (레벨 → Bài → 타이핑)
+// =================================================================
+function renderQuizLessonPicker(){
+  el("quizCard").classList.add("hidden");
+  el("resultCard").classList.add("hidden");
+  el("quizLessonCard").classList.add("hidden");
+  el("quizLevelCard").classList.remove("hidden");
+  renderLevelGrid(el("quizLevelGrid"), (lv) => {
+    quizLevel = lv;
+    el("quizLevelCard").classList.add("hidden");
+    el("quizLessonCard").classList.remove("hidden");
+    el("quizLevelTitle").textContent = LEVEL_ICON[lv] + " " + lv;
+    renderLessonGrid(el("quizLessonGrid"), lv, quizLesson, (l) => {
+      quizLesson = l;
+      startQuiz();
+    });
+  });
+}
+
+el("btnQuizBackLevel").addEventListener("click", () => {
+  quizLesson = null;
+  el("quizLessonCard").classList.add("hidden");
+  el("quizCard").classList.add("hidden");
+  el("resultCard").classList.add("hidden");
+  el("quizLevelCard").classList.remove("hidden");
+  renderLevelGrid(el("quizLevelGrid"), (lv) => {
+    quizLevel = lv;
+    el("quizLevelCard").classList.add("hidden");
+    el("quizLessonCard").classList.remove("hidden");
+    el("quizLevelTitle").textContent = LEVEL_ICON[lv] + " " + lv;
+    renderLessonGrid(el("quizLessonGrid"), lv, quizLesson, (l) => {
+      quizLesson = l;
+      startQuiz();
+    });
+  });
+});
+
+function startQuiz(){
+  if(!studentName){ openNameModal(); return; }
+  const lessonWords = words.filter(w => w.급수===quizLevel && w.과===quizLesson);
+  if(lessonWords.length < 1){ alert("Bài học này chưa có từ nào."); return; }
+  quizQueue = shuffle(lessonWords);
+  quizIndex = 0; quizCorrect = 0; wrongAnswers = [];
+  el("quizLessonCard").classList.add("hidden");
+  el("resultCard").classList.add("hidden");
+  el("quizCard").classList.remove("hidden");
+  renderTypeQuestion();
+}
+
+function renderTypeQuestion(){
+  const w = quizQueue[quizIndex];
+  el("quizProgress").textContent = `${quizIndex+1} / ${quizQueue.length}`;
+  el("quizScore").textContent = `Đúng ${quizCorrect}`;
+  el("qMeaning").textContent = w.뜻;
+  el("exampleHint").textContent = "";
+  const input = el("typeInput");
+  input.value = ""; input.disabled = false;
+  input.classList.remove("correct","wrong");
+  el("typeFeedback").textContent = ""; el("typeFeedback").className = "type-feedback";
+  input.focus();
+}
+
+function submitTypeAnswer(){
+  const input = el("typeInput");
+  if(input.disabled) return;
+  const w = quizQueue[quizIndex];
+  const isCorrect = norm(input.value) === norm(w.단어) && input.value.trim() !== "";
+  input.disabled = true;
+  input.classList.add(isCorrect ? "correct" : "wrong");
+
+  const fb = el("typeFeedback");
+  if(isCorrect){
+    quizCorrect++;
+    fb.textContent = "Chính xác!";
+    fb.className = "type-feedback correct";
+  } else {
+    fb.textContent = `Sai rồi. Đáp án đúng: ${w.단어}`;
+    fb.className = "type-feedback wrong";
+    wrongAnswers.push(w);
+    addToWrongNote(w);
+  }
+  speak(w.단어);
+  if(w.예문) el("exampleHint").textContent = `Ví dụ: ${w.예문}`;
+
+  setTimeout(() => {
+    quizIndex++;
+    if(quizIndex < quizQueue.length) renderTypeQuestion();
+    else showQuizResult();
+  }, 1300);
+}
+
+el("btnTypeSubmit").addEventListener("click", submitTypeAnswer);
+el("typeInput").addEventListener("keydown", (e) => { if(e.key==="Enter") submitTypeAnswer(); });
+el("btnTypeSpeak").addEventListener("click", () => speak(quizQueue[quizIndex].단어));
+
+function showQuizResult(){
+  el("quizCard").classList.add("hidden");
+  el("resultCard").classList.remove("hidden");
+  const pct = Math.round((quizCorrect / quizQueue.length) * 100);
+  el("resultNum").textContent = pct + "%";
+
+  recordAttempt(quizLesson, "Kiểm tra", quizCorrect, quizQueue.length, pct);
+
+  const wl = el("wrongList");
+  if(wrongAnswers.length===0){
+    wl.innerHTML = `<div class="empty-state">Bạn đã làm đúng hết! 👏</div>`;
+  } else {
+    wl.innerHTML = `<div class="section-sub" style="margin-bottom:8px;">Từ sai (đã lưu vào sổ từ sai)</div>` +
+      wrongAnswers.map(w => `<div class="wrong-item"><span>${escapeHtml(w.단어)}</span><span>${escapeHtml(w.뜻)}</span></div>`).join("");
+  }
+}
+
+el("btnRetry").addEventListener("click", () => startQuiz());
+el("btnBackLesson").addEventListener("click", () => {
+  quizLesson = null; quizLevel = null;
+  renderQuizLessonPicker();
+});
+
+// =================================================================
+// 3) 오답노트
+// =================================================================
+function renderWrongNote(){
+  el("reviewQuizCard").classList.add("hidden");
+  el("wrongCount").textContent = wrongNote.length;
+  const listEl = el("wrongNoteList");
+  if(wrongNote.length===0){
+    listEl.innerHTML = `<div class="empty-state">Sổ từ sai đang trống. Hãy làm bài kiểm tra hoặc thêm từ trong phần Học từ.</div>`;
+    return;
+  }
+  const sorted = [...wrongNote].sort((a,b) => b.count - a.count);
+  listEl.innerHTML = sorted.map((w, i) => `
+    <div class="wrongnote-item">
+      <div>
+        <div class="wrongnote-word">${escapeHtml(w.단어)}</div>
+        <div class="wrongnote-meaning">${escapeHtml(w.뜻)}</div>
+      </div>
+      <div class="wrongnote-actions">
+        <span class="wrongnote-count">${w.count} lần</span>
+        <button class="icon-btn" data-speak="${escapeHtml(w.단어)}">🔊</button>
+        <button class="icon-btn" data-remove="${escapeHtml(w.단어)}|${escapeHtml(w.뜻)}">✕</button>
+      </div>
+    </div>
+  `).join("");
+
+  listEl.querySelectorAll("[data-speak]").forEach(b => b.addEventListener("click", () => speak(b.dataset.speak)));
+  listEl.querySelectorAll("[data-remove]").forEach(b => b.addEventListener("click", () => {
+    const [단어, 뜻] = b.dataset.remove.split("|");
+    wrongNote = wrongNote.filter(w => !(w.단어===단어 && w.뜻===뜻));
+    saveAll();
+    renderWrongNote();
+  }));
+}
+
+el("btnClearWrong").addEventListener("click", () => {
+  if(wrongNote.length && !confirm("Bạn có chắc muốn xóa hết sổ từ sai không?")) return;
+  wrongNote = [];
+  saveAll();
+  renderWrongNote();
+});
+
+el("btnReviewWrong").addEventListener("click", () => {
+  if(wrongNote.length===0){ alert("Sổ từ sai đang trống."); return; }
+  reviewQueue = shuffle(wrongNote.map(w => ({...w})));
+  reviewIndex = 0; reviewCorrect = 0;
+  el("reviewQuizCard").classList.remove("hidden");
+  renderReviewQuestion();
+});
+
+function renderReviewQuestion(){
+  const w = reviewQueue[reviewIndex];
+  el("reviewProgress").textContent = `${reviewIndex+1} / ${reviewQueue.length}`;
+  el("reviewScore").textContent = `Đúng ${reviewCorrect}`;
+  el("rqMeaning").textContent = w.뜻;
+  const input = el("reviewInput");
+  input.value = ""; input.disabled = false; input.classList.remove("correct","wrong");
+  el("reviewFeedback").textContent = ""; el("reviewFeedback").className = "type-feedback";
+  input.focus();
+}
+
+function submitReviewAnswer(){
+  const input = el("reviewInput");
+  if(input.disabled) return;
+  const w = reviewQueue[reviewIndex];
+  const isCorrect = norm(input.value) === norm(w.단어) && input.value.trim() !== "";
+  input.disabled = true;
+  input.classList.add(isCorrect ? "correct" : "wrong");
+  const fb = el("reviewFeedback");
+
+  if(isCorrect){
+    reviewCorrect++;
+    fb.textContent = "Chính xác! Đã xóa khỏi sổ từ sai.";
+    fb.className = "type-feedback correct";
+    wrongNote = wrongNote.filter(x => !(x.단어===w.단어 && x.뜻===w.뜻));
+  } else {
+    fb.textContent = `Sai rồi. Đáp án đúng: ${w.단어}`;
+    fb.className = "type-feedback wrong";
+    const existing = wrongNote.find(x => x.단어===w.단어 && x.뜻===w.뜻);
+    if(existing) existing.count++;
+  }
+  speak(w.단어);
+
+  setTimeout(() => {
+    reviewIndex++;
+    if(reviewIndex < reviewQueue.length) renderReviewQuestion();
+    else {
+      el("reviewQuizCard").classList.add("hidden");
+      const pct = Math.round((reviewCorrect / reviewQueue.length) * 100);
+      recordAttempt("Ôn tập từ sai", "Ôn tập", reviewCorrect, reviewQueue.length, pct);
+      renderWrongNote();
+      alert(`Ôn tập hoàn tất! Đúng ${reviewCorrect} / ${reviewQueue.length}`);
+    }
+  }, 1300);
+}
+
+el("btnReviewSubmit").addEventListener("click", submitReviewAnswer);
+el("reviewInput").addEventListener("keydown", (e) => { if(e.key==="Enter") submitReviewAnswer(); });
+el("btnReviewSpeak").addEventListener("click", () => speak(reviewQueue[reviewIndex].단어));
+
+// =================================================================
+// 4) 내 기록 (학생용 통계)
+// =================================================================
+function renderMyStats(){
+  const hint = el("statsNameHint");
+  if(!studentName){
+    hint.textContent = "Nhập tên để xem kết quả các bài kiểm tra của bạn.";
+    el("statAttempts").textContent = "0";
+    el("statAvg").textContent = "0%";
+    el("statBest").textContent = "0%";
+    el("statsList").innerHTML = "";
+    return;
+  }
+  const mine = studentRecords.filter(r => r.name === studentName);
+  hint.textContent = `Đây là kết quả học tập của ${studentName}.`;
+  el("statAttempts").textContent = mine.length;
+  const avg = mine.length ? Math.round(mine.reduce((s,r)=>s+r.pct,0)/mine.length) : 0;
+  const best = mine.length ? Math.max(...mine.map(r=>r.pct)) : 0;
+  el("statAvg").textContent = avg + "%";
+  el("statBest").textContent = best + "%";
+
+  const listEl = el("statsList");
+  if(mine.length===0){
+    listEl.innerHTML = `<div class="empty-state">Bạn chưa làm bài kiểm tra nào.</div>`;
+    return;
+  }
+  listEl.innerHTML = mine.map(r => `
+    <div class="record-item">
+      <div>
+        <div>Bài ${escapeHtml(r.lesson)} · ${escapeHtml(r.type)}</div>
+        <div class="record-meta">${escapeHtml(r.time)} · ${r.correct}/${r.total}</div>
+      </div>
+      <div class="record-pct ${r.pct>=85?'good':r.pct>=60?'mid':'low'}">${r.pct}%</div>
+    </div>
+  `).join("");
+}
+
+// =================================================================
+// 5) 선생님 모드: 학생 성적 & 숙제 관리
+// =================================================================
+el("btnRosterAdd").addEventListener("click", () => {
+  const name = el("rosterNameInput").value.trim();
+  const cls  = el("rosterClassInput").value;
+  if(!name) return;
+  if(!manualRoster.find(r => r.name === name)){
+    manualRoster.push({ name, class: cls });
+  }
+  el("rosterNameInput").value = "";
+  renderRosterPreview();
+  renderHomeworkGrid();
+  saveAll();
+});
+
+el("btnClearRoster").addEventListener("click", () => {
+  if(!confirm("Xóa toàn bộ danh sách học viên?")) return;
+  manualRoster = [];
+  renderRosterPreview();
+  renderHomeworkGrid();
+  saveAll();
+});
+
+el("btnDownloadRosterTemplate").addEventListener("click", () => {
+  const wb = XLSX.utils.book_new();
+  const data = [
+    ["Tên học viên","Lớp học"],
+    ["Nguyễn Văn A","Sơ cấp 1"],
+    ["Trần Thị B","Sơ cấp 2"],
+    ["Lê Văn C","Trung cấp 1"],
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws["!cols"] = [{wch:22},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, ws, "DanhSachHocVien");
+  XLSX.writeFile(wb, "mau-danh-sach-hoc-vien.xlsx");
+});
+
+el("btnClearRecords").addEventListener("click", () => {
+  if(studentRecords.length && !confirm("Xóa tất cả kết quả và bài tập về nhà?")) return;
+  studentRecords = []; homeworkMap = {};
+  renderHomeworkGrid(); renderRecordsList(); saveAll();
+});
+
+el("btnExportRecords").addEventListener("click", () => {
+  if(studentRecords.length===0 && getRosterNames().length===0){
+    alert("Không có dữ liệu để xuất."); return;
+  }
+  const wb = XLSX.utils.book_new();
+  const recordSheet = XLSX.utils.json_to_sheet(studentRecords.map(r => ({
+    "Tên": r.name, "Lớp": r.class||"", "Cấp độ+Bài": r.lesson,
+    "Loại": r.type, "Đúng": r.correct, "Tổng": r.total, "Tỷ lệ (%)": r.pct, "Thời gian": r.time
+  })));
+  XLSX.utils.book_append_sheet(wb, recordSheet, "KetQua");
+
+  const lessonKeys = [...new Set(words.map(w => `${w.급수}|Bài ${w.과}`))].sort();
+  const hwRows = getRosterNames().map(name => {
+    const row = { "Tên": name, "Lớp": manualRoster.find(r=>r.name===name)?.class||"" };
+    lessonKeys.forEach(k => { row[k.replace("|"," - ")] = homeworkMap[`${name}__${k}`] ? "O" : "X"; });
+    return row;
+  });
+  const hwSheet = XLSX.utils.json_to_sheet(hwRows);
+  XLSX.utils.book_append_sheet(wb, hwSheet, "BaiTapVeNha");
+  XLSX.writeFile(wb, "ket_qua_hoc_vien.xlsx");
+});
+
+function renderHomeworkGrid(){
+  const table = el("hwTable");
+  const roster = getRosterNames();
+  // 급수+Bài 조합으로 열 구성 (레벨별 그룹핑)
+  const lessonKeys = [...new Set(words.map(w => `${w.급수}||${w.과}`))].sort();
+
+  if(roster.length===0){
+    table.innerHTML = `<tr><td class="empty-state" style="padding:16px;">Chưa có học viên nào.</td></tr>`;
+    return;
+  }
+  if(lessonKeys.length===0){
+    table.innerHTML = `<tr><td class="empty-state" style="padding:16px;">Vui lòng thêm từ vựng trước.</td></tr>`;
+    return;
+  }
+
+  let html = `<tr><th>Tên</th><th>Lớp</th>${lessonKeys.map(k => {
+    const [lv, bai] = k.split("||");
+    return `<th style="font-size:10px;">${escapeHtml(lv)}<br>Bài ${escapeHtml(bai)}</th>`;
+  }).join("")}</tr>`;
+
+  roster.forEach(name => {
+    const cls = manualRoster.find(r=>r.name===name)?.class || "";
+    html += `<tr><td>${escapeHtml(name)}</td><td style="font-size:11px;">${escapeHtml(cls)}</td>`;
+    lessonKeys.forEach(k => {
+      const key = `${name}__${k}`;
+      html += `<td><input type="checkbox" data-key="${key}" ${homeworkMap[key]?"checked":""}></td>`;
+    });
+    html += `</tr>`;
+  });
+  table.innerHTML = html;
+
+  table.querySelectorAll("input[type=checkbox]").forEach(cb => {
+    cb.addEventListener("change", (e) => {
+      homeworkMap[e.target.dataset.key] = e.target.checked;
+      saveAll();
+      // GAS 동기화
+      if(GAS_ENABLED){
+        const [nameKey, lessonKey] = e.target.dataset.key.split("__");
+        const cls = manualRoster.find(r=>r.name===nameKey)?.class || "";
+        pushHomeworkToGAS(nameKey, cls, lessonKey, e.target.checked);
+      }
+    });
+  });
+}
+
+function renderRecordsList(){
+  const listEl = el("recordsList");
+  if(studentRecords.length===0){
+    listEl.innerHTML = `<div class="empty-state">Chưa có kết quả làm bài nào.</div>`;
+    return;
+  }
+  listEl.innerHTML = studentRecords.slice(0, 30).map(r => `
+    <div class="record-item">
+      <div>
+        <div><b>${escapeHtml(r.name)}</b> · Bài ${escapeHtml(r.lesson)} · ${escapeHtml(r.type)}</div>
+        <div class="record-meta">${escapeHtml(r.time)} · ${r.correct}/${r.total}</div>
+      </div>
+      <div class="record-pct ${r.pct>=85?'good':r.pct>=60?'mid':'low'}">${r.pct}%</div>
+    </div>
+  `).join("");
+}
+
+// =================================================================
+// 💾 localStorage 자동 저장/불러오기
+// — 단어장, 오답노트, 성적기록, 숙제체크, 학생이름 모두 보존
+// =================================================================
+// ================================================================
+// ⚙️ GAS 연동 설정 — 배포 URL을 여기에 붙여넣으세요
+// ================================================================
+const GAS_URL = "https://script.google.com/macros/s/AKfycbykehYa9Y1MckuqM1x6kEzqItMbuzwNKqo1RG6n0R-mcUMzJ6fUOb9781DQFDW3QvBe/exec";
+// GAS가 설정되지 않은 경우 localStorage 전용 모드로 동작합니다.
+const GAS_ENABLED = GAS_URL && !GAS_URL.includes("여기에");
+
+// ================================================================
+// 💾 데이터 저장소 (localStorage + GAS 이중 구조)
+// ================================================================
+const STORAGE_KEYS = {
+  words:         "kross_words",
+  wrongNote:     "kross_wrongNote",
+  studentRecords:"kross_studentRecords",
+  manualRoster:  "kross_manualRoster",
+  homeworkMap:   "kross_homeworkMap",
+  studentName:   "kross_studentName",
+  lastSheetUrl:  "kross_lastSheetUrl",
+  pw:            "kross_pw",
+};
+
+// ── localStorage (항상 동작) ──────────────────────────────────
+function saveAll(){
+  try{
+    localStorage.setItem(STORAGE_KEYS.words,          JSON.stringify(words));
+    localStorage.setItem(STORAGE_KEYS.wrongNote,      JSON.stringify(wrongNote));
+    localStorage.setItem(STORAGE_KEYS.studentRecords, JSON.stringify(studentRecords));
+    localStorage.setItem(STORAGE_KEYS.manualRoster,   JSON.stringify(manualRoster));
+    localStorage.setItem(STORAGE_KEYS.homeworkMap,    JSON.stringify(homeworkMap));
+    localStorage.setItem(STORAGE_KEYS.studentName,    studentName);
+    localStorage.setItem(STORAGE_KEYS.pw,             teacherPassword);
+    if(lastSheetUrl) localStorage.setItem(STORAGE_KEYS.lastSheetUrl, lastSheetUrl);
+  }catch(e){ console.warn("localStorage 저장 실패:", e); }
+}
+
+function loadAll(){
+  try{
+    const w = localStorage.getItem(STORAGE_KEYS.words);
+    if(w) words = JSON.parse(w);
+
+    const wn = localStorage.getItem(STORAGE_KEYS.wrongNote);
+    if(wn) wrongNote = JSON.parse(wn);
+
+    const sr = localStorage.getItem(STORAGE_KEYS.studentRecords);
+    if(sr) studentRecords = JSON.parse(sr);
+
+    const mr = localStorage.getItem(STORAGE_KEYS.manualRoster);
+    if(mr){
+      const raw = JSON.parse(mr);
+      manualRoster = raw.map(r => typeof r === "string" ? {name:r, class:""} : r);
+    }
+
+    const hm = localStorage.getItem(STORAGE_KEYS.homeworkMap);
+    if(hm) homeworkMap = JSON.parse(hm);
+
+    const sn = localStorage.getItem(STORAGE_KEYS.studentName);
+    if(sn){ studentName = sn; }
+
+    const pw = localStorage.getItem(STORAGE_KEYS.pw);
+    if(pw) teacherPassword = pw;
+
+    const su = localStorage.getItem(STORAGE_KEYS.lastSheetUrl);
+    if(su){ lastSheetUrl = su; el("sheetUrlInput").value = su; el("btnRefreshSheet").classList.remove("hidden"); }
+  }catch(e){ console.warn("localStorage 불러오기 실패:", e); }
+}
+
+// ── GAS API 호출 헬퍼 ─────────────────────────────────────────
+async function gasGet(action){
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000); // 8초 타임아웃
+  try{
+    const res = await fetch(`${GAS_URL}?action=${action}`, { signal: controller.signal });
+    clearTimeout(timer);
+    return res.json();
+  }catch(e){
+    clearTimeout(timer);
+    throw e;
+  }
+}
+async function gasPost(body){
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  try{
+    const res = await fetch(GAS_URL, {
+      method:"POST",
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    return res.json();
+  }catch(e){
+    clearTimeout(timer);
+    throw e;
+  }
+}
+
+// ── GAS에서 단어 + 명단 로드 (앱 시작 시) ────────────────────
+async function loadFromGAS(){
+  if(!GAS_ENABLED) return false;
+  try{
+    const [wRes, rRes] = await Promise.all([
+      gasGet("getWords"),
+      gasGet("getRoster"),
+    ]);
+    if(wRes.ok && wRes.data.length > 0){
+      words = wRes.data.map(r => ({
+        급수: String(r["급수"]||""),
+        과:   String(r["과"]||"1"),
+        단어: String(r["단어"]||""),
+        뜻:   String(r["뜻"]||""),
+        예문: String(r["예문"]||""),
+      }));
+      localStorage.setItem(STORAGE_KEYS.words, JSON.stringify(words));
+    }
+    if(rRes.ok && rRes.data.length > 0){
+      manualRoster = rRes.data.map(r => ({
+        name:  String(r["이름"]||""),
+        class: String(r["반"]||""),
+      }));
+      localStorage.setItem(STORAGE_KEYS.manualRoster, JSON.stringify(manualRoster));
+    }
+    return true;
+  }catch(e){
+    console.warn("GAS 로드 실패 (오프라인 모드로 전환):", e);
+    return false;
+  }
+}
+
+// ── GAS로 단어 저장 (선생님 업로드 시) ───────────────────────
+async function syncWordsToGAS(){
+  if(!GAS_ENABLED) return;
+  try{
+    await gasPost({ action:"setWords", words });
+  }catch(e){ console.warn("GAS 단어 동기화 실패:", e); }
+}
+
+// ── GAS로 명단 저장 (선생님 업로드 시) ───────────────────────
+async function syncRosterToGAS(){
+  if(!GAS_ENABLED) return;
+  try{
+    await gasPost({ action:"setRoster", roster: manualRoster });
+  }catch(e){ console.warn("GAS 명단 동기화 실패:", e); }
+}
+
+// ── GAS로 성적 기록 추가 (퀴즈 완료 시) ─────────────────────
+async function pushRecordToGAS(record){
+  if(!GAS_ENABLED) return;
+  try{
+    await gasPost({ action:"addRecord", record });
+  }catch(e){ console.warn("GAS 성적 저장 실패:", e); }
+}
+
+// ── GAS로 숙제 체크 저장 ─────────────────────────────────────
+async function pushHomeworkToGAS(name, cls, lesson, done){
+  if(!GAS_ENABLED) return;
+  try{
+    await gasPost({ action:"setHomework", name, cls, lesson, done });
+  }catch(e){ console.warn("GAS 숙제 저장 실패:", e); }
+}
+
+// ── recordAttempt에 GAS 연동 추가 ────────────────────────────
+// (기존 함수를 GAS 버전으로 재정의)
+const _origRecordAttempt2 = recordAttempt;
+// 이 시점엔 recordAttempt가 이미 위에서 function 선언으로 정의됨
+// → 기존 함수 내부에 GAS 호출 추가는 아래 래핑 방식 대신
+//   직접 호출하는 방식으로 처리
+
+// renderTable 이후 GAS 동기화 트리거
+const _origRenderTable2 = null; // 미사용 — 직접 호출 방식 사용
+
+// ── 숙제 체크 GAS 동기화 연결 ─────────────────────────────────
+// renderHomeworkGrid 내 checkbox 이벤트에 GAS 호출 추가됨 (아래)
+
+// =================================================================
+// 🚀 앱 시작
+// =================================================================
+loadAll(); // 우선 localStorage에서 복원 (오프라인 대비)
+updateNameDisplay();
+renderRosterPreview();
+renderHomeworkGrid();
+renderRecordsList();
+renderTable();
+switchStudentSub("study");
+
+// GAS에서 최신 데이터 로드 (비동기 — 화면 표시 후 백그라운드로)
+if(GAS_ENABLED){
+  // 로딩 배너 (건너뛰기 버튼 포함)
+  const banner = document.createElement("div");
+  banner.id = "gasBanner";
+  banner.style.cssText = "position:fixed;top:0;left:0;right:0;background:var(--green);color:#fff;padding:10px 16px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between;z-index:9999;";
+  banner.innerHTML = `<span>🔄 서버에서 최신 데이터 불러오는 중...</span><button onclick="document.getElementById('gasBanner').remove()" style="background:rgba(255,255,255,0.25);border:none;color:#fff;padding:4px 10px;border-radius:8px;cursor:pointer;font-size:12px;">건너뛰기 ✕</button>`;
+  document.body.prepend(banner);
+
+  loadFromGAS().then(success => {
+    const b = document.getElementById("gasBanner");
+    if(b) b.remove();
+    if(success){
+      renderTable();
+      renderRosterPreview();
+      renderHomeworkGrid();
+      if(!studentName && manualRoster.length > 0){
+        setTimeout(() => openNameModal(), 600);
+      }
+      showToast(`✅ 최신 데이터 로드 완료 — ${words.length}개 단어`);
+    } else {
+      if(words.length > 0){
+        showToast(`📦 오프라인 모드 — ${words.length}개 단어 (캐시)`);
+      } else {
+        showToast("⚠️ GAS 연결 실패 — 선생님 모드에서 단어를 업로드해주세요");
+      }
+    }
+  });
+} else {
+  if(!studentName && manualRoster.length > 0){
+    setTimeout(() => openNameModal(), 500);
+  }
+  if(words.length > 0){
+    showToast(`✓ Đã khôi phục ${words.length} từ`);
+  }
+}
+
+</script>
+
+</body>
+</html>
