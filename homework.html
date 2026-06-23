@@ -6,14 +6,13 @@
 <title>KROSS – Nộp Bài Tập</title>
 <style>
   :root {
-    --bg:#f7f5f0;--surface:#ffffff;--border:#e2ddd6;--ink:#1a1714;--ink-dim:#6b6460;
+    --bg:#f7f5f0;--surface:#fff;--border:#e2ddd6;--ink:#1a1714;--ink-dim:#6b6460;
     --accent:#d94f3d;--accent-2:#2c6fad;--green:#2a7d4f;--tag-bg:#fdf0ee;
     --radius:12px;--shadow:0 2px 12px rgba(0,0,0,.08);
-    --font-vi:'Be Vietnam Pro','Noto Sans','Arial',sans-serif;
   }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   html{font-size:16px;background:var(--bg);color:var(--ink)}
-  body{font-family:var(--font-vi);min-height:100vh}
+  body{font-family:'Be Vietnam Pro','Arial',sans-serif;min-height:100vh}
   button{cursor:pointer;font-family:inherit}
   input,select,textarea{font-family:inherit}
 
@@ -28,7 +27,6 @@
 
   .page{display:none;padding:32px 24px 64px;max-width:800px;margin:0 auto}
   .page.active{display:block}
-
   .section-title{font-size:1.35rem;font-weight:800;margin-bottom:4px}
   .section-sub{font-size:.85rem;color:var(--ink-dim);margin-bottom:28px}
 
@@ -43,34 +41,29 @@
     background:#fafaf8;color:var(--ink);transition:border-color .2s;outline:none}
   .form-group input:focus,.form-group select:focus,.form-group textarea:focus{
     border-color:var(--accent);background:#fff}
-  .form-group textarea{resize:vertical;min-height:90px}
+  .form-group textarea{resize:vertical;min-height:80px}
 
   .dropzone{border:2px dashed var(--border);border-radius:10px;padding:32px 20px;
-    text-align:center;cursor:pointer;background:#fafaf8;transition:border-color .2s,background .2s;
-    position:relative}
+    text-align:center;cursor:pointer;background:#fafaf8;transition:border-color .2s,background .2s;position:relative}
   .dropzone:hover,.dropzone.dragover{border-color:var(--accent);background:var(--tag-bg)}
   .dropzone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
   .dropzone .dz-icon{font-size:2rem;margin-bottom:8px}
   .dropzone .dz-text{font-size:.9rem;color:var(--ink-dim)}
   .dropzone .dz-hint{font-size:.78rem;color:var(--ink-dim);margin-top:4px}
 
-  .preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
-    gap:10px;margin-top:14px}
-  .preview-item{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:1;
-    background:var(--bg);border:1px solid var(--border)}
+  .preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin-top:14px}
+  .preview-item{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:1;background:var(--bg);border:1px solid var(--border)}
   .preview-item img{width:100%;height:100%;object-fit:cover}
   .remove-btn{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;
-    border:none;border-radius:50%;width:22px;height:22px;font-size:.75rem;
-    line-height:22px;text-align:center;cursor:pointer}
+    border:none;border-radius:50%;width:22px;height:22px;font-size:.75rem;line-height:22px;text-align:center;cursor:pointer}
 
   .progress-wrap{margin-top:14px;display:none}
   .progress-bar-bg{background:#e2ddd6;border-radius:20px;height:8px;overflow:hidden}
   .progress-bar{background:var(--accent);height:8px;border-radius:20px;transition:width .3s;width:0%}
   .progress-label{font-size:.78rem;color:var(--ink-dim);margin-top:5px;text-align:center}
 
-  .btn{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;
-    border-radius:8px;font-size:.9rem;font-weight:700;border:none;
-    transition:opacity .15s,transform .1s}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;border-radius:8px;
+    font-size:.9rem;font-weight:700;border:none;transition:opacity .15s,transform .1s}
   .btn:active{transform:scale(.97)}
   .btn-primary{background:var(--accent);color:#fff}
   .btn-blue{background:var(--accent-2);color:#fff}
@@ -86,8 +79,7 @@
 
   .hw-row{display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid var(--border)}
   .hw-row:last-child{border-bottom:none}
-  .hw-thumb{width:64px;height:64px;flex-shrink:0;border-radius:8px;object-fit:cover;
-    border:1px solid var(--border);background:var(--bg)}
+  .hw-thumb{width:64px;height:64px;flex-shrink:0;border-radius:8px;object-fit:cover;border:1px solid var(--border);background:var(--bg)}
   .hw-info{flex:1;min-width:0}
   .hw-name{font-weight:700;font-size:.95rem;margin-bottom:2px}
   .hw-meta{font-size:.78rem;color:var(--ink-dim)}
@@ -106,21 +98,12 @@
   .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;
     align-items:center;justify-content:center;z-index:600;cursor:zoom-out}
   .lightbox img{max-width:92vw;max-height:88vh;border-radius:8px}
-  .lightbox-close{position:absolute;top:18px;right:22px;color:#fff;font-size:1.8rem;
-    background:none;border:none}
+  .lightbox-close{position:absolute;top:18px;right:22px;color:#fff;font-size:1.8rem;background:none;border:none}
 
   .feedback-area{display:none;margin-top:10px}
   .feedback-area textarea{width:100%;padding:8px 12px;border:1.5px solid var(--border);
     border-radius:8px;font-size:.85rem;resize:none;min-height:70px;outline:none}
   .feedback-area textarea:focus{border-color:var(--accent-2)}
-
-  .setup-step{display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--border)}
-  .setup-step:last-child{border-bottom:none}
-  .step-num{width:28px;height:28px;flex-shrink:0;border-radius:50%;background:var(--accent);
-    color:#fff;font-size:.82rem;font-weight:800;display:flex;align-items:center;justify-content:center}
-  .step-body{flex:1;font-size:.88rem;line-height:1.7}
-  .step-body strong{display:block;font-size:.92rem;margin-bottom:2px}
-  code{background:rgba(0,0,0,.07);border-radius:4px;padding:1px 6px;font-size:.82rem}
 
   @media(max-width:600px){
     .site-header{padding:0 16px}
@@ -130,41 +113,36 @@
     .hw-actions{flex-direction:row;flex-wrap:wrap;justify-content:flex-end}
   }
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 </head>
 <body>
 
-<!-- ── Header ── -->
 <header class="site-header">
   <div class="logo">KR<span>O</span>SS</div>
   <nav class="nav-tabs">
     <button class="active" onclick="showPage('student')">📝 Nộp Bài</button>
     <button onclick="showPage('teacher-gate')">👩‍🏫 Giáo Viên</button>
-    <button onclick="showPage('setup')">⚙️ Cài Đặt</button>
   </nav>
 </header>
 
-<!-- ── Trang học sinh: Nộp bài ── -->
+<!-- 학생 페이지 -->
 <main class="page active" id="page-student">
   <div class="section-title">Nộp Bài Tập 📎</div>
-  <div class="section-sub">Chụp ảnh bài tập đã viết vào vở và nộp tại đây. Giáo viên sẽ kiểm tra và nhận xét cho bạn.</div>
+  <div class="section-sub">Chụp ảnh bài tập đã viết vào vở và nộp tại đây.</div>
 
   <div class="card" id="submit-form">
     <div class="form-group">
       <label>Họ và Tên</label>
-      <input type="text" id="s-name" placeholder="Ví dụ: Nguyễn Văn An" />
+      <input type="text" id="s-name" placeholder="Ví dụ: Nguyễn Văn An"/>
     </div>
     <div class="form-group">
       <label>Lớp học</label>
       <select id="s-class">
         <option value="">-- Chọn lớp --</option>
-        <option>Sơ cấp 1</option>
-        <option>Sơ cấp 2</option>
-        <option>Trung cấp 1</option>
-        <option>Trung cấp 2</option>
-        <option>TOPIK 1</option>
-        <option>TOPIK 2</option>
+        <option>Sơ cấp 1</option><option>Sơ cấp 2</option>
+        <option>Trung cấp 1</option><option>Trung cấp 2</option>
+        <option>TOPIK 1</option><option>TOPIK 2</option>
       </select>
     </div>
     <div class="form-group">
@@ -179,16 +157,16 @@
     </div>
     <div class="form-group">
       <label>Bài / Chương</label>
-      <input type="text" id="s-lesson" placeholder="Ví dụ: Bài 3 – Ôn ngữ pháp" />
+      <input type="text" id="s-lesson" placeholder="Ví dụ: Bài 3 – Ôn ngữ pháp"/>
     </div>
     <div class="form-group">
-      <label>Ghi chú cho giáo viên (không bắt buộc)</label>
+      <label>Ghi chú (không bắt buộc)</label>
       <textarea id="s-memo" placeholder="Nếu có điều muốn nhắn với giáo viên, hãy ghi vào đây."></textarea>
     </div>
     <div class="form-group">
       <label>Ảnh bài tập (tối đa 5 ảnh, mỗi ảnh tối đa 5MB)</label>
       <div class="dropzone" id="dropzone">
-        <input type="file" id="file-input" accept="image/*" multiple />
+        <input type="file" id="file-input" accept="image/*" multiple/>
         <div class="dz-icon">📷</div>
         <div class="dz-text">Kéo thả ảnh vào đây hoặc nhấn để chọn ảnh</div>
         <div class="dz-hint">JPG · PNG · HEIC · WebP</div>
@@ -196,7 +174,7 @@
       <div class="preview-grid" id="preview-grid"></div>
       <div class="progress-wrap" id="progress-wrap">
         <div class="progress-bar-bg"><div class="progress-bar" id="progress-bar"></div></div>
-        <div class="progress-label" id="progress-label">Đang chuẩn bị tải lên…</div>
+        <div class="progress-label" id="progress-label">Đang chuẩn bị…</div>
       </div>
     </div>
     <button class="btn btn-primary btn-full" id="submit-btn" onclick="submitHomework()">Nộp bài</button>
@@ -205,26 +183,29 @@
   <div class="card" id="success-card" style="display:none;text-align:center;padding:40px">
     <div style="font-size:3rem">✅</div>
     <div style="font-size:1.2rem;font-weight:800;margin:12px 0 6px">Nộp bài thành công!</div>
-    <div style="color:var(--ink-dim);font-size:.9rem;margin-bottom:20px">Giáo viên sẽ kiểm tra và gửi nhận xét cho bạn sớm nhé.</div>
+    <div style="color:var(--ink-dim);font-size:.9rem;margin-bottom:20px">Giáo viên sẽ kiểm tra và gửi nhận xét sớm nhé.</div>
     <button class="btn btn-ghost" onclick="resetForm()">Nộp bài khác</button>
   </div>
 </main>
 
-<!-- ── Trang giáo viên: Đăng nhập ── -->
+<!-- 교사 로그인 -->
 <main class="page" id="page-teacher-gate">
   <div class="section-title">Đăng Nhập Giáo Viên 🔐</div>
   <div class="section-sub">Trang quản lý bài tập dành riêng cho giáo viên.</div>
   <div class="card" style="max-width:360px">
     <div class="form-group">
       <label>Mật khẩu</label>
-      <input type="password" id="teacher-pw" placeholder="Nhập mật khẩu giáo viên" onkeydown="if(event.key==='Enter')teacherLogin()" />
+      <input type="password" id="teacher-pw" placeholder="Nhập mật khẩu giáo viên"
+        onkeydown="if(event.key==='Enter')teacherLogin()"/>
     </div>
     <button class="btn btn-blue btn-full" onclick="teacherLogin()">Đăng nhập</button>
-    <div id="login-err" style="color:var(--accent);font-size:.82rem;margin-top:8px;display:none">Mật khẩu không đúng. Vui lòng thử lại.</div>
+    <div id="login-err" style="color:var(--accent);font-size:.82rem;margin-top:8px;display:none">
+      Mật khẩu không đúng. Vui lòng thử lại.
+    </div>
   </div>
 </main>
 
-<!-- ── Trang giáo viên: Dashboard ── -->
+<!-- 교사 대시보드 -->
 <main class="page" id="page-teacher">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
     <div class="section-title">Quản Lý Bài Nộp 📋</div>
@@ -232,7 +213,6 @@
   </div>
   <div class="section-sub">Xem và nhận xét bài tập học sinh đã nộp.</div>
 
-  <!-- Bộ lọc -->
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">
     <select id="f-class" onchange="filterSubs()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.85rem;background:#fff;font-family:inherit">
       <option value="">Tất cả lớp</option>
@@ -256,7 +236,6 @@
     <button class="btn btn-ghost" style="font-size:.82rem;padding:8px 14px" onclick="exportCSV()">⬇ Xuất CSV</button>
   </div>
 
-  <!-- Thống kê -->
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px">
     <div class="card" style="padding:16px;text-align:center;margin-bottom:0">
       <div style="font-size:1.6rem;font-weight:800" id="st-total">0</div>
@@ -272,116 +251,42 @@
     </div>
   </div>
 
-  <!-- Danh sách bài nộp -->
-  <div class="card" id="hw-list-card">
+  <div class="card">
     <div id="hw-list">
-      <div style="text-align:center;color:var(--ink-dim);padding:32px 0;font-size:.9rem">Đang tải dữ liệu…</div>
+      <div style="text-align:center;color:var(--ink-dim);padding:32px 0;font-size:.9rem">Đang tải…</div>
     </div>
   </div>
 </main>
 
-<!-- ── Trang cài đặt (dành cho quản trị viên) ── -->
-<main class="page" id="page-setup">
-  <div class="section-title">⚙️ Hướng Dẫn Cài Đặt</div>
-  <div class="section-sub">Chỉ cần cài đặt một lần. Sau đó bài tập sẽ tự động lưu vào Google Drive.</div>
-
-  <div class="card">
-    <div class="setup-step">
-      <div class="step-num">1</div>
-      <div class="step-body">
-        <strong>Tạo thư mục trên Google Drive</strong>
-        Tạo thư mục tên <code>KROSS_숙제</code> trên Drive, sau đó copy ID từ URL.<br/>
-        Ví dụ: <code>https://drive.google.com/drive/folders/<b>1AbCdEfGh…</b></code>
-      </div>
-    </div>
-    <div class="setup-step">
-      <div class="step-num">2</div>
-      <div class="step-body">
-        <strong>Tạo Google Sheets</strong>
-        Tạo một bảng tính mới và copy ID từ URL.<br/>
-        Ví dụ: <code>https://docs.google.com/spreadsheets/d/<b>1XxYyZz…</b>/edit</code>
-      </div>
-    </div>
-    <div class="setup-step">
-      <div class="step-num">3</div>
-      <div class="step-body">
-        <strong>Dán code vào Apps Script</strong>
-        Vào <a href="https://script.google.com" target="_blank" style="color:var(--accent-2)">script.google.com</a>
-        → Tạo dự án mới → Dán toàn bộ nội dung file <code>kross_gas.js</code><br/>
-        Điền Folder ID, Sheet ID và mật khẩu vào phần <code>CONFIG</code> ở đầu file.
-      </div>
-    </div>
-    <div class="setup-step">
-      <div class="step-num">4</div>
-      <div class="step-body">
-        <strong>Triển khai dưới dạng Web App</strong>
-        Nhấn <b>Triển khai → Triển khai mới</b><br/>
-        Loại: <code>Ứng dụng web</code> / Chạy với tư cách: <code>Tôi</code> / Quyền truy cập: <code>Mọi người</code><br/>
-        → Copy <b>URL Web App</b> sau khi triển khai.
-      </div>
-    </div>
-    <div class="setup-step">
-      <div class="step-num">5</div>
-      <div class="step-body">
-        <strong>Dán URL vào file homework.html</strong>
-        Tìm dòng <code>const GAS_URL = '';</code> và dán URL vào trong cặp nháy đơn.<br/>
-        Lưu file và upload lên GitHub → Hoàn tất! 🎉
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div style="font-weight:700;margin-bottom:12px">📁 Cấu trúc thư mục sẽ được tạo tự động</div>
-    <div style="font-family:monospace;font-size:.88rem;line-height:2;color:var(--ink-dim);background:var(--bg);padding:16px;border-radius:8px">
-      📁 KROSS_숙제/<br/>
-      &nbsp;&nbsp;📁 Sơ cấp 1/<br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;📁 Nguyễn Văn An/<br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🖼 2024-07-01_Ngữpháp_01.jpg<br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🖼 2024-07-01_Ngữpháp_02.jpg<br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;📁 Trần Thị Mai/<br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🖼 2024-07-02_Từvựng_01.jpg<br/>
-      &nbsp;&nbsp;📁 TOPIK 1/<br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;📁 …
-    </div>
-  </div>
-
-  <div class="card" style="border-color:#c5d8f5;background:#edf4fd">
-    <div style="font-weight:700;color:#123069;margin-bottom:8px">⚠️ Lần đầu chạy cần cấp quyền</div>
-    <div style="font-size:.87rem;color:#1a3f6f;line-height:1.7">
-      Khi nộp bài lần đầu, Google sẽ yêu cầu xác nhận quyền truy cập.<br/>
-      Nhấn <b>Nâng cao → Tiếp tục (không an toàn)</b> để cho phép.<br/>
-      Chỉ dùng quyền truy cập Drive và Sheets của tài khoản của bạn — hoàn toàn an toàn.
-    </div>
-  </div>
-</main>
-
-<!-- Lightbox -->
 <div class="lightbox" id="lightbox" style="display:none" onclick="closeLightbox(event)">
   <button class="lightbox-close" onclick="document.getElementById('lightbox').style.display='none'">✕</button>
-  <img id="lb-img" src="" alt="Ảnh bài tập" onclick="event.stopPropagation()" />
+  <img id="lb-img" src="" alt="Ảnh bài tập" onclick="event.stopPropagation()"/>
 </div>
-
 <div id="toast"></div>
 
 <script>
-// ★ Dán URL của Google Apps Script vào đây sau khi triển khai ★
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbw8wHsqFYMi_TLceGRtTCQxkn53p6l_a6kAGnVbW5r6Cf29QJYX6EE64HGf-j0qeyZXyA/exec';   // Ví dụ: 'https://script.google.com/macros/s/AKfycbwkDmWHmfmkAEY527OPc615Aal6J8465q4CmQGD4HhwK7CqA3salzyapIrswoXxKttz6Q/exec'
-
-const DEMO = !GAS_URL;
-const TEACHER_PW_DEMO = 'kross1234';
+// ★ GAS URL ★
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbw8wHsqFYMi_TLceGRtTCQxkn53p6l_a6kAGnVbW5r6Cf29QJYX6EE64HGf-j0qeyZXyA/exec';
 
 let selectedFiles = [];
 let allSubs       = [];
 
-// ── Chuyển trang ──
+// ── 페이지 전환 ──
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(`page-${id}`).classList.add('active');
-  const map = { student:0, 'teacher-gate':1, setup:2 };
+  document.getElementById('page-' + id).classList.add('active');
+  const map = { student:0, 'teacher-gate':1, teacher:1 };
   document.querySelectorAll('.nav-tabs button').forEach((b,i) => b.classList.toggle('active', i === map[id]));
 }
 
-// ── Dropzone ──
+// ── GAS 호출 (GET 방식, CORS 없음) ──
+function gasGet(params) {
+  const qs  = Object.entries(params).map(([k,v]) => k+'='+encodeURIComponent(v)).join('&');
+  const url = GAS_URL + '?' + qs;
+  return fetch(url).then(r => r.json());
+}
+
+// ── 드롭존 ──
 const dropzone  = document.getElementById('dropzone');
 const fileInput = document.getElementById('file-input');
 const grid      = document.getElementById('preview-grid');
@@ -395,14 +300,16 @@ function addFiles(files) {
   files.forEach(f => {
     if (selectedFiles.filter(Boolean).length >= 5) { showToast('Chỉ được đính kèm tối đa 5 ảnh.'); return; }
     if (!f.type.startsWith('image/'))              { showToast('Chỉ chấp nhận file ảnh.'); return; }
-    if (f.size > 5 * 1024 * 1024)                  { showToast(`${f.name} — Ảnh vượt quá 5MB.`); return; }
+    if (f.size > 5*1024*1024)                       { showToast(f.name + ' vượt quá 5MB.'); return; }
     const idx = selectedFiles.length;
     selectedFiles.push(f);
     const reader = new FileReader();
     reader.onload = e => {
-      const item = Object.assign(document.createElement('div'), { className:'preview-item' });
+      const item = document.createElement('div');
+      item.className = 'preview-item';
       item.dataset.idx = idx;
-      item.innerHTML = `<img src="${e.target.result}" alt="xem trước"/><button class="remove-btn" onclick="removeFile(${idx})">✕</button>`;
+      item.innerHTML = '<img src="'+e.target.result+'" alt="xem trước"/>'
+        +'<button class="remove-btn" onclick="removeFile('+idx+')">✕</button>';
       grid.appendChild(item);
     };
     reader.readAsDataURL(f);
@@ -410,15 +317,14 @@ function addFiles(files) {
 }
 function removeFile(idx) {
   selectedFiles[idx] = null;
-  const el = grid.querySelector(`[data-idx="${idx}"]`);
+  const el = grid.querySelector('[data-idx="'+idx+'"]');
   if (el) el.remove();
 }
-
 function toBase64(file) {
   return new Promise(res => { const r = new FileReader(); r.onload=e=>res(e.target.result); r.readAsDataURL(file); });
 }
 
-// ── Nộp bài ──
+// ── 숙제 제출 ──
 async function submitHomework() {
   const name   = document.getElementById('s-name').value.trim();
   const cls    = document.getElementById('s-class').value;
@@ -433,20 +339,20 @@ async function submitHomework() {
   if (!lesson)       { showToast('Vui lòng nhập tên bài / chương.'); return; }
   if (!files.length) { showToast('Vui lòng đính kèm ít nhất 1 ảnh.'); return; }
 
-  const btn = document.getElementById('submit-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Đang tải lên…';
-
+  const btn   = document.getElementById('submit-btn');
   const wrap  = document.getElementById('progress-wrap');
   const bar   = document.getElementById('progress-bar');
   const label = document.getElementById('progress-label');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Đang tải lên…';
   wrap.style.display = 'block';
 
   try {
     const images = [];
     for (let i = 0; i < files.length; i++) {
-      label.textContent = `Đang xử lý ảnh… (${i+1}/${files.length})`;
-      bar.style.width   = `${Math.round(((i+0.5)/files.length)*60)}%`;
+      label.textContent = 'Đang xử lý ảnh ' + (i+1) + '/' + files.length + '…';
+      bar.style.width   = Math.round(((i+0.5)/files.length)*60) + '%';
       images.push(await toBase64(files[i]));
     }
 
@@ -454,33 +360,20 @@ async function submitHomework() {
     label.textContent = 'Đang lưu vào Google Drive…';
 
     const payload = { studentName:name, class:cls, hwType:type, lesson, memo, images };
+    const json = await gasGet({ action:'submit', data: JSON.stringify(payload) });
 
-    if (DEMO) {
-      await new Promise(r => setTimeout(r, 800));
-      const record = { id: Date.now(), ...payload, imageUrls: images.slice(0,1),
-        submittedAt: new Date().toISOString(), status:'pending', feedback:'' };
-      const saved = JSON.parse(localStorage.getItem('kross_hw')||'[]');
-      saved.unshift(record);
-      localStorage.setItem('kross_hw', JSON.stringify(saved));
-    } else {
-      const res = await fetch(GAS_URL, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ action:'submit', data:payload }),
-      });
-      const json = await res.json();
-      if (json.error) throw new Error(json.error);
-    }
+    if (json.error) throw new Error(json.error);
 
     bar.style.width   = '100%';
     label.textContent = 'Hoàn tất!';
     await new Promise(r => setTimeout(r, 400));
 
-    document.getElementById('submit-form').style.display = 'none';
+    document.getElementById('submit-form').style.display  = 'none';
     document.getElementById('success-card').style.display = 'block';
-  } catch (err) {
+
+  } catch(err) {
     console.error(err);
-    showToast('Có lỗi xảy ra. Vui lòng thử lại.');
+    showToast('Có lỗi xảy ra: ' + err.message);
     bar.style.width = '0%';
   } finally {
     btn.disabled = false;
@@ -499,29 +392,19 @@ function resetForm() {
   document.getElementById('success-card').style.display = 'none';
 }
 
-// ── Đăng nhập giáo viên ──
+// ── 교사 로그인 ──
 async function teacherLogin() {
   const pw = document.getElementById('teacher-pw').value;
-  let ok = false;
-
-  if (DEMO) {
-    ok = pw === TEACHER_PW_DEMO;
-  } else {
-    try {
-      const res  = await fetch(`${GAS_URL}?action=list&pw=${encodeURIComponent(pw)}`);
-      const json = await res.json();
-      ok = !json.error;
-      if (ok) allSubs = json;
-    } catch { ok = false; }
-  }
-
-  if (ok) {
+  try {
+    const json = await gasGet({ action:'list', pw });
+    if (json.error) throw new Error(json.error);
+    allSubs = json;
     document.getElementById('login-err').style.display = 'none';
     sessionStorage.setItem('teacher','1');
     sessionStorage.setItem('tpw', pw);
     showPage('teacher');
-    if (!DEMO) renderSubs(allSubs); else loadSubs();
-  } else {
+    renderSubs(allSubs);
+  } catch {
     document.getElementById('login-err').style.display = 'block';
   }
 }
@@ -533,18 +416,14 @@ function teacherLogout() {
   showPage('teacher-gate');
 }
 
-// ── Tải danh sách bài nộp ──
 async function loadSubs() {
-  if (DEMO) {
-    allSubs = JSON.parse(localStorage.getItem('kross_hw')||'[]');
-  } else {
-    const pw = sessionStorage.getItem('tpw') || '';
-    try {
-      const res = await fetch(`${GAS_URL}?action=list&pw=${encodeURIComponent(pw)}`);
-      allSubs = await res.json();
-    } catch { showToast('Không tải được dữ liệu.'); allSubs=[]; }
-  }
-  filterSubs();
+  const pw = sessionStorage.getItem('tpw') || '';
+  try {
+    const json = await gasGet({ action:'list', pw });
+    if (json.error) { showToast('Không tải được dữ liệu.'); return; }
+    allSubs = json;
+    filterSubs();
+  } catch { showToast('Lỗi kết nối.'); }
 }
 
 function filterSubs() {
@@ -552,8 +431,8 @@ function filterSubs() {
   const type   = document.getElementById('f-type').value;
   const status = document.getElementById('f-status').value;
   renderSubs(allSubs.filter(s =>
-    (!cls    || s.class  === cls)   &&
-    (!type   || s.hwType === type)  &&
+    (!cls    || s.class  === cls)  &&
+    (!type   || s.hwType === type) &&
     (!status || s.status === status)
   ));
 }
@@ -577,116 +456,92 @@ function renderSubs(list) {
     const thumb   = urls[0] || '';
     const date    = new Date(s.submittedAt).toLocaleString('vi-VN',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
     const checked = s.status === 'checked';
+    const safeThumb = thumb.replace(/'/g,"\\'");
 
-    return `<div class="hw-row" id="row-${s.id}">
-      ${thumb
-        ? `<img class="hw-thumb" src="${thumb}" alt="Bài tập" onclick="openLightbox('${thumb}')" style="cursor:zoom-in"/>`
-        : `<div class="hw-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem">📄</div>`}
-      <div class="hw-info">
-        <div class="hw-name">${esc(s.studentName)}</div>
-        <div class="hw-meta">${esc(s.class)} · <span class="badge ${TYPE_BADGE[s.hwType]||''}">${TYPE_LABEL[s.hwType]||s.hwType}</span> · ${esc(s.lesson)} · ${date}</div>
-        ${s.memo?`<div style="font-size:.82rem;color:var(--ink-dim);margin-top:4px">💬 ${esc(s.memo)}</div>`:''}
-        ${urls.length>1?`<div style="margin-top:6px;display:flex;gap:6px">${urls.map(u=>`<img src="${u}" style="width:38px;height:38px;object-fit:cover;border-radius:6px;cursor:zoom-in;border:1px solid var(--border)" onclick="openLightbox('${u}')" />`).join('')}</div>`:''}
-        ${s.feedback?`<div style="font-size:.82rem;background:#edf7f2;border-radius:8px;padding:6px 10px;margin-top:8px;color:var(--green)">✅ Nhận xét: ${esc(s.feedback)}</div>`:''}
-        <div class="feedback-area" id="fb-area-${s.id}">
-          <textarea id="fb-txt-${s.id}" placeholder="Nhập nhận xét của bạn…"></textarea>
-          <div style="margin-top:6px;display:flex;gap:8px">
-            <button class="btn btn-blue" style="font-size:.8rem;padding:7px 14px" onclick="saveFeedback('${s.id}')">Lưu</button>
-            <button class="btn btn-ghost" style="font-size:.8rem;padding:7px 14px" onclick="toggleFb('${s.id}')">Hủy</button>
-          </div>
-        </div>
-      </div>
-      <div class="hw-actions">
-        <span class="badge ${checked?'badge-checked':'badge-pending'}">${checked?'✅ Đã xem':'⏳ Chờ xem'}</span>
-        ${!checked?`<button class="btn btn-ghost" style="font-size:.78rem;padding:6px 12px" onclick="markChecked('${s.id}')">Đánh dấu đã xem</button>`:''}
-        <button class="btn btn-ghost" style="font-size:.78rem;padding:6px 12px" onclick="toggleFb('${s.id}')">📝 Nhận xét</button>
-        <button class="btn btn-ghost" style="font-size:.78rem;padding:6px 12px;color:var(--accent)" onclick="delSub('${s.id}')">Xóa</button>
-      </div>
-    </div>`;
+    return '<div class="hw-row" id="row-'+s.id+'">'
+      +(thumb
+        ? '<img class="hw-thumb" src="'+thumb+'" alt="Bài tập" onclick="openLightbox(\''+safeThumb+'\')" style="cursor:zoom-in"/>'
+        : '<div class="hw-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem">📄</div>')
+      +'<div class="hw-info">'
+        +'<div class="hw-name">'+esc(s.studentName)+'</div>'
+        +'<div class="hw-meta">'+esc(s.class)+' · <span class="badge '+(TYPE_BADGE[s.hwType]||'')+'">'+( TYPE_LABEL[s.hwType]||s.hwType)+'</span> · '+esc(s.lesson)+' · '+date+'</div>'
+        +(s.memo?'<div style="font-size:.82rem;color:var(--ink-dim);margin-top:4px">💬 '+esc(s.memo)+'</div>':'')
+        +(urls.length>1?'<div style="margin-top:6px;display:flex;gap:6px">'+urls.map(u=>'<img src="'+u+'" style="width:38px;height:38px;object-fit:cover;border-radius:6px;cursor:zoom-in;border:1px solid var(--border)" onclick="openLightbox(\''+u.replace(/'/g,"\\'")+'\')"/>').join('')+'</div>':'')
+        +(s.feedback?'<div style="font-size:.82rem;background:#edf7f2;border-radius:8px;padding:6px 10px;margin-top:8px;color:var(--green)">✅ Nhận xét: '+esc(s.feedback)+'</div>':'')
+        +'<div class="feedback-area" id="fb-area-'+s.id+'">'
+          +'<textarea id="fb-txt-'+s.id+'" placeholder="Nhập nhận xét…"></textarea>'
+          +'<div style="margin-top:6px;display:flex;gap:8px">'
+            +'<button class="btn btn-blue" style="font-size:.8rem;padding:7px 14px" onclick="saveFeedback(\''+s.id+'\')">Lưu</button>'
+            +'<button class="btn btn-ghost" style="font-size:.8rem;padding:7px 14px" onclick="toggleFb(\''+s.id+'\')">Hủy</button>'
+          +'</div>'
+        +'</div>'
+      +'</div>'
+      +'<div class="hw-actions">'
+        +'<span class="badge '+(checked?'badge-checked':'badge-pending')+'">'+(checked?'✅ Đã xem':'⏳ Chờ xem')+'</span>'
+        +(!checked?'<button class="btn btn-ghost" style="font-size:.78rem;padding:6px 12px" onclick="markChecked(\''+s.id+'\')">Đánh dấu đã xem</button>':'')
+        +'<button class="btn btn-ghost" style="font-size:.78rem;padding:6px 12px" onclick="toggleFb(\''+s.id+'\')">📝 Nhận xét</button>'
+        +'<button class="btn btn-ghost" style="font-size:.78rem;padding:6px 12px;color:var(--accent)" onclick="delSub(\''+s.id+'\')">Xóa</button>'
+      +'</div>'
+    +'</div>';
   }).join('');
 }
 
-// ── Thao tác của giáo viên ──
 function toggleFb(id) {
-  const el = document.getElementById(`fb-area-${id}`);
+  const el = document.getElementById('fb-area-'+id);
   el.style.display = el.style.display==='block' ? 'none' : 'block';
 }
 async function saveFeedback(id) {
-  const text = document.getElementById(`fb-txt-${id}`).value.trim();
+  const text = document.getElementById('fb-txt-'+id).value.trim();
   if (!text) { showToast('Vui lòng nhập nội dung nhận xét.'); return; }
-  await apiUpdate(id, { status:'checked', feedback:text });
+  await gasGet({ action:'update', id, updates: JSON.stringify({ status:'checked', feedback:text }) });
   showToast('Đã lưu nhận xét.');
   loadSubs();
 }
 async function markChecked(id) {
-  await apiUpdate(id, { status:'checked' });
+  await gasGet({ action:'update', id, updates: JSON.stringify({ status:'checked' }) });
   showToast('Đã đánh dấu là đã xem.');
   loadSubs();
 }
 async function delSub(id) {
   if (!confirm('Bạn có chắc muốn xóa bài nộp này không?')) return;
-  if (DEMO) {
-    const d = JSON.parse(localStorage.getItem('kross_hw')||'[]').filter(s=>String(s.id)!==String(id));
-    localStorage.setItem('kross_hw', JSON.stringify(d));
-  } else {
-    await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ action:'delete', id }) });
-  }
+  await gasGet({ action:'delete', id });
   showToast('Đã xóa.');
   loadSubs();
 }
-async function apiUpdate(id, updates) {
-  if (DEMO) {
-    const d = JSON.parse(localStorage.getItem('kross_hw')||'[]');
-    const i = d.findIndex(s=>String(s.id)===String(id));
-    if (i!==-1) Object.assign(d[i], updates);
-    localStorage.setItem('kross_hw', JSON.stringify(d));
-  } else {
-    await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ action:'update', id, updates }) });
-  }
-}
 
-// ── Xuất CSV ──
 function exportCSV() {
   if (!allSubs.length) { showToast('Không có dữ liệu để xuất.'); return; }
   const h = ['Thời gian nộp','Họ và tên','Lớp','Loại bài tập','Bài/Chương','Ghi chú','Số ảnh','Trạng thái','Nhận xét'];
-  const rows = allSubs.map(s => [
+  const rows = allSubs.map(s=>[
     new Date(s.submittedAt).toLocaleString('vi-VN'),
-    s.studentName, s.class, TYPE_LABEL[s.hwType]||s.hwType,
-    s.lesson, s.memo||'',
-    (s.imageUrls||[]).length,
-    s.status==='checked'?'Đã xem':'Chưa xem',
-    s.feedback||'',
+    s.studentName,s.class,TYPE_LABEL[s.hwType]||s.hwType,
+    s.lesson,s.memo||'',(s.imageUrls||[]).length,
+    s.status==='checked'?'Đã xem':'Chưa xem',s.feedback||''
   ]);
-  const csv = [h,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const csv = [h,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const a = document.createElement('a');
   a.href = 'data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
-  a.download = `KROSS_BaiNop_${new Date().toISOString().slice(0,10)}.csv`;
+  a.download = 'KROSS_BaiNop_'+new Date().toISOString().slice(0,10)+'.csv';
   a.click();
 }
 
-// ── Lightbox ──
 function openLightbox(src) {
   document.getElementById('lb-img').src = src;
   document.getElementById('lightbox').style.display = 'flex';
 }
 function closeLightbox(e) {
-  if (e.target === document.getElementById('lightbox'))
-    document.getElementById('lightbox').style.display = 'none';
+  if (e.target===document.getElementById('lightbox'))
+    document.getElementById('lightbox').style.display='none';
 }
-
-// ── Thông báo toast ──
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), 2800);
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800);
 }
 function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Khôi phục phiên giáo viên ──
 if (sessionStorage.getItem('teacher')) { showPage('teacher'); loadSubs(); }
 </script>
 </body>
