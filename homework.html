@@ -279,11 +279,14 @@ function showPage(id) {
   document.querySelectorAll('.nav-tabs button').forEach((b,i) => b.classList.toggle('active', i === map[id]));
 }
 
-// ── GAS 호출 (GET 방식, CORS 없음) ──
-function gasGet(params) {
-  const qs  = Object.entries(params).map(([k,v]) => k+'='+encodeURIComponent(v)).join('&');
-  const url = GAS_URL + '?' + qs;
-  return fetch(url).then(r => r.json());
+// ── GAS 호출 (POST + text/plain → CORS preflight 우회) ──
+async function gasGet(payload) {
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload),
+  });
+  return await res.json();
 }
 
 // ── 드롭존 ──
@@ -360,7 +363,7 @@ async function submitHomework() {
     label.textContent = 'Đang lưu vào Google Drive…';
 
     const payload = { studentName:name, class:cls, hwType:type, lesson, memo, images };
-    const json = await gasGet({ action:'submit', data: JSON.stringify(payload) });
+    const json = await gasGet({ action:'submit', data: payload });
 
     if (json.error) throw new Error(json.error);
 
@@ -493,12 +496,12 @@ function toggleFb(id) {
 async function saveFeedback(id) {
   const text = document.getElementById('fb-txt-'+id).value.trim();
   if (!text) { showToast('Vui lòng nhập nội dung nhận xét.'); return; }
-  await gasGet({ action:'update', id, updates: JSON.stringify({ status:'checked', feedback:text }) });
+  await gasGet({ action:'update', id, updates: { status:'checked', feedback:text } });
   showToast('Đã lưu nhận xét.');
   loadSubs();
 }
 async function markChecked(id) {
-  await gasGet({ action:'update', id, updates: JSON.stringify({ status:'checked' }) });
+  await gasGet({ action:'update', id, updates: { status:'checked' } });
   showToast('Đã đánh dấu là đã xem.');
   loadSubs();
 }
