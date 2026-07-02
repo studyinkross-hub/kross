@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KROSS - Kiểm tra trình độ tiếng Hàn miễn phí</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#232323;
+    --pine:#2C5F4F;
+    --pine-dark:#1D4137;
+    --pine-light:#EAF1EE;
+    --gold:#C89B3C;
+    --gold-soft:#F3E6C4;
+    --paper:#FAF7F0;
+    --paper-card:#FFFFFF;
+    --gray:#8A8578;
+    --line:#E4DFD3;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Be Vietnam Pro',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+
+  /* ---------- KROSS brand header bar ---------- */
+  .kross-header{
+    background:#17181B;
+    position:sticky;
+    top:0;
+    z-index:20;
+    padding:14px 20px;
+  }
+  .kross-header-inner{
+    max-width:520px;
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .kross-logo{
+    font-family:'Be Vietnam Pro',sans-serif;
+    font-weight:800;
+    font-size:1.15rem;
+    letter-spacing:.02em;
+    color:#fff;
+  }
+  .kross-logo .o{color:#E8382B;}
+  .kross-tagline{
+    font-size:.62rem;
+    font-weight:600;
+    letter-spacing:.12em;
+    color:#D9D9D9;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .kr{font-family:'Noto Serif KR',serif;}
+  .wrap{
+    max-width:520px;
+    margin:0 auto;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding:0 20px 40px;
+  }
+
+  /* ---------- Header / progress bridge ---------- */
+  .topbar{
+    padding:18px 0 10px;
+    position:sticky;
+    top:50px;
+    background:var(--paper);
+    z-index:10;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .brand-name{
+    font-weight:800;
+    font-size:1.05rem;
+    letter-spacing:.02em;
+    color:var(--pine-dark);
+  }
+  .brand-name span{color:var(--gold);}
+  .step-label{
+    font-size:.78rem;
+    color:var(--gray);
+    font-weight:500;
+  }
+  .bridge{
+    display:flex;
+    gap:5px;
+    align-items:center;
+  }
+  .stone{
+    flex:1;
+    height:7px;
+    border-radius:99px;
+    background:var(--line);
+    position:relative;
+    overflow:hidden;
+    transition:background .35s ease;
+  }
+  .stone.done{background:var(--pine);}
+  .stone.current::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:var(--gold);
+    animation:pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:.35;}
+    50%{opacity:1;}
+  }
+
+  /* ---------- Cards / screens ---------- */
+  .screen{
+    display:none;
+    flex:1;
+    flex-direction:column;
+    animation:fadeUp .38s ease;
+  }
+  .screen.active{display:flex;}
+  @keyframes fadeUp{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  /* Intro screen */
+  .hero{
+    padding:28px 0 8px;
+    text-align:left;
+  }
+  .hero-eyebrow{
+    display:inline-block;
+    background:var(--gold-soft);
+    color:#8A6A1B;
+    font-size:.72rem;
+    font-weight:700;
+    padding:5px 12px;
+    border-radius:99px;
+    margin-bottom:16px;
+    letter-spacing:.03em;
+  }
+  .hero h1{
+    font-family:'Noto Serif KR',serif;
+    font-size:1.7rem;
+    line-height:1.4;
+    margin:0 0 12px;
+    color:var(--pine-dark);
+  }
+  .hero p{
+    color:#5B564B;
+    font-size:.92rem;
+    line-height:1.65;
+    margin:0 0 22px;
+  }
+  .hero-visual{
+    background:var(--pine);
+    border-radius:var(--radius);
+    padding:22px;
+    margin-bottom:24px;
+    color:#fff;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero-visual::before{
+    content:"";
+    position:absolute;
+    right:-30px; top:-30px;
+    width:140px;height:140px;
+    background:rgba(255,255,255,.08);
+    border-radius:50%;
+  }
+  .hero-visual .k{
+    font-family:'Noto Serif KR',serif;
+    font-size:2.4rem;
+    font-weight:700;
+    opacity:.95;
+  }
+  .hero-visual .sub{
+    font-size:.82rem;
+    opacity:.85;
+    margin-top:6px;
+  }
+  .trust-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:26px;
+  }
+  .trust-item{
+    flex:1;
+    background:var(--paper-card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 10px;
+    text-align:center;
+  }
+  .trust-item .num{
+    font-weight:800;
+    color:var(--pine);
+    font-size:1.05rem;
+    display:block;
+  }
+  .trust-item .label{
+    font-size:.68rem;
+    color:var(--gray);
+    line-height:1.3;
+  }
+
+  /* Form elements */
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-size:.82rem;
+    font-weight:600;
+    margin-bottom:7px;
+    color:var(--ink);
+  }
+  .field input[type=text], .field input[type=tel], .field input[type=number], .field select{
+    width:100%;
+    padding:13px 14px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    font-family:inherit;
+    font-size:.92rem;
+    background:#fff;
+    color:var(--ink);
+    transition:border-color .2s;
+  }
+  .field input:focus, .field select:focus{
+    outline:none;
+    border-color:var(--pine);
+  }
+  .chip-group{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .chip{
+    padding:10px 14px;
+    border:1.5px solid var(--line);
+    border-radius:99px;
+    font-size:.84rem;
+    font-weight:600;
+    color:#5B564B;
+    background:#fff;
+    cursor:pointer;
+    user-select:none;
+    transition:all .15s;
+  }
+  .chip:hover{border-color:var(--pine);}
+  .chip.selected{
+    background:var(--pine);
+    border-color:var(--pine);
+    color:#fff;
+  }
+
+  .btn-primary{
+    width:100%;
+    padding:16px;
+    background:var(--pine);
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    font-family:inherit;
+    font-weight:700;
+    font-size:.98rem;
+    cursor:pointer;
+    transition:background .2s, transform .1s;
+    margin-top:6px;
+  }
+  .btn-primary:hover{background:var(--pine-dark);}
+  .btn-primary:active{transform:scale(.98);}
+  .btn-primary:disabled{background:#C9C4B6; cursor:not-allowed;}
+  .btn-ghost{
+    width:100%;
+    padding:14px;
+    background:transparent;
+    color:var(--pine);
+    border:1.5px solid var(--pine);
+    border-radius:12px;
+    font-family:inherit;
+    font-weight:700;
+    font-size:.92rem;
+    cursor:pointer;
+    margin-top:10px;
+  }
+  .fine-print{
+    font-size:.72rem;
+    color:var(--gray);
+    text-align:center;
+    margin-top:14px;
+    line-height:1.5;
+  }
+
+  /* Question screen */
+  .q-tag{
+    display:inline-block;
+    font-size:.72rem;
+    font-weight:700;
+    color:var(--pine);
+    background:var(--pine-light);
+    padding:4px 10px;
+    border-radius:99px;
+    margin-bottom:14px;
+    margin-top:22px;
+  }
+  .q-prompt{
+    font-size:.85rem;
+    color:var(--gray);
+    margin-bottom:6px;
+  }
+  .q-main{
+    font-family:'Noto Serif KR',serif;
+    font-size:2.1rem;
+    color:var(--ink);
+    margin-bottom:6px;
+    line-height:1.3;
+  }
+  .q-main.small{
+    font-family:'Be Vietnam Pro',sans-serif;
+    font-size:1.05rem;
+    font-weight:600;
+    line-height:1.6;
+  }
+  .q-passage{
+    background:var(--paper-card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px;
+    font-size:.95rem;
+    line-height:1.75;
+    margin:14px 0 20px;
+    color:var(--ink);
+  }
+  .q-passage .kr-line{
+    font-family:'Noto Serif KR',serif;
+    font-weight:600;
+    font-size:1.05rem;
+    color:var(--pine-dark);
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin:20px 0 10px;
+  }
+  .opt{
+    padding:15px 16px;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    background:#fff;
+    font-size:.94rem;
+    font-weight:500;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    transition:all .15s;
+  }
+  .opt:hover{border-color:var(--pine);}
+  .opt.selected{
+    border-color:var(--pine);
+    background:var(--pine-light);
+  }
+  .opt .letter{
+    width:26px;height:26px;
+    flex:none;
+    border-radius:50%;
+    border:1.5px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:.75rem;
+    font-weight:700;
+    color:var(--gray);
+  }
+  .opt.selected .letter{
+    background:var(--pine);
+    border-color:var(--pine);
+    color:#fff;
+  }
+  .qnav{
+    margin-top:auto;
+    padding-top:18px;
+    display:flex;
+    gap:10px;
+  }
+  .qnav .btn-primary{margin-top:0;}
+  .btn-back{
+    flex:none;
+    width:52px;
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    color:var(--gray);
+    font-size:1.1rem;
+    cursor:pointer;
+  }
+
+  textarea{
+    width:100%;
+    min-height:90px;
+    padding:14px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    font-family:inherit;
+    font-size:.9rem;
+    resize:vertical;
+  }
+  textarea:focus{outline:none;border-color:var(--pine);}
+
+  /* Loading screen */
+  .loading{
+    flex:1;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:16px;
+  }
+  .loading.active{display:flex;}
+  .spinner{
+    width:38px;height:38px;
+    border:3px solid var(--line);
+    border-top-color:var(--pine);
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading p{color:var(--gray); font-size:.88rem;}
+
+  /* Result screen */
+  .result-badge{
+    background:var(--pine);
+    color:#fff;
+    border-radius:var(--radius);
+    padding:26px 22px;
+    text-align:center;
+    margin:24px 0 20px;
+    position:relative;
+    overflow:hidden;
+  }
+  .result-badge::before{
+    content:"";
+    position:absolute;
+    left:-40px; bottom:-40px;
+    width:150px;height:150px;
+    background:rgba(255,255,255,.07);
+    border-radius:50%;
+  }
+  .result-badge .eyebrow{
+    font-size:.75rem;
+    opacity:.8;
+    margin-bottom:8px;
+    letter-spacing:.04em;
+  }
+  .result-badge .level{
+    font-family:'Noto Serif KR',serif;
+    font-size:1.7rem;
+    font-weight:700;
+  }
+  .result-badge .desc{
+    font-size:.85rem;
+    opacity:.9;
+    margin-top:8px;
+    line-height:1.5;
+  }
+  .recommend-card{
+    background:var(--paper-card);
+    border:1.5px solid var(--gold);
+    border-radius:var(--radius);
+    padding:20px;
+    margin-bottom:16px;
+  }
+  .recommend-card .tag{
+    display:inline-block;
+    background:var(--gold-soft);
+    color:#8A6A1B;
+    font-size:.7rem;
+    font-weight:700;
+    padding:4px 10px;
+    border-radius:99px;
+    margin-bottom:10px;
+  }
+  .recommend-card h3{
+    margin:0 0 8px;
+    font-size:1.05rem;
+    color:var(--pine-dark);
+  }
+  .recommend-card p{
+    margin:0;
+    font-size:.87rem;
+    color:#5B564B;
+    line-height:1.6;
+  }
+  .cta-row{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+  }
+  .cta-row a{
+    flex:1;
+    text-align:center;
+    padding:15px;
+    border-radius:12px;
+    font-weight:700;
+    font-size:.88rem;
+    text-decoration:none;
+  }
+  .cta-zalo{background:var(--pine); color:#fff;}
+  .cta-call{background:#fff; color:var(--pine); border:1.5px solid var(--pine);}
+
+  footer{
+    text-align:center;
+    padding:22px 0 4px;
+    font-size:.72rem;
+    color:var(--gray);
+  }
+
+  @media (max-width:380px){
+    .q-main{font-size:1.8rem;}
+    .hero h1{font-size:1.45rem;}
+  }
+</style>
+</head>
+<body>
+
+<div class="kross-header">
+  <div class="kross-header-inner">
+    <div class="kross-logo">KR<span class="o">O</span>SS</div>
+    <div class="kross-tagline">FROM DREAM TO GOAL</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="topbar" id="topbar" style="display:none;">
+    <div class="brand">
+      <div class="brand-name">KROSS <span>·</span> Kiểm tra tiếng Hàn</div>
+      <div class="step-label" id="stepLabel">1 / 18</div>
+    </div>
+    <div class="bridge" id="bridge"></div>
+  </div>
+
+  <!-- ============ SCREEN 0: INTRO ============ -->
+  <div class="screen active" id="screen-intro">
+    <div class="hero">
+      <span class="hero-eyebrow">MIỄN PHÍ · 10-15 PHÚT</span>
+      <h1 class="kr">한국어 레벨테스트<br>Kiểm tra trình độ tiếng Hàn</h1>
+      <p>Trả lời một vài câu hỏi ngắn để KROSS xác định trình độ hiện tại của bạn và gợi ý lộ trình phù hợp — dù mục tiêu của bạn là du học, đi làm, hay chỉ đơn giản là yêu thích tiếng Hàn.</p>
+
+      <div class="hero-visual">
+        <div class="k">가나다</div>
+        <div class="sub">Bắt đầu từ đâu cũng được — bài test sẽ tự tìm đúng điểm xuất phát của bạn.</div>
+      </div>
+
+      <div class="trust-row">
+        <div class="trust-item"><span class="num">18</span><span class="label">câu hỏi ngắn</span></div>
+        <div class="trust-item"><span class="num">4</span><span class="label">nhóm trình độ</span></div>
+        <div class="trust-item"><span class="num">0đ</span><span class="label">hoàn toàn miễn phí</span></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Họ và tên</label>
+      <input type="text" id="f_name" placeholder="Nguyễn Văn A">
+    </div>
+    <div class="field">
+      <label>Số điện thoại / Zalo</label>
+      <input type="tel" id="f_phone" placeholder="09xxxxxxxx">
+    </div>
+    <div class="field">
+      <label>Tuổi</label>
+      <input type="number" id="f_age" placeholder="18" min="10" max="60">
+    </div>
+    <div class="field">
+      <label>Đang là học sinh / sinh viên / đi làm?</label>
+      <input type="text" id="f_school" placeholder="VD: Lớp 12 - THPT..., hoặc đang đi làm">
+    </div>
+
+    <div class="field">
+      <label>Bạn học tiếng Hàn với mục tiêu gì?</label>
+      <div class="chip-group" id="purposeGroup">
+        <div class="chip" data-v="du_hoc">🎓 Du học Hàn Quốc</div>
+        <div class="chip" data-v="viec_lam">💼 Việc làm công ty Hàn</div>
+        <div class="chip" data-v="thuc_tap">🤝 Thực tập / CTS</div>
+        <div class="chip" data-v="topik">📘 Luyện thi TOPIK</div>
+        <div class="chip" data-v="so_thich">❤️ Sở thích cá nhân</div>
+        <div class="chip" data-v="chua_ro">🤔 Chưa rõ, muốn tư vấn</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Bạn nghĩ trình độ hiện tại của mình là?</label>
+      <select id="f_selflevel">
+        <option value="chua_biet">Chưa biết chữ Hàn (Hangul)</option>
+        <option value="doc_duoc">Đọc được Hangul, chưa nói được câu</option>
+        <option value="giao_tiep_don_gian">Nói được câu đơn giản</option>
+        <option value="topik_co_kinh_nghiem">Đã học qua / có kinh nghiệm TOPIK</option>
+      </select>
+    </div>
+
+    <button class="btn-primary" id="btnStart" disabled>Bắt đầu kiểm tra →</button>
+    <div class="fine-print">Thông tin của bạn chỉ được KROSS sử dụng để tư vấn lộ trình học phù hợp, không chia sẻ cho bên thứ ba.</div>
+  </div>
+
+  <!-- ============ SCREEN 1: QUESTIONS (injected by JS) ============ -->
+  <div class="screen" id="screen-quiz">
+    <div class="q-tag" id="qTag">ĐỌC CHỮ HANGUL</div>
+    <div class="q-prompt" id="qPrompt">Từ này được đọc là gì?</div>
+    <div class="q-main" id="qMain">가</div>
+    <div class="q-passage" id="qPassage" style="display:none;"></div>
+    <div class="options" id="qOptions"></div>
+    <div class="qnav">
+      <button class="btn-back" id="btnBack">←</button>
+      <button class="btn-primary" id="btnNext" disabled>Tiếp theo</button>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN 2: SELF-INTRO (optional, not scored) ============ -->
+  <div class="screen" id="screen-intro-write">
+    <div class="q-tag">CUỐI CÙNG (KHÔNG BẮT BUỘC)</div>
+    <div class="q-main small">Thử viết một câu giới thiệu bản thân bằng tiếng Hàn (nếu chưa biết thì để trống cũng không sao) 🙂</div>
+    <div class="q-passage kr-line" style="margin-top:14px;">예: 저는 KROSS에서 한국어를 공부합니다.</div>
+    <div class="field" style="margin-top:16px;">
+      <textarea id="f_selfintro" placeholder="여기에 작성해주세요 (không bắt buộc)"></textarea>
+    </div>
+    <div class="qnav">
+      <button class="btn-back" id="btnBack2">←</button>
+      <button class="btn-primary" id="btnSubmit">Xem kết quả →</button>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN 3: LOADING ============ -->
+  <div class="loading" id="screen-loading">
+    <div class="spinner"></div>
+    <p>Đang phân tích kết quả của bạn...</p>
+  </div>
+
+  <!-- ============ SCREEN 4: RESULT ============ -->
+  <div class="screen" id="screen-result">
+    <div class="result-badge">
+      <div class="eyebrow">KẾT QUẢ CỦA BẠN</div>
+      <div class="level" id="resultLevel">Level 1 · Sơ cấp 1</div>
+      <div class="desc" id="resultDesc">Bạn đã biết Hangul và một số từ vựng cơ bản.</div>
+    </div>
+
+    <div class="recommend-card">
+      <div class="tag" id="recTag">GỢI Ý LỘ TRÌNH</div>
+      <h3 id="recTitle">Khóa Sơ cấp 1 tại KROSS</h3>
+      <p id="recDesc">Phù hợp để xây nền tảng vững chắc trước khi bước vào TOPIK hoặc hồ sơ du học.</p>
+    </div>
+
+    <p style="font-size:.85rem; color:#5B564B; line-height:1.6; text-align:center; margin:8px 0 4px;">
+      Để nhận lộ trình chi tiết và tư vấn miễn phí (15-20 phút) phù hợp với mục tiêu của bạn, hãy liên hệ KROSS ngay:
+    </p>
+
+    <div class="cta-row">
+      <a href="#" id="ctaZalo" class="cta-zalo" target="_blank">💬 Nhắn Zalo tư vấn</a>
+      <a href="#" id="ctaCall" class="cta-call">📞 Gọi ngay</a>
+    </div>
+
+    <footer>KROSS · Trung tâm tiếng Hàn - Du học - Việc làm tại Đà Nẵng</footer>
+  </div>
+
+</div>
+
+<script>
+/* =====================================================================
+   설정 영역 — 실제 배포 전 아래 3개 값만 채우면 됨
+===================================================================== */
+const GAS_URL   = ''; // ← Google Apps Script 배포 URL 붙여넣기 (leveltest_gas.js 배포 후)
+const GAS_ENABLED = GAS_URL.length > 0;
+const ZALO_LINK = 'https://zalo.me/0000000000';   // ← KROSS Zalo OA 링크로 교체
+const PHONE_TEL = '+84900000000';                  // ← KROSS 전화번호로 교체 (tel: 형식)
+
+/* =====================================================================
+   문항 데이터 — Agent D 검수 후 자유롭게 교체/확장 가능
+   type: 'hangul' | 'vocab' | 'grammar' | 'reading'
+===================================================================== */
+const QUESTIONS = [
+  // --- 1. Đọc chữ Hangul (5) ---
+  {type:'hangul', tag:'ĐỌC CHỮ HANGUL', prompt:'Từ này được phát âm gần đúng là gì?', main:'가', options:['ga','na','da','ba'], answer:0},
+  {type:'hangul', tag:'ĐỌC CHỮ HANGUL', prompt:'Từ này được phát âm gần đúng là gì?', main:'나', options:['ma','na','sa','la'], answer:1},
+  {type:'hangul', tag:'ĐỌC CHỮ HANGUL', prompt:'Từ này được phát âm gần đúng là gì?', main:'수', options:['su','mu','bu','gu'], answer:0},
+  {type:'hangul', tag:'ĐỌC CHỮ HANGUL', prompt:'Từ này được phát âm gần đúng là gì?', main:'하', options:['ha','pa','cha','ka'], answer:0},
+  {type:'hangul', tag:'ĐỌC CHỮ HANGUL', prompt:'Từ này được phát âm gần đúng là gì?', main:'김치', options:['gimchi','gicha','gimja','gicho'], answer:0},
+
+  // --- 2. Từ vựng cơ bản (5) ---
+  {type:'vocab', tag:'TỪ VỰNG CƠ BẢN', prompt:'từ này có nghĩa là gì?', main:'안녕하세요', options:['Xin chào','Cảm ơn','Tạm biệt','Xin lỗi'], answer:0},
+  {type:'vocab', tag:'TỪ VỰNG CƠ BẢN', prompt:'từ này có nghĩa là gì?', main:'감사합니다', options:['Xin lỗi','Cảm ơn','Không sao','Chào buổi sáng'], answer:1},
+  {type:'vocab', tag:'TỪ VỰNG CƠ BẢN', prompt:'từ này có nghĩa là gì?', main:'학교', options:['Bệnh viện','Công ty','Trường học','Nhà hàng'], answer:2},
+  {type:'vocab', tag:'TỪ VỰNG CƠ BẢN', prompt:'từ này có nghĩa là gì?', main:'친구', options:['Gia đình','Bạn bè','Giáo viên','Hàng xóm'], answer:1},
+  {type:'vocab', tag:'TỪ VỰNG CƠ BẢN', prompt:'từ này có nghĩa là gì?', main:'회사', options:['Trường học','Sân bay','Công ty','Khách sạn'], answer:2},
+
+  // --- 3. Ngữ pháp cơ bản (5) ---
+  {type:'grammar', tag:'NGỮ PHÁP CƠ BẢN', prompt:'Chọn từ đúng điền vào chỗ trống', main:'저___ 학생입니다. (Tôi là học sinh)', options:['는','가','을','도'], answer:0},
+  {type:'grammar', tag:'NGỮ PHÁP CƠ BẢN', prompt:'Chọn từ đúng điền vào chỗ trống', main:'이것___ 제 책입니다. (Đây là sách của tôi)', options:['을','은','에서','와'], answer:1},
+  {type:'grammar', tag:'NGỮ PHÁP CƠ BẢN', prompt:'Chọn từ đúng điền vào chỗ trống', main:'저는 한국어___ 공부합니다. (Tôi học tiếng Hàn)', options:['이','가','를','에'], answer:2},
+  {type:'grammar', tag:'NGỮ PHÁP CƠ BẢN', prompt:'Chọn từ đúng điền vào chỗ trống', main:'학교___ 갑니다. (Tôi đi đến trường)', options:['에','의','도','만'], answer:0},
+  {type:'grammar', tag:'NGỮ PHÁP CƠ BẢN', prompt:'Chọn từ đúng điền vào chỗ trống', main:'친구___ 같이 공부해요. (Học cùng với bạn)', options:['하고','까지','부터','만큼'], answer:0},
+
+  // --- 4. Đọc hiểu đoạn ngắn (3) ---
+  {type:'reading', tag:'ĐỌC HIỂU', prompt:'Đọc đoạn văn rồi trả lời câu hỏi',
+    passage:'<span class="kr-line">저는 후엔입니다. 저는 다낭에 삽니다. 저는 KROSS에서 한국어를 배웁니다.</span><br><br>Em tên là Huyền. Em sống ở Đà Nẵng. Em học tiếng Hàn tại KROSS.',
+    main:'Người viết học tiếng Hàn ở đâu?', options:['Ở nhà','Tại KROSS','Ở Hà Nội','Ở trường đại học'], answer:1},
+  {type:'reading', tag:'ĐỌC HIỂU', prompt:'Đọc đoạn văn rồi trả lời câu hỏi',
+    passage:'<span class="kr-line">저는 한국에 가고 싶습니다. 그래서 매일 한국어를 공부합니다.</span><br><br>Tôi muốn đi Hàn Quốc. Vì vậy tôi học tiếng Hàn mỗi ngày.',
+    main:'Tại sao người viết học tiếng Hàn mỗi ngày?', options:['Vì thích âm nhạc Hàn Quốc','Vì muốn đi Hàn Quốc','Vì công việc yêu cầu','Không có lý do'], answer:1},
+  {type:'reading', tag:'ĐỌC HIỂU', prompt:'Đọc đoạn văn rồi trả lời câu hỏi',
+    passage:'<span class="kr-line">이 학생은 초급 1을 끝냈습니다. 이제 초급 2를 공부할 것입니다.</span><br><br>Học sinh này đã học xong Sơ cấp 1. Bây giờ sẽ học Sơ cấp 2.',
+    main:'Học sinh này sắp học trình độ nào tiếp theo?', options:['Sơ cấp 1','Sơ cấp 2','TOPIK 2','Đã học xong hết'], answer:1},
+];
+
+/* =====================================================================
+   상태 관리
+===================================================================== */
+let currentQ = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+let purposeVal = null;
+
+const $ = (id) => document.getElementById(id);
+
+/* ---------- 목적 칩 선택 ---------- */
+document.querySelectorAll('#purposeGroup .chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('#purposeGroup .chip').forEach(c=>c.classList.remove('selected'));
+    chip.classList.add('selected');
+    purposeVal = chip.dataset.v;
+    checkIntroReady();
+  });
+});
+
+['f_name','f_phone','f_age','f_school'].forEach(id=>{
+  $(id).addEventListener('input', checkIntroReady);
+});
+function checkIntroReady(){
+  const ok = $('f_name').value.trim() && $('f_phone').value.trim() && $('f_age').value && purposeVal;
+  $('btnStart').disabled = !ok;
+}
+
+/* ---------- 화면 전환 ---------- */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+$('btnStart').addEventListener('click', ()=>{
+  showScreen('screen-quiz');
+  $('topbar').style.display='block';
+  buildBridge();
+  renderQuestion();
+});
+
+/* ---------- 진행바(징검다리) ---------- */
+function buildBridge(){
+  const bridge = $('bridge');
+  bridge.innerHTML = '';
+  QUESTIONS.forEach((_, i)=>{
+    const s = document.createElement('div');
+    s.className = 'stone';
+    s.id = 'stone-'+i;
+    bridge.appendChild(s);
+  });
+  updateBridge();
+}
+function updateBridge(){
+  QUESTIONS.forEach((_, i)=>{
+    const s = $('stone-'+i);
+    s.classList.remove('done','current');
+    if(i < currentQ) s.classList.add('done');
+    else if(i === currentQ) s.classList.add('current');
+  });
+  $('stepLabel').textContent = (currentQ+1)+' / '+QUESTIONS.length;
+}
+
+/* ---------- 문항 렌더링 ---------- */
+function renderQuestion(){
+  const q = QUESTIONS[currentQ];
+  $('qTag').textContent = q.tag;
+  $('qPrompt').textContent = q.prompt;
+
+  if(q.type === 'reading'){
+    $('qMain').classList.add('small');
+    $('qMain').textContent = q.main;
+    $('qPassage').style.display = 'block';
+    $('qPassage').innerHTML = q.passage;
+  } else if(q.type === 'grammar'){
+    $('qMain').classList.add('small');
+    $('qMain').textContent = q.main;
+    $('qPassage').style.display = 'none';
+  } else {
+    $('qMain').classList.remove('small');
+    $('qMain').textContent = q.main;
+    $('qPassage').style.display = 'none';
+  }
+
+  const optWrap = $('qOptions');
+  optWrap.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.options.forEach((opt, i)=>{
+    const div = document.createElement('div');
+    div.className = 'opt' + (answers[currentQ]===i ? ' selected' : '');
+    div.innerHTML = `<span class="letter">${letters[i]}</span><span>${opt}</span>`;
+    div.addEventListener('click', ()=>selectOption(i));
+    optWrap.appendChild(div);
+  });
+
+  $('btnNext').disabled = answers[currentQ] === null;
+  $('btnNext').textContent = currentQ === QUESTIONS.length-1 ? 'Hoàn thành phần trắc nghiệm →' : 'Tiếp theo';
+  $('btnBack').style.visibility = currentQ===0 ? 'hidden' : 'visible';
+  updateBridge();
+}
+
+function selectOption(i){
+  answers[currentQ] = i;
+  renderQuestion();
+}
+
+$('btnNext').addEventListener('click', ()=>{
+  if(currentQ < QUESTIONS.length-1){
+    currentQ++;
+    renderQuestion();
+  } else {
+    showScreen('screen-intro-write');
+  }
+});
+$('btnBack').addEventListener('click', ()=>{
+  if(currentQ>0){ currentQ--; renderQuestion(); }
+});
+$('btnBack2').addEventListener('click', ()=>{
+  showScreen('screen-quiz');
+});
+
+/* =====================================================================
+   채점 및 레벨 산출
+===================================================================== */
+function scoreTest(){
+  let correct = 0;
+  QUESTIONS.forEach((q,i)=>{ if(answers[i]===q.answer) correct++; });
+  return correct;
+}
+function levelFromScore(score){
+  const total = QUESTIONS.length; // 18
+  if(score <= 3)  return {code:'L0', label:'Level 0 · Mới bắt đầu', desc:'Bạn đang ở giai đoạn khởi động — cần làm quen với Hangul và các từ cơ bản trước.'};
+  if(score <= 9)  return {code:'L1', label:'Level 1 · Sơ cấp 1', desc:'Bạn đã đọc được Hangul và biết một số từ, ngữ pháp cơ bản.'};
+  if(score <= 14) return {code:'L2', label:'Level 2 · Sơ cấp 2', desc:'Bạn có nền tảng khá tốt, có thể học nâng cao và bắt đầu làm quen với TOPIK.'};
+  return {code:'L3', label:'Level 3 · Trung cấp / TOPIK', desc:'Bạn đã có nền tảng vững, phù hợp để tập trung vào TOPIK và mục tiêu du học/việc làm.'};
+}
+
+const RECOMMEND = {
+  du_hoc:   {tag:'DU HỌC HÀN QUỐC', title:'Khóa Chuẩn bị Du học Hàn Quốc KROSS', desc:'Kết hợp tiếng Hàn với lộ trình D4/D2 — KROSS sẽ đồng hành từ nền tảng ngôn ngữ đến hồ sơ du học.'},
+  viec_lam: {tag:'VIỆC LÀM CÔNG TY HÀN', title:'Khóa Tiếng Hàn Thực Chiến cho Việc Làm', desc:'Tập trung vào CV, phỏng vấn, giao tiếp công sở — chuẩn bị cho công việc tại công ty Hàn Quốc.'},
+  thuc_tap: {tag:'THỰC TẬP / CTS', title:'Khóa Chuẩn bị Thực tập tại Doanh nghiệp Hàn', desc:'Ngôn ngữ + kỹ năng thực tế để sẵn sàng cho chương trình thực tập/CTS.'},
+  topik:    {tag:'LUYỆN THI TOPIK', title:'Khóa TOPIK & Lộ trình Du học', desc:'Ôn luyện theo cấu trúc đề thi TOPIK, kết hợp tư vấn chọn trường phù hợp.'},
+  so_thich: {tag:'HỌC VÌ SỞ THÍCH', title:'Khóa Tiếng Hàn Giao Tiếp Cơ Bản', desc:'Học nhẹ nhàng, đúng tốc độ của bạn — sau này có thể chuyển sang TOPIK hoặc lộ trình du học bất cứ lúc nào.'},
+  chua_ro:  {tag:'CẦN TƯ VẤN THÊM', title:'Buổi tư vấn định hướng miễn phí', desc:'Đội ngũ KROSS sẽ trò chuyện 15-20 phút để giúp bạn tìm ra mục tiêu và lộ trình phù hợp nhất.'},
+};
+
+/* =====================================================================
+   제출 처리
+===================================================================== */
+$('btnSubmit').addEventListener('click', async ()=>{
+  showScreen('screen-loading');
+  $('screen-loading').classList.add('active');
+
+  const score = scoreTest();
+  const level = levelFromScore(score);
+  const rec = RECOMMEND[purposeVal] || RECOMMEND.chua_ro;
+
+  const payload = {
+    timestamp: new Date().toISOString(),
+    name: $('f_name').value.trim(),
+    phone: $('f_phone').value.trim(),
+    age: $('f_age').value,
+    school: $('f_school').value.trim(),
+    purpose: purposeVal,
+    selfLevel: $('f_selflevel').value,
+    selfIntro: $('f_selfintro').value.trim(),
+    score: score,
+    totalQuestions: QUESTIONS.length,
+    level: level.code,
+    levelLabel: level.label,
+    answers: answers,
+  };
+
+  // 로컬 백업 (네트워크 실패해도 데이터 유실 방지)
+  try{
+    const backlog = JSON.parse(localStorage.getItem('kross_leveltest_backlog') || '[]');
+    backlog.push(payload);
+    localStorage.setItem('kross_leveltest_backlog', JSON.stringify(backlog));
+  }catch(e){}
+
+  if(GAS_ENABLED){
+    try{
+      await fetch(GAS_URL, {
+        method:'POST',
+        headers:{'Content-Type':'text/plain'}, // CORS preflight 회피
+        body: JSON.stringify(payload)
+      });
+    }catch(e){
+      console.warn('GAS 전송 실패, 로컬 백업만 유지:', e);
+    }
+  }
+
+  // 결과 화면 채우기
+  $('resultLevel').textContent = level.label;
+  $('resultDesc').textContent = level.desc;
+  $('recTag').textContent = rec.tag;
+  $('recTitle').textContent = rec.title;
+  $('recDesc').textContent = rec.desc;
+  $('ctaZalo').href = ZALO_LINK;
+  $('ctaCall').href = 'tel:'+PHONE_TEL;
+
+  setTimeout(()=>{
+    $('screen-loading').classList.remove('active');
+    showScreen('screen-result');
+    $('topbar').style.display='none';
+  }, 900);
+});
+</script>
+</body>
+</html>
