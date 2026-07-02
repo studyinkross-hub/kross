@@ -226,92 +226,92 @@
     background:var(--surface-soft); color:var(--text); font-size:13px;
   }
 
-  /* ===================== 유학 CTA + 비행기 트랜지션 ===================== */
-  .study-abroad-cta{
-    display:flex; align-items:center; gap:12px;
-    background:linear-gradient(135deg,#2C5F4F 0%,#1D4137 100%);
-    border-radius:16px; padding:16px 18px; margin:16px 0 22px;
-    cursor:pointer; border:none; width:100%; text-align:left;
-    box-shadow:0 8px 20px rgba(29,65,55,0.25);
-    transition:transform .15s ease, box-shadow .15s ease;
+  /* ── 레벨 선택 카드 ── */
+  .level-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:8px;
   }
-  .study-abroad-cta:hover{ transform:translateY(-1px); box-shadow:0 10px 24px rgba(29,65,55,0.32); }
-  .study-abroad-cta:active{ transform:translateY(0) scale(.99); }
-  .study-abroad-cta .icon{
-    font-size:26px; flex:none;
-    filter:drop-shadow(0 2px 3px rgba(0,0,0,.2));
+  @media(max-width:480px){ .level-grid{ grid-template-columns:repeat(2,1fr); } }
+  .level-card{
+    padding:16px 10px; border-radius:14px; border:1.5px solid var(--border);
+    background:var(--surface-soft); cursor:pointer; text-align:center; transition:all 0.12s;
   }
-  .study-abroad-cta .txt{ flex:1; }
-  .study-abroad-cta .txt .t1{ color:#F3E6C4; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
-  .study-abroad-cta .txt .t2{ color:#fff; font-size:14.5px; font-weight:700; margin-top:2px; }
-  .study-abroad-cta .arrow{ color:#F3E6C4; font-size:18px; flex:none; }
+  .level-card:hover{ border-color:var(--green); background:#f0f8e8; }
+  .level-card.active{ background:var(--green); color:#fff; border-color:var(--green); }
+  .level-card .lv-name{ font-weight:800; font-size:13px; line-height:1.3; }
+  .level-card .lv-count{ font-size:11px; color:var(--text-dim); margin-top:3px; }
+  .level-card.active .lv-count{ color:rgba(255,255,255,0.75); }
+  .level-card.empty{ opacity:0.4; cursor:default; pointer-events:none; }
 
-  .flight-overlay{
-    position:fixed; inset:0; z-index:9999;
-    display:flex; align-items:center; justify-content:center;
-    opacity:0; pointer-events:none;
-    transition:opacity .28s ease;
-    overflow:hidden;
+  /* ── 뒤로가기 칩 ── */
+  .back-chip{
+    display:inline-flex; align-items:center; gap:5px; margin-bottom:12px; font-size:12.5px;
+    font-weight:600; color:var(--text-dim); cursor:pointer; background:var(--surface);
+    border:1px solid var(--border); border-radius:100px; padding:6px 12px;
   }
-  .flight-overlay.active{ opacity:1; pointer-events:all; }
-  .flight-sky{
-    position:absolute; inset:0;
-    background:linear-gradient(180deg,#B9E0F7 0%,#E3F2FB 55%,#F6F9F2 100%);
-  }
-  .flight-cloud{
-    position:absolute; background:#fff; border-radius:100px; opacity:.85;
-    box-shadow:22px 6px 0 -2px #fff, -20px 10px 0 -4px #fff;
-  }
-  .flight-overlay .flight-cloud{ transform:translateX(-40px); opacity:0; transition:none; }
-  .flight-overlay.active .flight-cloud{ animation:cloudDrift 1.6s ease-out forwards; }
-  .fc1{ width:70px; height:26px; top:22%; left:10%; animation-delay:.05s !important; }
-  .fc2{ width:54px; height:20px; top:38%; left:60%; animation-delay:.2s !important; }
-  .fc3{ width:60px; height:22px; top:64%; left:30%; animation-delay:.1s !important; }
-  @keyframes cloudDrift{
-    0%{ opacity:0; transform:translateX(-30px); }
-    20%{ opacity:.85; }
-    100%{ opacity:.85; transform:translateX(40px); }
-  }
-  .flight-trail{ position:absolute; inset:0; width:100%; height:100%; }
-  .flight-trail path{
-    fill:none; stroke:#2C5F4F; stroke-width:2.5; stroke-linecap:round;
-    stroke-dasharray:900; stroke-dashoffset:900; opacity:.35;
-  }
-  .flight-overlay.active .flight-trail path{
-    animation:trailDraw 1.15s cubic-bezier(.4,0,.2,1) forwards;
-  }
-  @keyframes trailDraw{ to{ stroke-dashoffset:0; } }
-  .flight-plane{
-    position:absolute; left:6%; bottom:14%; font-size:38px;
-    transform:rotate(-12deg) scale(.9); opacity:0;
-  }
-  .flight-overlay.active .flight-plane{
-    animation:planeFly 1.25s cubic-bezier(.45,0,.4,1) forwards;
-  }
-  @keyframes planeFly{
-    0%{ left:6%; bottom:12%; transform:rotate(-10deg) scale(.85); opacity:0; }
-    10%{ opacity:1; }
-    55%{ left:52%; bottom:56%; transform:rotate(-18deg) scale(1.15); opacity:1; }
-    100%{ left:104%; bottom:98%; transform:rotate(-22deg) scale(1.35); opacity:0; }
-  }
-  .flight-caption{
-    position:absolute; bottom:14%; left:50%; transform:translateX(-50%);
-    color:var(--green-dark); font-weight:700; font-size:14px;
-    background:#fff; padding:10px 20px; border-radius:100px;
-    box-shadow:0 6px 16px rgba(60,90,40,.18);
-    opacity:0; white-space:nowrap;
-  }
-  .flight-overlay.active .flight-caption{
-    animation:capIn .4s ease .68s forwards;
-  }
-  @keyframes capIn{ from{opacity:0; transform:translateX(-50%) translateY(8px);} to{opacity:1; transform:translateX(-50%) translateY(0);} }
+  .back-chip:hover{ color:var(--green-dark); border-color:var(--green); }
 
-  @media (prefers-reduced-motion: reduce){
-    .flight-overlay.active .flight-plane,
-    .flight-overlay.active .flight-trail path,
-    .flight-overlay.active .flight-cloud,
-    .flight-overlay.active .flight-caption{ animation:none !important; opacity:1 !important; }
+  /* ── 학생 명단 미리보기 ── */
+  .roster-preview{ margin-top:14px; }
+  .roster-group{ margin-bottom:12px; }
+  .roster-group-title{
+    font-family:'JetBrains Mono',monospace; font-size:10px; text-transform:uppercase;
+    color:var(--text-dim); letter-spacing:0.08em; margin-bottom:6px;
   }
+  .roster-name-chip{
+    display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:8px;
+    background:var(--surface-soft); font-size:12.5px; margin:2px 4px 2px 0; border:1px solid var(--border);
+  }
+  .roster-name-chip .del-btn{
+    background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:11px; padding:0;
+  }
+  .roster-name-chip .del-btn:hover{ color:var(--rose); }
+
+  /* ── 모달 공통 ── */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(30,50,20,0.45); backdrop-filter:blur(4px);
+    display:flex; align-items:center; justify-content:center; z-index:1000; padding:20px;
+  }
+  .modal-box{
+    background:var(--surface); border-radius:22px; padding:32px 28px; width:100%; max-width:420px;
+    box-shadow:0 20px 60px rgba(30,50,20,0.22);
+  }
+  .modal-box .modal-title{
+    font-size:18px; font-weight:800; margin-bottom:6px; color:var(--green-dark);
+  }
+  .modal-box .modal-sub{
+    font-size:13px; color:var(--text-dim); margin-bottom:20px; line-height:1.5;
+  }
+  .modal-input{
+    width:100%; padding:14px 16px; border-radius:12px; border:1.5px solid var(--border);
+    background:var(--surface-soft); color:var(--text); font-size:16px; margin-bottom:14px;
+  }
+  .modal-input:focus{ outline:none; border-color:var(--green); }
+  .modal-actions{ display:flex; gap:10px; }
+  .modal-actions .btn{ flex:1; padding:13px; }
+  .modal-error{
+    font-size:12.5px; color:var(--rose); margin-bottom:10px; min-height:18px; font-weight:600;
+  }
+
+  /* ── 이름 선택 그리드 ── */
+  .name-grid{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px; }
+  .name-chip{
+    padding:12px 18px; border-radius:12px; border:1.5px solid var(--border);
+    background:var(--surface-soft); cursor:pointer; font-size:14px; font-weight:700; color:var(--text);
+    transition:all 0.12s;
+  }
+  .name-chip:hover{ background:var(--green); color:#fff; border-color:var(--green); }
+  .name-chip.selected{ background:var(--green-dark); color:#fff; border-color:var(--green-dark); }
+
+  /* ── 현재 학생 이름 표시 ── */
+  .name-row{
+    display:flex; align-items:center; gap:10px; margin-bottom:14px;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:13px 16px;
+    box-shadow:var(--shadow); cursor:pointer;
+  }
+  .name-row:hover{ border-color:var(--green); }
+  .name-row label{ font-size:12px; color:var(--text-dim); white-space:nowrap; font-weight:600; cursor:pointer; }
+  .name-row .name-display{ flex:1; font-size:14px; font-weight:700; color:var(--text); }
+  .name-row .name-change{ font-size:11px; color:var(--text-dim); }
 </style>
 </head>
 <body>
@@ -322,40 +322,73 @@
     <div class="tagline">Ứng dụng học từ vựng tiếng Hàn</div>
   </div>
 
-  <button class="study-abroad-cta" onclick="playFlightTransition('leveltest.html')">
-    <span class="icon">✈️</span>
-    <span class="txt">
-      <div class="t1">Miễn phí · 10-15 phút</div>
-      <div class="t2">Kiểm tra trình độ & Lộ trình Du học Hàn Quốc</div>
-    </span>
-    <span class="arrow">→</span>
-  </button>
-
-  <div style="text-align:center;margin:0 0 20px">
-    <a href="homework.html" style="display:inline-block;background:#d94f3d;color:#fff;padding:10px 24px;border-radius:8px;font-weight:700;text-decoration:none;font-size:.95rem">
-      📎 Nộp bài tập về nhà
-    </a>
+  <!-- ── 비밀번호 모달 (선생님 입장용) ── -->
+  <div class="modal-overlay hidden" id="pwModal">
+    <div class="modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div class="modal-title">🔒 Khu vực Giáo viên</div>
+        <button id="btnPwClose" style="background:none;border:none;font-size:20px;color:var(--text-dim);cursor:pointer;line-height:1;padding:0 0 0 12px;">✕</button>
+      </div>
+      <div class="modal-sub">Vui lòng nhập mật khẩu để tiếp tục. Chỉ giáo viên mới có quyền truy cập.</div>
+      <input type="password" class="modal-input" id="pwInput" placeholder="Nhập mật khẩu">
+      <div class="modal-error" id="pwError"></div>
+      <div class="modal-actions">
+        <button class="btn" id="btnPwCancel">Hủy</button>
+        <button class="btn primary" id="btnPwConfirm">Xác nhận</button>
+      </div>
+    </div>
   </div>
 
-  <!-- ===================== 비행기 트랜지션 오버레이 ===================== -->
-  <div class="flight-overlay" id="flightOverlay">
-    <div class="flight-sky"></div>
-    <div class="flight-cloud fc1"></div>
-    <div class="flight-cloud fc2"></div>
-    <div class="flight-cloud fc3"></div>
-    <svg class="flight-trail" viewBox="0 0 400 400" preserveAspectRatio="none">
-      <path d="M25,350 Q210,230 380,20" />
-    </svg>
-    <div class="flight-plane">✈️</div>
-    <div class="flight-caption">Đang đến với hành trình du học Hàn Quốc...</div>
+  <!-- ── 이름 선택 모달 (학생용) ── -->
+  <div class="modal-overlay hidden" id="nameModal">
+    <div class="modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div class="modal-title" id="nameModalTitle">👋 Xin chào!</div>
+        <button id="btnNameClose" style="background:none;border:none;font-size:20px;color:var(--text-dim);cursor:pointer;line-height:1;padding:0 0 0 12px;">✕</button>
+      </div>
+      <div class="modal-sub" id="nameModalSub">Chọn lớp của bạn.</div>
+
+      <!-- 1단계: 반 선택 -->
+      <div id="classPickStep">
+        <div class="name-grid" id="classGrid"></div>
+      </div>
+
+      <!-- 2단계: 이름 선택 -->
+      <div id="namePickStep" class="hidden">
+        <div class="back-chip" id="btnBackToClass">← Chọn lớp khác</div>
+        <div style="position:relative;margin-bottom:14px;">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;pointer-events:none;">🔍</span>
+          <input type="text" id="nameSearch" autocomplete="off"
+            placeholder="Nhập tên của bạn..."
+            style="width:100%;padding:15px 15px 15px 44px;border-radius:14px;border:2px solid var(--green);background:var(--surface-soft);color:var(--text);font-size:16px;font-weight:600;outline:none;">
+        </div>
+        <div id="nameHint" style="text-align:center;padding:20px 0;color:var(--text-dim);font-size:13px;">
+          <div style="font-size:28px;margin-bottom:8px;">👆</div>
+          Nhập tên bạn vào ô tìm kiếm phía trên
+        </div>
+        <div id="nameSearchResult" class="hidden">
+          <div class="name-grid" id="nameGrid"></div>
+          <div id="nameNoResult" class="hidden" style="text-align:center;padding:16px;color:var(--text-dim);font-size:13px;">
+            Không tìm thấy tên này
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-error" id="nameError"></div>
+      <div class="modal-actions">
+        <button class="btn" id="btnNameSkip">Bỏ qua</button>
+        <button class="btn primary hidden" id="btnNameConfirm">Bắt đầu học →</button>
+      </div>
+    </div>
   </div>
 
   <!-- ===================== HỌC VIÊN ===================== -->
   <div id="studentView">
 
-    <div class="name-row">
-      <label>Tên</label>
-      <input type="text" id="studentNameInput" placeholder="Nhập tên để lưu điểm số">
+    <div class="name-row" id="nameRow">
+      <label>Học viên</label>
+      <div class="name-display" id="nameDisplay">Chưa chọn tên</div>
+      <div class="name-change">▼ Đổi</div>
     </div>
 
     <div class="subtabs">
@@ -367,9 +400,16 @@
 
     <!-- ---------- Học từ ---------- -->
     <div id="studySection">
-      <div class="card" id="studyLessonCard">
-        <div class="section-title">Chọn bài học</div>
+      <div class="card" id="studyLevelCard">
+        <div class="section-title">Chọn cấp độ</div>
         <div class="section-sub">Xem nghĩa tiếng Việt và thử nhớ lại từ tiếng Hàn. Nhấn vào thẻ để xem đáp án.</div>
+        <div class="level-grid" id="studyLevelGrid"></div>
+      </div>
+
+      <div class="card hidden" id="studyLessonCard">
+        <div class="back-chip" id="btnStudyBackLevel">← Chọn cấp độ khác</div>
+        <div class="section-title" id="studyLevelTitle">Sơ cấp 1</div>
+        <div class="section-sub">Chọn bài học</div>
         <div class="lesson-grid" id="studyLessonGrid"></div>
       </div>
 
@@ -389,12 +429,19 @@
 
     <!-- ---------- Kiểm tra ---------- -->
     <div id="quizSection" class="hidden">
-      <div class="card" id="quizLessonCard">
+      <div class="card" id="quizLevelCard">
         <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
-          <span>Chọn bài học</span>
+          <span>Chọn cấp độ</span>
           <button class="btn small hidden" id="btnRefreshSheet">🔄 Cập nhật mới nhất</button>
         </div>
         <div class="section-sub">Khi thấy nghĩa tiếng Việt, hãy nhập từ tiếng Hàn tương ứng.</div>
+        <div class="level-grid" id="quizLevelGrid"></div>
+      </div>
+
+      <div class="card hidden" id="quizLessonCard">
+        <div class="back-chip" id="btnQuizBackLevel">← Chọn cấp độ khác</div>
+        <div class="section-title" id="quizLevelTitle">Sơ cấp 1</div>
+        <div class="section-sub">Chọn bài học</div>
         <div class="lesson-grid" id="quizLessonGrid"></div>
       </div>
 
@@ -484,9 +531,31 @@
       <button class="back-btn" id="btnBackStudent">← Quay lại học viên</button>
     </div>
 
+    <!-- GAS 연결 상태 -->
+    <div class="card" style="padding:14px 18px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="gasStatusDot" style="width:10px;height:10px;border-radius:50%;background:var(--text-dim);flex-shrink:0;"></span>
+        <span id="gasStatusText" style="font-size:13px;color:var(--text-dim);">
+          GAS 미설정 — localStorage 전용 모드 (데이터가 이 브라우저에만 저장됩니다)
+        </span>
+        <button id="btnGasCheck" class="btn small" style="margin-left:auto;">연결 확인</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">🔒 Bảo mật</div>
+      <div class="section-sub">Thay đổi mật khẩu giáo viên. Mật khẩu mặc định: <b>kross1234</b></div>
+      <div class="upload-row">
+        <input type="password" id="pwCurrentInput" placeholder="Mật khẩu hiện tại" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface-soft);color:var(--text);font-size:13px;">
+        <input type="password" id="pwNewInput" placeholder="Mật khẩu mới" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface-soft);color:var(--text);font-size:13px;">
+        <button class="btn small primary" id="btnChangePw">변경</button>
+      </div>
+      <div id="pwChangeMsg" style="font-size:12.5px;min-height:18px;"></div>
+    </div>
+
     <div class="card">
       <div class="section-title">Tải lên từ vựng (Excel)</div>
-      <div class="section-sub">Tải file Excel (.xlsx) theo định dạng: Bài / Từ / Nghĩa (Tiếng Việt) / Câu ví dụ (tùy chọn) / Cấp độ (tùy chọn).</div>
+      <div class="section-sub">Tải file Excel (.xlsx) theo định dạng: <b>Cấp độ | Bài | Từ (Tiếng Hàn) | Nghĩa (Tiếng Việt) | Câu ví dụ</b>.</div>
       <div class="upload-row">
         <label class="file-label" id="fileLabel">
           📂 Chọn file Excel hoặc kéo thả vào đây
@@ -530,7 +599,7 @@
       <div class="table-wrap">
         <table id="wordTable">
           <thead>
-            <tr><th>Bài</th><th>Từ</th><th>Nghĩa (VN)</th><th>Ví dụ</th><th>Cấp độ</th><th></th></tr>
+            <tr><th>Cấp độ</th><th>Bài</th><th>Từ</th><th>Nghĩa (VN)</th><th>Ví dụ</th><th></th></tr>
           </thead>
           <tbody id="wordTbody"></tbody>
         </table>
@@ -539,12 +608,33 @@
     </div>
 
     <div class="card">
-      <div class="section-title">👩‍🏫 Quản lý điểm & bài tập về nhà</div>
-      <div class="section-sub">Khi học viên nhập tên và làm bài kiểm tra, kết quả sẽ tự động được lưu. Bài tập về nhà cần đánh dấu thủ công.</div>
-
-      <div class="roster-add">
-        <input type="text" id="rosterNameInput" placeholder="Thêm tên học viên vào danh sách">
+      <div class="section-title">👥 Danh sách học viên</div>
+      <div class="section-sub">Tải lên file Excel danh sách học viên. Hệ thống sẽ dùng danh sách này để học viên đăng nhập và để phân loại kết quả theo lớp.</div>
+      <div class="upload-row">
+        <label class="file-label">
+          📂 Tải lên danh sách học viên (.xlsx)
+          <input type="file" id="studentFileInput" accept=".xlsx,.xls">
+        </label>
+        <button class="btn small" id="btnDownloadRosterTemplate">⬇ Tải mẫu</button>
+      </div>
+      <div class="upload-row">
+        <input type="text" id="rosterNameInput" placeholder="Thêm tên học viên thủ công" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface-soft);color:var(--text);font-size:13px;">
+        <select id="rosterClassInput" style="padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface-soft);color:var(--text);font-size:13px;">
+          <option value="">-- Chọn lớp --</option>
+          <option>Sơ cấp 1</option><option>Sơ cấp 2</option>
+          <option>Trung cấp 1</option><option>Trung cấp 2</option>
+          <option>Topik 1</option><option>Topik 2</option>
+        </select>
         <button class="btn small" id="btnRosterAdd">+ Thêm</button>
+        <button class="btn small" id="btnClearRoster" style="color:var(--rose);">Xóa danh sách</button>
+      </div>
+      <div id="rosterPreview"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">👩‍🏫 Quản lý điểm & bài tập về nhà</div>
+      <div class="section-sub">Khi học viên chọn tên và làm bài kiểm tra, kết quả sẽ tự động được lưu theo từng lớp.</div>
+      <div class="upload-row">
         <button class="btn small" id="btnExportRecords">Xuất ra Excel</button>
         <button class="btn small" id="btnClearRecords">Xóa tất cả kết quả</button>
       </div>
@@ -567,23 +657,33 @@
 </div>
 
 <script>
-// ---------------------------------------------------------------
-// 상태
-// ---------------------------------------------------------------
-let words = []; // {과, 단어, 뜻, 예문, 레벨}
-let studentSub = "study"; // study | quiz | wrong | stats
+// ================================================================
+// ⚙️ GAS 설정 — 항상 최상단
+// ================================================================
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxN3GjL-yQz4KinAS-Pil669-PuDhPytsJVuC_S_FLHycdP1gcWXLXCBAjJUqukVoIK/exec";
+const GAS_ENABLED = !!(GAS_URL && !GAS_URL.includes("여기에"));
 
-let studyLesson = null, studyIdx = 0, studyRevealed = false;
-let quizLesson = null;
+// ---------------------------------------------------------------
+// 상수 및 상태
+// ---------------------------------------------------------------
+const LEVELS = ["Sơ cấp 1","Sơ cấp 2","Trung cấp 1","Trung cấp 2","Topik 1","Topik 2"];
+const LEVEL_ICON = {"Sơ cấp 1":"🌱","Sơ cấp 2":"🌿","Trung cấp 1":"📘","Trung cấp 2":"📗","Topik 1":"🏅","Topik 2":"🏆"};
+
+let words = []; // {급수, 과, 단어, 뜻, 예문}
+let studentSub = "study";
+
+let studyLevel = null, studyLesson = null, studyIdx = 0, studyRevealed = false;
+let quizLevel = null, quizLesson = null;
 let quizQueue = [], quizIndex = 0, quizCorrect = 0, wrongAnswers = [];
 
-let wrongNote = []; // [{단어, 뜻, 예문, count}]
+let wrongNote = [];
 let reviewQueue = [], reviewIndex = 0, reviewCorrect = 0;
 
 let studentName = "";
-let studentRecords = []; // [{name, lesson, type, correct, total, pct, time}]
-let manualRoster = [];
+let studentRecords = [];
+let manualRoster = []; // [{name, class}]
 let homeworkMap = {};
+let teacherPassword = "kross1234";
 
 const el = id => document.getElementById(id);
 const shuffle = arr => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
@@ -592,14 +692,291 @@ function escapeHtml(s){
   return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
+// GAS 연결 상태 UI 업데이트
+function updateGasStatusUI(status){
+  const dot  = el("gasStatusDot");
+  const text = el("gasStatusText");
+  if(status === "connected"){
+    dot.style.background  = "var(--green)";
+    text.style.color      = "var(--green-dark)";
+    text.textContent      = "✅ GAS 연결됨 — 데이터가 구글 시트에 실시간 저장됩니다";
+  } else if(status === "error"){
+    dot.style.background  = "var(--rose)";
+    text.style.color      = "var(--rose)";
+    text.textContent      = "❌ GAS 연결 실패 — URL을 확인해주세요";
+  } else {
+    dot.style.background  = "var(--text-dim)";
+    text.style.color      = "var(--text-dim)";
+    text.textContent      = "GAS 미설정 — localStorage 전용 모드 (데이터가 이 브라우저에만 저장됩니다)";
+  }
+}
+
+el("btnGasCheck").addEventListener("click", async () => {
+  el("btnGasCheck").textContent = "확인 중...";
+  el("btnGasCheck").disabled = true;
+  if(!GAS_ENABLED){
+    updateGasStatusUI("none");
+    el("btnGasCheck").textContent = "연결 확인";
+    el("btnGasCheck").disabled = false;
+    alert("GAS_URL이 설정되지 않았습니다.\nword-quiz.html 상단의 GAS_URL 값을 채워주세요.");
+    return;
+  }
+  try{
+    const res = await gasGet("");
+    if(res.ok){
+      updateGasStatusUI("connected");
+    } else {
+      updateGasStatusUI("error");
+    }
+  }catch(e){
+    updateGasStatusUI("error");
+  }
+  el("btnGasCheck").textContent = "연결 확인";
+  el("btnGasCheck").disabled = false;
+});
+
+// 초기 상태 표시
+if(GAS_ENABLED) updateGasStatusUI("connected");
+
 // ---------------------------------------------------------------
-// 학생 ↔ 교사 화면 전환
+// 🔒 비밀번호 모달 (선생님 입장)
 // ---------------------------------------------------------------
 el("btnGoTeacher").addEventListener("click", () => {
-  el("studentView").classList.add("hidden");
-  el("teacherView").classList.remove("hidden");
+  el("pwInput").value = "";
+  el("pwError").textContent = "";
+  el("pwModal").classList.remove("hidden");
+  setTimeout(() => el("pwInput").focus(), 100);
+});
+
+function closePwModal(){ el("pwModal").classList.add("hidden"); }
+el("btnPwCancel").addEventListener("click", closePwModal);
+el("btnPwClose").addEventListener("click", closePwModal);
+el("pwModal").addEventListener("click", (e) => { if(e.target === el("pwModal")) closePwModal(); });
+el("btnPwConfirm").addEventListener("click", checkPassword);
+el("pwInput").addEventListener("keydown", e => {
+  if(e.key === "Enter") checkPassword();
+  if(e.key === "Escape") closePwModal();
+});
+
+function checkPassword(){
+  const val = el("pwInput").value;
+  if(val === teacherPassword){
+    el("pwModal").classList.add("hidden");
+    el("studentView").classList.add("hidden");
+    el("teacherView").classList.remove("hidden");
+    window.scrollTo(0,0);
+  } else {
+    el("pwError").textContent = "Mật khẩu không đúng. Vui lòng thử lại.";
+    el("pwInput").value = "";
+    el("pwInput").focus();
+  }
+}
+
+// 비밀번호 변경
+el("btnChangePw").addEventListener("click", () => {
+  const cur = el("pwCurrentInput").value;
+  const nw = el("pwNewInput").value;
+  const msg = el("pwChangeMsg");
+  if(cur !== teacherPassword){
+    msg.style.color = "var(--rose)";
+    msg.textContent = "Mật khẩu hiện tại không đúng.";
+    return;
+  }
+  if(nw.length < 4){
+    msg.style.color = "var(--rose)";
+    msg.textContent = "Mật khẩu mới phải có ít nhất 4 ký tự.";
+    return;
+  }
+  teacherPassword = nw;
+  localStorage.setItem("kross_pw", teacherPassword);
+  el("pwCurrentInput").value = "";
+  el("pwNewInput").value = "";
+  msg.style.color = "var(--green-dark)";
+  msg.textContent = "✓ Đã đổi mật khẩu thành công.";
+  setTimeout(() => { msg.textContent = ""; }, 2500);
+});
+
+// ---------------------------------------------------------------
+// 👤 이름 선택 모달 (반 선택 → 이름 선택 2단계)
+// ---------------------------------------------------------------
+let selectedName = "";
+let selectedClass = "";
+
+function openNameModal(){
+  selectedName = studentName;
+  selectedClass = manualRoster.find(r => r.name === studentName)?.class || "";
+  el("nameError").textContent = "";
+  el("nameModal").classList.remove("hidden");
+  showClassPickStep();
+}
+
+// 1단계: 반 선택
+function showClassPickStep(){
+  el("classPickStep").classList.remove("hidden");
+  el("namePickStep").classList.add("hidden");
+  el("btnNameConfirm").classList.add("hidden");
+  el("nameModalTitle").textContent = "👋 Xin chào!";
+  el("nameModalSub").textContent = "Chọn lớp của bạn.";
+
+  const grid = el("classGrid");
+  // 반 목록: manualRoster에 있는 반 + "미분류" 처리
+  const classes = [...new Set(manualRoster.map(r => r.class || "Chưa phân lớp"))].sort();
+
+  if(classes.length === 0){
+    grid.innerHTML = `<div style="font-size:13px;color:var(--text-dim);width:100%;">Giáo viên chưa thêm danh sách học viên.<br>Vui lòng liên hệ giáo viên.</div>`;
+    return;
+  }
+
+  grid.innerHTML = classes.map(cls => {
+    const cnt = manualRoster.filter(r => (r.class || "Chưa phân lớp") === cls).length;
+    const icon = {"Sơ cấp 1":"🌱","Sơ cấp 2":"🌿","Trung cấp 1":"📘","Trung cấp 2":"📗","Topik 1":"🏅","Topik 2":"🏆"}[cls] || "📋";
+    const isActive = cls === selectedClass;
+    return `<div class="name-chip${isActive?' selected':''}" data-class="${escapeHtml(cls)}" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 12px;">
+      <span style="font-size:20px;">${icon}</span>
+      <span style="font-weight:700;">${escapeHtml(cls)}</span>
+      <span style="font-size:11px;opacity:0.65;">${cnt}명</span>
+    </div>`;
+  }).join("");
+
+  grid.querySelectorAll(".name-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      selectedClass = chip.dataset.class;
+      showNamePickStep(selectedClass);
+    });
+  });
+}
+
+// 2단계: 검색창으로 이름 선택
+function showNamePickStep(cls){
+  el("classPickStep").classList.add("hidden");
+  el("namePickStep").classList.remove("hidden");
+  el("btnNameConfirm").classList.add("hidden"); // 이름 선택 전엔 숨김
+  el("nameModalTitle").textContent = `📋 ${cls}`;
+  el("nameModalSub").textContent = "Nhập tên của bạn để bắt đầu.";
+
+  const roster = manualRoster
+    .filter(r => (r.class || "Chưa phân lớp") === cls)
+    .map(r => r.name)
+    .sort();
+
+  const searchInput = el("nameSearch");
+  const hint        = el("nameHint");
+  const resultBox   = el("nameSearchResult");
+  const noResult    = el("nameNoResult");
+  const grid        = el("nameGrid");
+
+  // 초기화
+  searchInput.value = "";
+  hint.classList.remove("hidden");
+  resultBox.classList.add("hidden");
+  el("btnNameConfirm").classList.add("hidden");
+
+  if(roster.length === 0){
+    hint.innerHTML = `<div style="font-size:24px;margin-bottom:8px;">😅</div>Lớp này chưa có học viên nào.`;
+    searchInput.style.display = "none";
+    return;
+  }
+  searchInput.style.display = "";
+
+  function renderResults(query){
+    const q = query.trim().toLowerCase();
+    if(!q){
+      hint.classList.remove("hidden");
+      resultBox.classList.add("hidden");
+      el("btnNameConfirm").classList.add("hidden");
+      return;
+    }
+    hint.classList.add("hidden");
+    resultBox.classList.remove("hidden");
+
+    const filtered = roster.filter(n => n.toLowerCase().includes(q));
+    if(filtered.length === 0){
+      grid.innerHTML = "";
+      noResult.classList.remove("hidden");
+      el("btnNameConfirm").classList.add("hidden");
+      return;
+    }
+    noResult.classList.add("hidden");
+    grid.innerHTML = filtered.map(name => `
+      <div class="name-chip${name===selectedName?' selected':''}" data-name="${escapeHtml(name)}"
+        style="width:100%;text-align:left;padding:13px 16px;font-size:15px;font-weight:600;border-radius:12px;">
+        ${escapeHtml(name)}
+      </div>
+    `).join("");
+
+    grid.querySelectorAll(".name-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        selectedName = chip.dataset.name;
+        grid.querySelectorAll(".name-chip").forEach(c =>
+          c.classList.toggle("selected", c.dataset.name===selectedName)
+        );
+        el("btnNameConfirm").classList.remove("hidden");
+        el("btnNameConfirm").textContent = `${selectedName} — Bắt đầu học →`;
+      });
+    });
+
+    // 결과 1개면 자동 선택
+    if(filtered.length === 1){
+      selectedName = filtered[0];
+      grid.querySelector(".name-chip").classList.add("selected");
+      el("btnNameConfirm").classList.remove("hidden");
+      el("btnNameConfirm").textContent = `${selectedName} — Bắt đầu học →`;
+    }
+  }
+
+  searchInput.oninput = (e) => renderResults(e.target.value);
+  searchInput.onkeydown = (e) => {
+    if(e.key === "Enter" && selectedName){
+      studentName = selectedName;
+      updateNameDisplay();
+      closeNameModal();
+      saveAll();
+    }
+  };
+  setTimeout(() => searchInput.focus(), 150);
+}
+
+el("btnBackToClass").addEventListener("click", () => showClassPickStep());
+el("nameRow").addEventListener("click", () => openNameModal());
+
+function closeNameModal(){
+  el("nameModal").classList.add("hidden");
+  el("nameError").textContent = "";
+}
+
+el("btnNameClose").addEventListener("click", closeNameModal);
+el("btnNameSkip").addEventListener("click", closeNameModal);
+el("nameModal").addEventListener("click", (e) => { if(e.target === el("nameModal")) closeNameModal(); });
+
+el("btnNameConfirm").addEventListener("click", () => {
+  if(!selectedName){
+    el("nameError").textContent = "Vui lòng chọn tên của bạn.";
+    return;
+  }
+  studentName = selectedName;
+  updateNameDisplay();
+  closeNameModal();
+  saveAll();
+});
+
+el("btnBackStudent").addEventListener("click", () => {
+  el("teacherView").classList.add("hidden");
+  el("studentView").classList.remove("hidden");
+  switchStudentSub(studentSub);
   window.scrollTo(0,0);
 });
+
+// ESC 키로 열려있는 모달 모두 닫기 (전역)
+document.addEventListener("keydown", (e) => {
+  if(e.key === "Escape"){
+    if(typeof closePwModal === "function") closePwModal();
+    if(typeof closeNameModal === "function") closeNameModal();
+  }
+});
+
+// ---------------------------------------------------------------
+// 학생 ↔ 교사 화면 전환 (뒤로가기)
+// ---------------------------------------------------------------
 el("btnBackStudent").addEventListener("click", () => {
   el("teacherView").classList.add("hidden");
   el("studentView").classList.remove("hidden");
@@ -625,27 +1002,35 @@ function switchStudentSub(sub){
   if(sub==="stats") renderMyStats();
 }
 
-el("studentNameInput").addEventListener("input", (e) => {
-  studentName = e.target.value.trim();
-});
+// 이름 표시 갱신
+function updateNameDisplay(){
+  el("nameDisplay").textContent = studentName || "Chưa chọn tên — nhấn để chọn";
+}
 
 // ---------------------------------------------------------------
 // 컬럼 매칭 헬퍼 (한국어/베트남어 헤더 모두 인식)
 // ---------------------------------------------------------------
+// NFC 정규화 적용 - 베트남어 NFD/NFC 불일치 문제 해결
+function nfc(s){ return s ? String(s).normalize("NFC") : ""; }
+
 function findCol(headers, patterns){
-  return headers.findIndex(h => patterns.some(p => h.toLowerCase().includes(p)));
+  return headers.findIndex(h =>
+    patterns.some(p => nfc(h).toLowerCase().includes(nfc(p).toLowerCase()))
+  );
 }
 function getField(row, patterns){
   const keys = Object.keys(row);
-  const key = keys.find(k => patterns.some(p => k.toLowerCase().includes(p)));
+  const key = keys.find(k =>
+    patterns.some(p => nfc(k).toLowerCase().includes(nfc(p).toLowerCase()))
+  );
   return key ? row[key] : "";
 }
 const PAT = {
-  과: ["과","bài","lesson"],
-  단어: ["단어","từ","word"],
-  뜻: ["뜻","nghĩa","meaning"],
-  예문: ["예문","ví dụ","example"],
-  레벨: ["레벨","cấp","level"],
+  급수: ["cấp độ","급수","cap do","capdo","cap_do"],
+  과: ["bài","과","lesson","bai"],
+  단어: ["단어","từ","word","tu"],
+  뜻: ["뜻","nghĩa","nghia","meaning"],
+  예문: ["예문","ví dụ","vi du","example","câu"],
 };
 
 // ---------------------------------------------------------------
@@ -780,35 +1165,135 @@ function handleExcelUpload(e){
   if(!file) return;
   const reader = new FileReader();
   reader.onload = (evt) => {
-    const data = new Uint8Array(evt.target.result);
-    const wb = XLSX.read(data, { type:"array" });
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(sheet, { defval:"" });
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, { type:"array" });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
 
-    let added = 0;
-    rows.forEach(r => {
-      const 과 = getField(r, PAT.과);
-      const 단어 = getField(r, PAT.단어);
-      const 뜻 = getField(r, PAT.뜻);
-      if(과==="" || 단어==="" || 뜻==="") return;
-      words.push({
-        과: String(과),
-        단어: String(단어),
-        뜻: String(뜻),
-        예문: String(getField(r, PAT.예문) || ""),
-        레벨: String(getField(r, PAT.레벨) || "")
+      // 1차: 헤더 자동 감지 (NFC 정규화 적용)
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval:"" });
+      let added = 0;
+      rows.forEach(r => {
+        const 급수v = getField(r, PAT.급수);
+        const 과v   = getField(r, PAT.과);
+        const 단어v  = getField(r, PAT.단어);
+        const 뜻v   = getField(r, PAT.뜻);
+        if(!단어v || !뜻v) return;
+        words.push({
+          급수: String(급수v || ""),
+          과:   String(과v || "1").replace(/\.0$/,""),
+          단어: String(단어v),
+          뜻:   String(뜻v),
+          예문: String(getField(r, PAT.예문) || ""),
+        });
+        added++;
       });
-      added++;
-    });
-    renderTable();
-    el("fileInput").value = "";
-    if(added===0) alert("Không tìm thấy từ nào. Vui lòng kiểm tra định dạng mẫu (Bài/Từ/Nghĩa).");
+
+      // 2차 폴백: 위치 기반 파싱
+      // 새 템플릿: col0=Cấp độ, col1=Bài, col2=Từ, col3=Nghĩa, col4=Ví dụ
+      // 구 템플릿: col0=Bài, col1=Từ, col2=Nghĩa, col3=Ví dụ
+      if(added === 0){
+        const arr = XLSX.utils.sheet_to_json(sheet, { header:1, defval:"" });
+        if(arr.length < 2){
+          alert("Không tìm thấy dữ liệu. Vui lòng kiểm tra file Excel.");
+          return;
+        }
+        // 첫 행으로 컬럼 구조 감지
+        const header0 = arr[0] || [];
+        const isNewFormat = LEVELS.some(lv =>
+          header0.some(h => nfc(String(h)).toLowerCase().includes("c"))
+        ) && header0.length >= 4;
+
+        for(let i = 1; i < arr.length; i++){
+          const row = arr[i];
+          let 급수v, 과v, 단어v, 뜻v, 예문v;
+          if(isNewFormat && header0.length >= 4){
+            // Cấp độ | Bài | Từ | Nghĩa | Ví dụ
+            급수v = row[0]; 과v = row[1]; 단어v = row[2]; 뜻v = row[3]; 예문v = row[4];
+          } else {
+            // Bài | Từ | Nghĩa | Ví dụ (구 형식)
+            급수v = ""; 과v = row[0]; 단어v = row[1]; 뜻v = row[2]; 예문v = row[3];
+          }
+          if(!단어v || !뜻v) continue;
+          words.push({
+            급수: String(급수v || ""),
+            과:   String(과v || "1").replace(/\.0$/,""),
+            단어: String(단어v),
+            뜻:   String(뜻v),
+            예문: String(예문v || ""),
+          });
+          added++;
+        }
+      }
+
+      renderTable();
+      el("fileInput").value = "";
+      if(added === 0){
+        alert("Không tìm thấy từ nào.\nKiểm tra định dạng: Cấp độ | Bài | Từ | Nghĩa | Ví dụ");
+      } else {
+        // 선생님이 엑셀 업로드한 경우에만 GAS에 저장
+        if(GAS_ENABLED){
+          showToast(`✓ Đã tải ${added} từ — đang lưu lên server...`);
+          syncWordsToGAS().then(() => showToast(`✅ Đã lưu ${added} từ lên Google Sheet`));
+        } else {
+          showToast(`✓ Đã tải ${added} từ`);
+        }
+      }
+    }catch(err){
+      alert("Lỗi đọc file: " + err.message);
+    }
   };
   reader.readAsArrayBuffer(file);
 }
 
+// ── 학생 명단 엑셀 업로드 ──────────────────────────────────────
+el("studentFileInput").addEventListener("change", handleStudentUpload);
+
+function handleStudentUpload(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, { type:"array" });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const arr = XLSX.utils.sheet_to_json(sheet, { header:1, defval:"" });
+      if(arr.length < 2){ alert("Không có dữ liệu."); return; }
+
+      let added = 0;
+      for(let i = 1; i < arr.length; i++){
+        const row = arr[i];
+        const name = String(row[0] || "").trim();
+        const cls  = String(row[1] || "").trim();
+        if(!name) continue;
+        if(!manualRoster.find(r => r.name === name)){
+          manualRoster.push({ name, class: cls });
+          added++;
+        }
+      }
+      el("studentFileInput").value = "";
+      renderRosterPreview();
+      saveAll();
+      if(GAS_ENABLED) syncRosterToGAS();
+      showToast(`✓ Đã thêm ${added} học viên`);
+    }catch(err){
+      alert("Lỗi đọc file: " + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function showToast(msg){
+  const t = document.createElement("div");
+  t.style.cssText = "position:fixed;bottom:18px;right:18px;background:var(--green);color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(60,90,40,0.25);z-index:999;";
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
 el("btnTemplate").addEventListener("click", () => {
-  alert("Định dạng cột Excel:\n\nBài | Từ | Nghĩa (Tiếng Việt) | Câu ví dụ (tùy chọn) | Cấp độ (tùy chọn)\n\nVí dụ:\n1 | 안녕하세요 | Xin chào | Xin chào, rất vui được gặp bạn | Sơ cấp\n1 | 회사 | Công ty | Tôi làm việc ở công ty | Sơ cấp\n2 | 면접 | Phỏng vấn | Ngày mai tôi có buổi phỏng vấn | Trung cấp");
+  alert("Định dạng cột Excel (mới):\n\nCấp độ | Bài | Từ (Tiếng Hàn) | Nghĩa (Tiếng Việt) | Câu ví dụ\n\nCấp độ hợp lệ: Sơ cấp 1 / Sơ cấp 2 / Trung cấp 1 / Trung cấp 2 / Topik 1 / Topik 2");
 });
 
 el("btnAddRow").addEventListener("click", () => {
@@ -865,23 +1350,36 @@ function renderTable(){
   el("wordCount").textContent = words.length;
   el("emptyState").classList.toggle("hidden", words.length>0);
 
+  const levelOptions = LEVELS.map(lv =>
+    `<option value="${escapeHtml(lv)}">${escapeHtml(lv)}</option>`
+  ).join("");
+
   words.forEach((w, idx) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><input value="${escapeHtml(w.과)}" data-idx="${idx}" data-field="과" style="width:36px"></td>
+      <td>
+        <select data-idx="${idx}" data-field="급수" style="width:100px;padding:3px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--surface-soft);color:var(--text);">
+          <option value="">-- 급수 --</option>
+          ${LEVELS.map(lv => `<option value="${escapeHtml(lv)}"${w.급수===lv?' selected':''}>${escapeHtml(lv)}</option>`).join("")}
+        </select>
+      </td>
+      <td><input value="${escapeHtml(w.과)}" data-idx="${idx}" data-field="과" style="width:40px"></td>
       <td><input value="${escapeHtml(w.단어)}" data-idx="${idx}" data-field="단어"></td>
       <td><input value="${escapeHtml(w.뜻)}" data-idx="${idx}" data-field="뜻"></td>
       <td><input value="${escapeHtml(w.예문)}" data-idx="${idx}" data-field="예문"></td>
-      <td><input value="${escapeHtml(w.레벨)}" data-idx="${idx}" data-field="레벨" style="width:60px"></td>
       <td><span class="row-del" data-idx="${idx}">✕</span></td>
     `;
     tbody.appendChild(tr);
   });
 
-  tbody.querySelectorAll("input").forEach(inp => {
+  tbody.querySelectorAll("input,select").forEach(inp => {
     inp.addEventListener("input", (e) => {
       const idx = e.target.dataset.idx, field = e.target.dataset.field;
       words[idx][field] = e.target.value;
+    });
+    inp.addEventListener("change", (e) => {
+      const idx = e.target.dataset.idx, field = e.target.dataset.field;
+      if(idx !== undefined) words[idx][field] = e.target.value;
     });
   });
   tbody.querySelectorAll(".row-del").forEach(btn => {
@@ -892,24 +1390,48 @@ function renderTable(){
   });
 
   if(typeof renderHomeworkGrid === "function") renderHomeworkGrid();
+  saveAll();
+  // ⚠️ 여기서 syncWordsToGAS() 호출 제거
+  // 학생 접속 시 빈 데이터로 덮어쓰는 버그 방지
+  // → 선생님이 엑셀 업로드 또는 직접 저장할 때만 GAS에 씀
 }
 
 // ---------------------------------------------------------------
 // 공통: 과 목록 칩 렌더링
 // ---------------------------------------------------------------
-function renderLessonGrid(gridEl, selected, onPick){
-  const lessons = [...new Set(words.map(w => w.과))].sort();
+// renderLessonGrid: 특정 급수 내 Bài 목록
+function renderLessonGrid(gridEl, level, selected, onPick){
+  const lessons = [...new Set(words.filter(w=>w.급수===level).map(w=>w.과))]
+    .sort((a,b) => Number(a)-Number(b));
   gridEl.innerHTML = "";
   if(lessons.length===0){
-    gridEl.innerHTML = `<div class="empty-state">Giáo viên chưa thêm từ vựng nào.</div>`;
+    gridEl.innerHTML = `<div class="empty-state">Chưa có bài học nào trong cấp độ này.</div>`;
     return;
   }
   lessons.forEach(l => {
+    const cnt = words.filter(w=>w.급수===level && w.과===l).length;
     const chip = document.createElement("div");
     chip.className = "lesson-chip" + (l===selected ? " active" : "");
-    chip.textContent = `Bài ${l}`;
+    chip.innerHTML = `Bài ${l} <span style="font-size:11px;opacity:0.7;">(${cnt})</span>`;
     chip.addEventListener("click", () => onPick(l));
     gridEl.appendChild(chip);
+  });
+}
+
+// renderLevelGrid: 6개 레벨 선택 카드
+function renderLevelGrid(gridEl, onPick){
+  gridEl.innerHTML = "";
+  if(words.length===0){
+    gridEl.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Giáo viên chưa thêm từ vựng nào. Vui lòng liên hệ giáo viên.</div>`;
+    return;
+  }
+  LEVELS.forEach(lv => {
+    const cnt = words.filter(w=>w.급수===lv).length;
+    const card = document.createElement("div");
+    card.className = "level-card" + (cnt===0 ? " empty" : "");
+    card.innerHTML = `<div>${LEVEL_ICON[lv]||""}</div><div class="lv-name">${escapeHtml(lv)}</div><div class="lv-count">${cnt} từ</div>`;
+    if(cnt > 0) card.addEventListener("click", () => onPick(lv));
+    gridEl.appendChild(card);
   });
 }
 
@@ -917,8 +1439,7 @@ function speak(text){
   if(!("speechSynthesis" in window)) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = "ko-KR";
-  u.rate = 0.88;
+  u.lang = "ko-KR"; u.rate = 0.88;
   speechSynthesis.speak(u);
 }
 
@@ -927,40 +1448,103 @@ function addToWrongNote(w){
   if(existing) existing.count++;
   else wrongNote.push({ 단어:w.단어, 뜻:w.뜻, 예문:w.예문, count:1 });
   el("wrongCount").textContent = wrongNote.length;
+  saveAll();
 }
 
 function recordAttempt(lesson, type, correct, total, pct){
   if(!studentName) return;
-  studentRecords.unshift({
-    name: studentName, lesson: lesson || "-", type, correct, total, pct,
-    time: new Date().toLocaleString()
-  });
+  const cls = manualRoster.find(r=>r.name===studentName)?.class || "";
+  const record = {
+    name: studentName, class: cls, lesson: lesson || "-", type,
+    correct, total, pct, time: new Date().toLocaleString()
+  };
+  studentRecords.unshift(record);
   renderHomeworkGrid();
   renderRecordsList();
+  saveAll();
+  // GAS에 성적 기록 전송
+  if(GAS_ENABLED) pushRecordToGAS(record);
 }
 
 function getRosterNames(){
   const fromRecords = studentRecords.map(r => r.name);
-  return [...new Set([...manualRoster, ...fromRecords])].sort();
+  const fromRoster = manualRoster.map(r => r.name);
+  return [...new Set([...fromRoster, ...fromRecords])].sort();
+}
+
+function renderRosterPreview(){
+  const preview = el("rosterPreview");
+  if(manualRoster.length===0){ preview.innerHTML=""; return; }
+  const byClass = {};
+  manualRoster.forEach(r => {
+    const cls = r.class || "Chưa phân lớp";
+    if(!byClass[cls]) byClass[cls] = [];
+    byClass[cls].push(r.name);
+  });
+  preview.innerHTML = Object.keys(byClass).sort().map(cls => `
+    <div class="roster-group">
+      <div class="roster-group-title">${escapeHtml(cls)} (${byClass[cls].length})</div>
+      ${byClass[cls].map(name => `
+        <span class="roster-name-chip">
+          ${escapeHtml(name)}
+          <button class="del-btn" data-name="${escapeHtml(name)}">✕</button>
+        </span>`).join("")}
+    </div>
+  `).join("");
+  preview.querySelectorAll(".del-btn").forEach(b => {
+    b.addEventListener("click", () => {
+      manualRoster = manualRoster.filter(r => r.name !== b.dataset.name);
+      renderRosterPreview();
+      saveAll();
+    });
+  });
 }
 
 // =================================================================
-// 1) 단어공부 (플래시카드, 베트남어 → 한국어)
+// 1) 단어공부 (레벨 → Bài → 플래시카드)
 // =================================================================
 let studyWords = [];
 
 function renderStudyLessonPicker(){
   el("studyCardArea").classList.add("hidden");
-  el("studyLessonCard").classList.remove("hidden");
-  renderLessonGrid(el("studyLessonGrid"), studyLesson, (l) => {
-    studyLesson = l;
-    studyWords = shuffle(words.filter(w => w.과 === l));
-    studyIdx = 0; studyRevealed = false;
-    el("studyLessonCard").classList.add("hidden");
-    el("studyCardArea").classList.remove("hidden");
-    renderFlashcard();
+  el("studyLessonCard").classList.add("hidden");
+  el("studyLevelCard").classList.remove("hidden");
+  renderLevelGrid(el("studyLevelGrid"), (lv) => {
+    studyLevel = lv;
+    el("studyLevelCard").classList.add("hidden");
+    el("studyLessonCard").classList.remove("hidden");
+    el("studyLevelTitle").textContent = LEVEL_ICON[lv] + " " + lv;
+    renderLessonGrid(el("studyLessonGrid"), lv, studyLesson, (l) => {
+      studyLesson = l;
+      studyWords = shuffle(words.filter(w => w.급수===lv && w.과===l));
+      studyIdx = 0; studyRevealed = false;
+      el("studyLessonCard").classList.add("hidden");
+      el("studyCardArea").classList.remove("hidden");
+      renderFlashcard();
+    });
   });
 }
+
+el("btnStudyBackLevel").addEventListener("click", () => {
+  studyLesson = null;
+  el("studyLessonCard").classList.add("hidden");
+  el("studyCardArea").classList.add("hidden");
+  el("studyLevelCard").classList.remove("hidden");
+  renderLevelGrid(el("studyLevelGrid"), (lv) => {
+    studyLevel = lv;
+    el("studyLevelCard").classList.add("hidden");
+    el("studyLessonCard").classList.remove("hidden");
+    el("studyLevelTitle").textContent = LEVEL_ICON[lv] + " " + lv;
+    renderLessonGrid(el("studyLessonGrid"), lv, studyLesson, (l) => {
+      studyLesson = l;
+      studyWords = shuffle(words.filter(w => w.급수===lv && w.과===l));
+      studyIdx = 0; studyRevealed = false;
+      el("studyLessonCard").classList.add("hidden");
+      el("studyCardArea").classList.remove("hidden");
+      renderFlashcard();
+    });
+  });
+});
 
 function renderFlashcard(){
   const w = studyWords[studyIdx];
@@ -1008,26 +1592,48 @@ el("btnFlashMark").addEventListener("click", () => {
 // =================================================================
 // 2) 퀴즈 (타이핑, 베트남어 → 한국어)
 // =================================================================
+// =================================================================
+// 2) 퀴즈 (레벨 → Bài → 타이핑)
+// =================================================================
 function renderQuizLessonPicker(){
   el("quizCard").classList.add("hidden");
   el("resultCard").classList.add("hidden");
-  el("quizLessonCard").classList.remove("hidden");
-  renderLessonGrid(el("quizLessonGrid"), quizLesson, (l) => {
-    quizLesson = l;
-    renderQuizLessonPicker();
-    startQuiz();
+  el("quizLessonCard").classList.add("hidden");
+  el("quizLevelCard").classList.remove("hidden");
+  renderLevelGrid(el("quizLevelGrid"), (lv) => {
+    quizLevel = lv;
+    el("quizLevelCard").classList.add("hidden");
+    el("quizLessonCard").classList.remove("hidden");
+    el("quizLevelTitle").textContent = LEVEL_ICON[lv] + " " + lv;
+    renderLessonGrid(el("quizLessonGrid"), lv, quizLesson, (l) => {
+      quizLesson = l;
+      startQuiz();
+    });
   });
 }
 
-function startQuiz(){
-  if(!studentName){
-    alert("Vui lòng nhập tên trước khi làm bài. (Ô tên ở phía trên)");
-    el("studentNameInput").focus();
-    return;
-  }
-  const lessonWords = words.filter(w => w.과 === quizLesson);
-  if(lessonWords.length < 1){ alert("Bài học này chưa có từ nào."); return; }
+el("btnQuizBackLevel").addEventListener("click", () => {
+  quizLesson = null;
+  el("quizLessonCard").classList.add("hidden");
+  el("quizCard").classList.add("hidden");
+  el("resultCard").classList.add("hidden");
+  el("quizLevelCard").classList.remove("hidden");
+  renderLevelGrid(el("quizLevelGrid"), (lv) => {
+    quizLevel = lv;
+    el("quizLevelCard").classList.add("hidden");
+    el("quizLessonCard").classList.remove("hidden");
+    el("quizLevelTitle").textContent = LEVEL_ICON[lv] + " " + lv;
+    renderLessonGrid(el("quizLessonGrid"), lv, quizLesson, (l) => {
+      quizLesson = l;
+      startQuiz();
+    });
+  });
+});
 
+function startQuiz(){
+  if(!studentName){ openNameModal(); return; }
+  const lessonWords = words.filter(w => w.급수===quizLevel && w.과===quizLesson);
+  if(lessonWords.length < 1){ alert("Bài học này chưa có từ nào."); return; }
   quizQueue = shuffle(lessonWords);
   quizIndex = 0; quizCorrect = 0; wrongAnswers = [];
   el("quizLessonCard").classList.add("hidden");
@@ -1100,7 +1706,10 @@ function showQuizResult(){
 }
 
 el("btnRetry").addEventListener("click", () => startQuiz());
-el("btnBackLesson").addEventListener("click", () => { quizLesson = null; renderQuizLessonPicker(); });
+el("btnBackLesson").addEventListener("click", () => {
+  quizLesson = null; quizLevel = null;
+  renderQuizLessonPicker();
+});
 
 // =================================================================
 // 3) 오답노트
@@ -1132,6 +1741,7 @@ function renderWrongNote(){
   listEl.querySelectorAll("[data-remove]").forEach(b => b.addEventListener("click", () => {
     const [단어, 뜻] = b.dataset.remove.split("|");
     wrongNote = wrongNote.filter(w => !(w.단어===단어 && w.뜻===뜻));
+    saveAll();
     renderWrongNote();
   }));
 }
@@ -1139,6 +1749,7 @@ function renderWrongNote(){
 el("btnClearWrong").addEventListener("click", () => {
   if(wrongNote.length && !confirm("Bạn có chắc muốn xóa hết sổ từ sai không?")) return;
   wrongNote = [];
+  saveAll();
   renderWrongNote();
 });
 
@@ -1242,16 +1853,43 @@ function renderMyStats(){
 // =================================================================
 el("btnRosterAdd").addEventListener("click", () => {
   const name = el("rosterNameInput").value.trim();
+  const cls  = el("rosterClassInput").value;
   if(!name) return;
-  if(!manualRoster.includes(name)) manualRoster.push(name);
+  if(!manualRoster.find(r => r.name === name)){
+    manualRoster.push({ name, class: cls });
+  }
   el("rosterNameInput").value = "";
+  renderRosterPreview();
   renderHomeworkGrid();
+  saveAll();
+});
+
+el("btnClearRoster").addEventListener("click", () => {
+  if(!confirm("Xóa toàn bộ danh sách học viên?")) return;
+  manualRoster = [];
+  renderRosterPreview();
+  renderHomeworkGrid();
+  saveAll();
+});
+
+el("btnDownloadRosterTemplate").addEventListener("click", () => {
+  const wb = XLSX.utils.book_new();
+  const data = [
+    ["Tên học viên","Lớp học"],
+    ["Nguyễn Văn A","Sơ cấp 1"],
+    ["Trần Thị B","Sơ cấp 2"],
+    ["Lê Văn C","Trung cấp 1"],
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws["!cols"] = [{wch:22},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, ws, "DanhSachHocVien");
+  XLSX.writeFile(wb, "mau-danh-sach-hoc-vien.xlsx");
 });
 
 el("btnClearRecords").addEventListener("click", () => {
-  if(studentRecords.length && !confirm("Bạn có chắc muốn xóa tất cả kết quả và việc kiểm tra bài tập không?")) return;
-  studentRecords = []; manualRoster = []; homeworkMap = {};
-  renderHomeworkGrid(); renderRecordsList();
+  if(studentRecords.length && !confirm("Xóa tất cả kết quả và bài tập về nhà?")) return;
+  studentRecords = []; homeworkMap = {};
+  renderHomeworkGrid(); renderRecordsList(); saveAll();
 });
 
 el("btnExportRecords").addEventListener("click", () => {
@@ -1259,44 +1897,49 @@ el("btnExportRecords").addEventListener("click", () => {
     alert("Không có dữ liệu để xuất."); return;
   }
   const wb = XLSX.utils.book_new();
-
   const recordSheet = XLSX.utils.json_to_sheet(studentRecords.map(r => ({
-    "Tên": r.name, "Bài": r.lesson, "Loại": r.type, "Đúng": r.correct, "Tổng": r.total, "Tỷ lệ đúng (%)": r.pct, "Thời gian": r.time
+    "Tên": r.name, "Lớp": r.class||"", "Cấp độ+Bài": r.lesson,
+    "Loại": r.type, "Đúng": r.correct, "Tổng": r.total, "Tỷ lệ (%)": r.pct, "Thời gian": r.time
   })));
   XLSX.utils.book_append_sheet(wb, recordSheet, "KetQua");
 
-  const lessons = [...new Set(words.map(w => w.과))].sort();
+  const lessonKeys = [...new Set(words.map(w => `${w.급수}|Bài ${w.과}`))].sort();
   const hwRows = getRosterNames().map(name => {
-    const row = { "Tên": name };
-    lessons.forEach(l => { row[`Bài ${l}`] = homeworkMap[`${name}__${l}`] ? "O" : "X"; });
+    const row = { "Tên": name, "Lớp": manualRoster.find(r=>r.name===name)?.class||"" };
+    lessonKeys.forEach(k => { row[k.replace("|"," - ")] = homeworkMap[`${name}__${k}`] ? "O" : "X"; });
     return row;
   });
   const hwSheet = XLSX.utils.json_to_sheet(hwRows);
   XLSX.utils.book_append_sheet(wb, hwSheet, "BaiTapVeNha");
-
   XLSX.writeFile(wb, "ket_qua_hoc_vien.xlsx");
 });
 
 function renderHomeworkGrid(){
   const table = el("hwTable");
-  const lessons = [...new Set(words.map(w => w.과))].sort();
   const roster = getRosterNames();
+  // 급수+Bài 조합으로 열 구성 (레벨별 그룹핑)
+  const lessonKeys = [...new Set(words.map(w => `${w.급수}||${w.과}`))].sort();
 
   if(roster.length===0){
-    table.innerHTML = `<tr><td class="empty-state" style="padding:16px;">Chưa có học viên nào. Học viên làm bài kiểm tra hoặc bạn thêm tên thủ công ở trên.</td></tr>`;
+    table.innerHTML = `<tr><td class="empty-state" style="padding:16px;">Chưa có học viên nào.</td></tr>`;
     return;
   }
-  if(lessons.length===0){
-    table.innerHTML = `<tr><td class="empty-state" style="padding:16px;">Vui lòng thêm từ vựng trước để tạo danh sách bài học.</td></tr>`;
+  if(lessonKeys.length===0){
+    table.innerHTML = `<tr><td class="empty-state" style="padding:16px;">Vui lòng thêm từ vựng trước.</td></tr>`;
     return;
   }
 
-  let html = `<tr><th>Tên</th>${lessons.map(l => `<th>Bài ${l}</th>`).join("")}</tr>`;
+  let html = `<tr><th>Tên</th><th>Lớp</th>${lessonKeys.map(k => {
+    const [lv, bai] = k.split("||");
+    return `<th style="font-size:10px;">${escapeHtml(lv)}<br>Bài ${escapeHtml(bai)}</th>`;
+  }).join("")}</tr>`;
+
   roster.forEach(name => {
-    html += `<tr><td>${escapeHtml(name)}</td>`;
-    lessons.forEach(l => {
-      const key = `${name}__${l}`;
-      html += `<td><input type="checkbox" data-key="${key}" ${homeworkMap[key] ? "checked" : ""}></td>`;
+    const cls = manualRoster.find(r=>r.name===name)?.class || "";
+    html += `<tr><td>${escapeHtml(name)}</td><td style="font-size:11px;">${escapeHtml(cls)}</td>`;
+    lessonKeys.forEach(k => {
+      const key = `${name}__${k}`;
+      html += `<td><input type="checkbox" data-key="${key}" ${homeworkMap[key]?"checked":""}></td>`;
     });
     html += `</tr>`;
   });
@@ -1305,6 +1948,13 @@ function renderHomeworkGrid(){
   table.querySelectorAll("input[type=checkbox]").forEach(cb => {
     cb.addEventListener("change", (e) => {
       homeworkMap[e.target.dataset.key] = e.target.checked;
+      saveAll();
+      // GAS 동기화
+      if(GAS_ENABLED){
+        const [nameKey, lessonKey] = e.target.dataset.key.split("__");
+        const cls = manualRoster.find(r=>r.name===nameKey)?.class || "";
+        pushHomeworkToGAS(nameKey, cls, lessonKey, e.target.checked);
+      }
     });
   });
 }
@@ -1326,18 +1976,198 @@ function renderRecordsList(){
   `).join("");
 }
 
+// =================================================================
+// 💾 localStorage 자동 저장/불러오기
+// — 단어장, 오답노트, 성적기록, 숙제체크, 학생이름 모두 보존
+// =================================================================
+// ================================================================
+// 💾 데이터 저장소 (localStorage + GAS 이중 구조)
+// ================================================================
+const STORAGE_KEYS = {
+  words:         "kross_words",
+  wrongNote:     "kross_wrongNote",
+  studentRecords:"kross_studentRecords",
+  manualRoster:  "kross_manualRoster",
+  homeworkMap:   "kross_homeworkMap",
+  studentName:   "kross_studentName",
+  lastSheetUrl:  "kross_lastSheetUrl",
+  pw:            "kross_pw",
+};
+
+// ── localStorage (항상 동작) ──────────────────────────────────
+function saveAll(){
+  try{
+    localStorage.setItem(STORAGE_KEYS.words,          JSON.stringify(words));
+    localStorage.setItem(STORAGE_KEYS.wrongNote,      JSON.stringify(wrongNote));
+    localStorage.setItem(STORAGE_KEYS.studentRecords, JSON.stringify(studentRecords));
+    localStorage.setItem(STORAGE_KEYS.manualRoster,   JSON.stringify(manualRoster));
+    localStorage.setItem(STORAGE_KEYS.homeworkMap,    JSON.stringify(homeworkMap));
+    localStorage.setItem(STORAGE_KEYS.studentName,    studentName);
+    localStorage.setItem(STORAGE_KEYS.pw,             teacherPassword);
+    if(lastSheetUrl) localStorage.setItem(STORAGE_KEYS.lastSheetUrl, lastSheetUrl);
+  }catch(e){ console.warn("localStorage 저장 실패:", e); }
+}
+
+function loadAll(){
+  try{
+    const w = localStorage.getItem(STORAGE_KEYS.words);
+    if(w) words = JSON.parse(w);
+
+    const wn = localStorage.getItem(STORAGE_KEYS.wrongNote);
+    if(wn) wrongNote = JSON.parse(wn);
+
+    const sr = localStorage.getItem(STORAGE_KEYS.studentRecords);
+    if(sr) studentRecords = JSON.parse(sr);
+
+    const mr = localStorage.getItem(STORAGE_KEYS.manualRoster);
+    if(mr){
+      const raw = JSON.parse(mr);
+      manualRoster = raw.map(r => typeof r === "string" ? {name:r, class:""} : r);
+    }
+
+    const hm = localStorage.getItem(STORAGE_KEYS.homeworkMap);
+    if(hm) homeworkMap = JSON.parse(hm);
+
+    const sn = localStorage.getItem(STORAGE_KEYS.studentName);
+    if(sn){ studentName = sn; }
+
+    const pw = localStorage.getItem(STORAGE_KEYS.pw);
+    if(pw) teacherPassword = pw;
+
+    const su = localStorage.getItem(STORAGE_KEYS.lastSheetUrl);
+    if(su){ lastSheetUrl = su; el("sheetUrlInput").value = su; el("btnRefreshSheet").classList.remove("hidden"); }
+  }catch(e){ console.warn("localStorage 불러오기 실패:", e); }
+}
+
+// ── GAS API 호출 헬퍼 ─────────────────────────────────────────
+async function gasGet(action){
+  const res = await fetch(`${GAS_URL}?action=${action}`);
+  return res.json();
+}
+async function gasPost(body){
+  const res = await fetch(GAS_URL, {
+    method:"POST",
+    body: JSON.stringify(body),
+  });
+  return res.json();
+}
+
+// ── GAS에서 단어 + 명단 로드 (앱 시작 시) ────────────────────
+async function loadFromGAS(){
+  if(!GAS_ENABLED) return false;
+  try{
+    const [wRes, rRes] = await Promise.all([
+      gasGet("getWords"),
+      gasGet("getRoster"),
+    ]);
+    if(wRes.ok && wRes.data.length > 0){
+      words = wRes.data.map(r => ({
+        급수: String(r["급수"]||""),
+        과:   String(r["과"]||"1"),
+        단어: String(r["단어"]||""),
+        뜻:   String(r["뜻"]||""),
+        예문: String(r["예문"]||""),
+      }));
+      localStorage.setItem(STORAGE_KEYS.words, JSON.stringify(words));
+    }
+    if(rRes.ok && rRes.data.length > 0){
+      manualRoster = rRes.data.map(r => ({
+        name:  String(r["이름"]||""),
+        class: String(r["반"]||""),
+      }));
+      localStorage.setItem(STORAGE_KEYS.manualRoster, JSON.stringify(manualRoster));
+    }
+    return true;
+  }catch(e){
+    console.warn("GAS 로드 실패 (오프라인 모드로 전환):", e);
+    return false;
+  }
+}
+
+// ── GAS로 단어 저장 (선생님 업로드 시) ───────────────────────
+async function syncWordsToGAS(){
+  if(!GAS_ENABLED) return;
+  try{
+    await gasPost({ action:"setWords", words });
+  }catch(e){ console.warn("GAS 단어 동기화 실패:", e); }
+}
+
+// ── GAS로 명단 저장 (선생님 업로드 시) ───────────────────────
+async function syncRosterToGAS(){
+  if(!GAS_ENABLED) return;
+  try{
+    await gasPost({ action:"setRoster", roster: manualRoster });
+  }catch(e){ console.warn("GAS 명단 동기화 실패:", e); }
+}
+
+// ── GAS로 성적 기록 추가 (퀴즈 완료 시) ─────────────────────
+async function pushRecordToGAS(record){
+  if(!GAS_ENABLED) return;
+  try{
+    await gasPost({ action:"addRecord", record });
+  }catch(e){ console.warn("GAS 성적 저장 실패:", e); }
+}
+
+// ── GAS로 숙제 체크 저장 ─────────────────────────────────────
+async function pushHomeworkToGAS(name, cls, lesson, done){
+  if(!GAS_ENABLED) return;
+  try{
+    await gasPost({ action:"setHomework", name, cls, lesson, done });
+  }catch(e){ console.warn("GAS 숙제 저장 실패:", e); }
+}
+
+// ── recordAttempt에 GAS 연동 추가 ────────────────────────────
+// (기존 함수를 GAS 버전으로 재정의)
+const _origRecordAttempt2 = recordAttempt;
+// 이 시점엔 recordAttempt가 이미 위에서 function 선언으로 정의됨
+// → 기존 함수 내부에 GAS 호출 추가는 아래 래핑 방식 대신
+//   직접 호출하는 방식으로 처리
+
+// renderTable 이후 GAS 동기화 트리거
+const _origRenderTable2 = null; // 미사용 — 직접 호출 방식 사용
+
+// ── 숙제 체크 GAS 동기화 연결 ─────────────────────────────────
+// renderHomeworkGrid 내 checkbox 이벤트에 GAS 호출 추가됨 (아래)
+
+// =================================================================
+// 🚀 앱 시작
+// =================================================================
+loadAll(); // 우선 localStorage에서 복원 (오프라인 대비)
+updateNameDisplay();
+renderRosterPreview();
 renderHomeworkGrid();
 renderRecordsList();
 renderTable();
 switchStudentSub("study");
 
-// ===================== 유학 CTA: 비행기 트랜지션 =====================
-function playFlightTransition(destUrl){
-  const overlay = document.getElementById('flightOverlay');
-  overlay.classList.add('active');
-  const wait = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 150 : 1300;
-  setTimeout(() => { window.location.href = destUrl; }, wait);
+// GAS에서 최신 데이터 로드 (비동기 — 화면 표시 후 백그라운드로)
+if(GAS_ENABLED){
+  showToast("🔄 서버에서 최신 데이터 불러오는 중...");
+  loadFromGAS().then(success => {
+    if(success){
+      renderTable();
+      renderRosterPreview();
+      renderHomeworkGrid();
+      // 이름 모달 자동 표시
+      if(!studentName && manualRoster.length > 0){
+        setTimeout(() => openNameModal(), 600);
+      }
+      showToast(`✅ 최신 데이터 로드 완료 — ${words.length}개 단어`);
+    } else {
+      // GAS 실패 시 localStorage 데이터로 동작
+      if(words.length > 0) showToast(`📦 오프라인 모드 — ${words.length}개 단어 (캐시)`);
+    }
+  });
+} else {
+  // GAS 미설정: localStorage 전용 모드
+  if(!studentName && manualRoster.length > 0){
+    setTimeout(() => openNameModal(), 500);
+  }
+  if(words.length > 0){
+    showToast(`✓ Đã khôi phục ${words.length} từ`);
+  }
 }
+
 </script>
 
 </body>
