@@ -478,6 +478,41 @@
     margin-top:8px;
     line-height:1.5;
   }
+  /* ── 점수 게이지 ── */
+  .score-gauge{ position:relative; width:132px; height:132px; margin:6px auto 14px; }
+  .score-gauge svg{ transform:rotate(-90deg); }
+  .score-gauge .track{ fill:none; stroke:rgba(255,255,255,.18); stroke-width:10; }
+  .score-gauge .bar{
+    fill:none; stroke:var(--gold); stroke-width:10; stroke-linecap:round;
+    transition:stroke-dashoffset 1.4s cubic-bezier(.25,.8,.3,1);
+  }
+  .score-gauge .num{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; color:#fff;
+  }
+  .score-gauge .num .big{ font-size:1.6rem; font-weight:800; line-height:1; }
+  .score-gauge .num .small{ font-size:.68rem; opacity:.75; margin-top:3px; }
+  /* ── 문항별 리뷰 ── */
+  .review-toggle{
+    width:100%; padding:13px; border-radius:12px; margin-top:14px;
+    border:1.5px solid var(--line); background:var(--paper-card); color:var(--pine-dark);
+    font-weight:700; font-size:.85rem; cursor:pointer; font-family:inherit;
+  }
+  .review-list{ display:none; margin-top:12px; }
+  .review-list.open{ display:block; }
+  .review-item{
+    background:var(--paper-card); border:1px solid var(--line); border-radius:12px;
+    padding:13px 14px; margin-bottom:9px; font-size:.83rem;
+  }
+  .review-item .ri-top{ display:flex; justify-content:space-between; gap:8px; margin-bottom:5px; }
+  .review-item .ri-tag{ font-size:.66rem; font-weight:700; letter-spacing:.06em; color:var(--gray); }
+  .review-item .ri-mark{ font-weight:800; font-size:.8rem; }
+  .review-item .ri-mark.ok{ color:var(--pine); }
+  .review-item .ri-mark.no{ color:#C0392B; }
+  .review-item .ri-q{ font-weight:600; line-height:1.45; }
+  .review-item .ri-main{ font-family:'Noto Serif KR',serif; font-weight:700; margin:3px 0; }
+  .review-item .ri-ans{ margin-top:5px; color:#5B564B; line-height:1.5; }
+  .review-item .ri-ans b{ color:var(--pine-dark); }
   .recommend-card{
     background:var(--paper-card);
     border:1.5px solid var(--gold);
@@ -534,6 +569,67 @@
     .q-main{font-size:1.8rem;}
     .hero h1{font-size:1.45rem;}
   }
+/* ================================================================
+   ✨ KROSS Level Test UI v2 — 비주얼 레이어 (로직 무변경)
+================================================================ */
+body{
+  background:
+    radial-gradient(800px 450px at 90% -8%, rgba(44,95,79,.09), transparent 60%),
+    radial-gradient(600px 400px at -8% 40%, rgba(200,155,60,.10), transparent 55%),
+    var(--paper);
+  background-attachment:fixed;
+}
+.screen.active > *{ animation:ltCardIn .4s cubic-bezier(.2,.7,.3,1) both; }
+@keyframes ltCardIn{ from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;} }
+@media(prefers-reduced-motion:reduce){ .screen.active > *{animation:none;} }
+
+/* 선택지 마이크로 인터랙션 */
+.opt{ transition:all .16s ease !important; border-radius:14px !important; }
+.opt:hover{ transform:translateY(-2px); box-shadow:0 6px 16px rgba(44,95,79,.14); }
+.opt:active{ transform:scale(.98); }
+.opt.selected{
+  box-shadow:0 6px 18px rgba(44,95,79,.28) !important;
+  animation:optPop .25s ease;
+}
+@keyframes optPop{ 50%{transform:scale(1.02);} }
+
+/* 진행 스톤: 현재 위치 펄스 */
+.stone.current::after{ animation:stonePulse 1.4s ease-in-out infinite; }
+@keyframes stonePulse{ 0%,100%{opacity:1;} 50%{opacity:.45;} }
+
+/* 버튼 그라데이션 + 샤인 */
+.btn-primary, #btnNext, #btnSubmit, .cta-zalo{
+  background:linear-gradient(135deg, var(--pine) 0%, var(--pine-dark) 130%) !important;
+  border:none !important;
+  box-shadow:0 6px 18px rgba(29,65,55,.3);
+  position:relative; overflow:hidden;
+  transition:all .18s ease;
+}
+.btn-primary:hover, #btnNext:hover, #btnSubmit:hover, .cta-zalo:hover{
+  box-shadow:0 8px 24px rgba(29,65,55,.42); transform:translateY(-1px);
+}
+.btn-primary::after, #btnNext::after, #btnSubmit::after, .cta-zalo::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(105deg, transparent 40%, rgba(255,255,255,.22) 50%, transparent 60%);
+  transform:translateX(-130%); animation:ltShine 4s ease-in-out infinite;
+}
+@keyframes ltShine{ 0%,65%{transform:translateX(-130%);} 100%{transform:translateX(130%);} }
+
+/* 결과 배지: 골드 그라데이션 테두리 + 미세 파티클 느낌 */
+.result-badge{
+  background:linear-gradient(150deg, var(--pine) 0%, var(--pine-dark) 100%);
+  box-shadow:0 16px 44px rgba(29,65,55,.3);
+  border:1px solid rgba(200,155,60,.4);
+}
+.result-badge .level{ text-shadow:0 2px 12px rgba(0,0,0,.25); }
+.recommend-card{ border-radius:16px; box-shadow:0 8px 26px rgba(44,95,79,.1); }
+
+/* 리뷰 아이템 진입 스태거 */
+.review-list.open .review-item{ animation:ltCardIn .3s ease both; }
+.review-list.open .review-item:nth-child(2){ animation-delay:.04s; }
+.review-list.open .review-item:nth-child(3){ animation-delay:.08s; }
+.review-list.open .review-item:nth-child(4){ animation-delay:.12s; }
+.review-list.open .review-item:nth-child(5){ animation-delay:.16s; }
 </style>
 </head>
 <body>
@@ -654,9 +750,22 @@
   <div class="screen" id="screen-result">
     <div class="result-badge">
       <div class="eyebrow">KẾT QUẢ CỦA BẠN</div>
+      <div class="score-gauge">
+        <svg width="132" height="132" viewBox="0 0 132 132">
+          <circle class="track" cx="66" cy="66" r="56"></circle>
+          <circle class="bar" id="gaugeBar" cx="66" cy="66" r="56"></circle>
+        </svg>
+        <div class="num">
+          <div class="big"><span id="gaugeNum">0</span>/<span id="gaugeTotal">18</span></div>
+          <div class="small">câu đúng</div>
+        </div>
+      </div>
       <div class="level" id="resultLevel">Level 1 · Sơ cấp 1</div>
       <div class="desc" id="resultDesc">Bạn đã biết Hangul và một số từ vựng cơ bản.</div>
     </div>
+
+    <button class="review-toggle" id="btnReviewToggle">📋 Xem lại từng câu hỏi ▾</button>
+    <div class="review-list" id="reviewList"></div>
 
     <div class="recommend-card">
       <div class="tag" id="recTag">GỢI Ý LỘ TRÌNH</div>
@@ -871,6 +980,15 @@ const RECOMMEND = {
 };
 
 /* =====================================================================
+   문항별 리뷰 토글
+===================================================================== */
+$('btnReviewToggle').addEventListener('click', ()=>{
+  const list = $('reviewList');
+  const open = list.classList.toggle('open');
+  $('btnReviewToggle').textContent = open ? '📋 Ẩn phần xem lại ▴' : '📋 Xem lại từng câu hỏi ▾';
+});
+
+/* =====================================================================
    제출 처리
 ===================================================================== */
 $('btnSubmit').addEventListener('click', async ()=>{
@@ -919,6 +1037,39 @@ $('btnSubmit').addEventListener('click', async ()=>{
   // 결과 화면 채우기
   $('resultLevel').textContent = level.label;
   $('resultDesc').textContent = level.desc;
+
+  // 점수 게이지 애니메이션
+  const total = QUESTIONS.length;
+  $('gaugeTotal').textContent = total;
+  const bar = $('gaugeBar');
+  const circ = 2 * Math.PI * 56;
+  bar.style.strokeDasharray = circ;
+  bar.style.strokeDashoffset = circ;
+  setTimeout(()=>{ bar.style.strokeDashoffset = circ * (1 - score/total); }, 1100);
+  let n = 0;
+  const countUp = setInterval(()=>{
+    if(n >= score){ clearInterval(countUp); return; }
+    n++; $('gaugeNum').textContent = n;
+  }, Math.max(40, 1200/Math.max(score,1)));
+  if(score === 0) $('gaugeNum').textContent = 0;
+
+  // 문항별 리뷰 렌더링
+  $('reviewList').innerHTML = QUESTIONS.map((q,i)=>{
+    const my = answers[i];
+    const ok = my === q.answer;
+    return `<div class="review-item">
+      <div class="ri-top">
+        <span class="ri-tag">Câu ${i+1} · ${q.tag}</span>
+        <span class="ri-mark ${ok?'ok':'no'}">${ok?'✓ Đúng':'✗ Sai'}</span>
+      </div>
+      <div class="ri-q">${q.prompt}</div>
+      ${q.main ? `<div class="ri-main">${q.main}</div>` : ''}
+      <div class="ri-ans">
+        ${ok ? `<b>Đáp án: ${q.options[q.answer]}</b>`
+             : `Bạn chọn: ${my===null?'(bỏ qua)':q.options[my]} → Đáp án đúng: <b>${q.options[q.answer]}</b>`}
+      </div>
+    </div>`;
+  }).join('');
   $('recTag').textContent = rec.tag;
   $('recTitle').textContent = rec.title;
   $('recDesc').textContent = rec.desc;
@@ -929,8 +1080,44 @@ $('btnSubmit').addEventListener('click', async ()=>{
     $('screen-loading').classList.remove('active');
     showScreen('screen-result');
     $('topbar').style.display='none';
+    ltConfetti();
   }, 900);
 });
+
+/* =====================================================================
+   결과 축하 컨페티 (라이브러리 없음)
+===================================================================== */
+function ltConfetti(){
+  let canvas = document.getElementById('ltConfetti');
+  if(!canvas){
+    canvas = document.createElement('canvas');
+    canvas.id = 'ltConfetti';
+    canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:999;';
+    document.body.appendChild(canvas);
+  }
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  const colors = ['#2C5F4F','#C89B3C','#E8382B','#F3E6C4','#1D4137'];
+  const parts = Array.from({length:110}, ()=>({
+    x: Math.random()*canvas.width, y: -20 - Math.random()*canvas.height*0.4,
+    w: 5+Math.random()*6, h: 8+Math.random()*8,
+    vy: 2+Math.random()*3, vx: -1.5+Math.random()*3,
+    rot: Math.random()*Math.PI, vr: -0.1+Math.random()*0.2,
+    c: colors[Math.floor(Math.random()*colors.length)]
+  }));
+  const t0 = Date.now();
+  (function frame(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    parts.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.fillStyle=p.c; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();
+    });
+    if(Date.now()-t0 < 2400) requestAnimationFrame(frame);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
+}
 </script>
 </body>
 </html>
