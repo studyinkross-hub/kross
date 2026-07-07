@@ -8,656 +8,723 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#F6F9F2;
-    --surface:#FFFFFF;
-    --surface-soft:#EEF5E6;
-    --border:#E1E8D8;
-    --text:#22301B;
-    --text-dim:#7C8770;
-    --green-dark:#2F5E22;
-    --green:#5C9A2E;
-    --green-light:#8DC63F;
-    --green-soft:#E6F1DA;
-    --gold:#F0B429;
-    --gold-soft:#FCEFC7;
-    --copper:#C98A4B;
-    --rose:#D9685A;
-    --rose-soft:#FBE6E2;
-    --radius:18px;
-    --shadow:0 6px 20px rgba(60,90,40,0.07);
-  }
-  body.dark{
-    --bg:#141A10;
-    --surface:#1D2617;
-    --surface-soft:#243020;
-    --border:#33402B;
-    --text:#E8F0DF;
-    --text-dim:#93A186;
-    --green-dark:#A8D96C;
-    --green:#7BB342;
-    --green-light:#8DC63F;
-    --green-soft:#2A3A20;
-    --gold:#F0B429;
-    --gold-soft:#453A18;
-    --rose:#E58275;
-    --rose-soft:#3E2320;
-    --shadow:0 6px 20px rgba(0,0,0,0.35);
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{
-    background:var(--bg);
-    color:var(--text); font-family:'Inter',sans-serif;
-    min-height:100vh; padding:36px 18px 70px;
-    transition:background .3s ease, color .3s ease;
-  }
-  .theme-toggle{
-    position:fixed; top:14px; right:14px; z-index:50;
-    width:42px; height:42px; border-radius:50%;
-    border:1px solid var(--border); background:var(--surface);
-    box-shadow:var(--shadow); font-size:18px; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    transition:transform .2s ease;
-  }
-  .theme-toggle:hover{ transform:scale(1.1) rotate(15deg); }
-  .streak-chip{
-    display:inline-flex; align-items:center; gap:6px;
-    margin-top:8px; padding:6px 14px; border-radius:99px;
-    background:var(--gold-soft); border:1px solid var(--gold);
-    font-size:12.5px; font-weight:700; color:var(--text);
-  }
-  .streak-chip .fire{ font-size:14px; }
-  /* ── 퀴즈 모드 선택 ── */
-  .mode-seg{
-    display:flex; gap:4px; background:var(--surface-soft);
-    border-radius:12px; padding:4px; margin-bottom:16px;
-  }
-  .mode-seg .seg{
-    flex:1; padding:9px 4px; text-align:center; border-radius:9px;
-    font-size:12px; font-weight:700; color:var(--text-dim); cursor:pointer;
-    transition:all .15s ease;
-  }
-  .mode-seg .seg.active{ background:var(--surface); color:var(--green-dark); box-shadow:0 2px 8px rgba(60,90,40,0.10); }
-  /* ── 객관식 ── */
-  .mcq-grid{ display:grid; grid-template-columns:1fr; gap:10px; margin:14px 0; }
-  .mcq-opt{
-    padding:15px 16px; border-radius:14px; border:1.5px solid var(--border);
-    background:var(--surface-soft); font-size:16px; font-weight:600; cursor:pointer;
-    font-family:'Noto Serif KR',serif; transition:all .15s ease; text-align:center;
-  }
-  .mcq-opt:hover{ border-color:var(--green); }
-  .mcq-opt.correct{ background:var(--green-soft); border-color:var(--green); color:var(--green-dark); }
-  .mcq-opt.wrong{ background:var(--rose-soft); border-color:var(--rose); color:var(--rose); }
-  .mcq-opt.disabled{ pointer-events:none; opacity:.75; }
-  /* ── 카드 매칭 게임 ── */
-  .match-stats{ display:flex; justify-content:space-between; margin-bottom:12px;
-    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-dim); font-weight:700; }
-  .match-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
-  .match-card{
-    aspect-ratio:3/2.4; border-radius:12px; cursor:pointer; perspective:600px;
-    -webkit-tap-highlight-color:transparent;
-  }
-  .match-inner{
-    position:relative; width:100%; height:100%;
-    transform-style:preserve-3d; transition:transform .35s ease;
-  }
-  .match-card.flip .match-inner{ transform:rotateY(180deg); }
-  .match-face{
-    position:absolute; inset:0; border-radius:12px; backface-visibility:hidden;
-    display:flex; align-items:center; justify-content:center; padding:5px;
-    text-align:center; font-weight:700; font-size:clamp(11px,3vw,14px); line-height:1.25;
-    overflow:hidden;
-  }
-  .match-back{ background:var(--green); color:#fff; font-size:20px; }
-  .match-front{
-    background:var(--surface); border:1.5px solid var(--border); color:var(--text);
-    transform:rotateY(180deg);
-  }
-  .match-card.ko .match-front{ font-family:'Noto Serif KR',serif; }
-  .match-card.done{ pointer-events:none; }
-  .match-card.done .match-front{ background:var(--green-soft); border-color:var(--green); color:var(--green-dark); }
-  .match-card.shake .match-inner{ animation:mshake .3s ease; }
-  @keyframes mshake{ 0%,100%{transform:rotateY(180deg) translateX(0);} 25%{transform:rotateY(180deg) translateX(-5px);} 75%{transform:rotateY(180deg) translateX(5px);} }
-/* ================================================================
-   ✨ KROSS UI v2 — 프리미엄 비주얼 레이어 (기존 로직 무변경 오버라이드)
-================================================================ */
-#confettiCanvas{ position:fixed; inset:0; pointer-events:none; z-index:999; }
-body{
-  background:
-    radial-gradient(900px 500px at 85% -10%, rgba(141,198,63,.16), transparent 60%),
-    radial-gradient(700px 450px at -10% 30%, rgba(240,180,41,.12), transparent 55%),
-    var(--bg);
-  background-attachment:fixed;
+/* ════════════════════════════════════════════════════════════════
+   KROSS Vocab — "STUDY CARD" Design System v3 (전면 재설계)
+   토큰: 잉크그린 / 페이퍼민트 / 리프 / 태극레드 / 골드
+   시그니처: 2px 잉크 보더 + 하드 오프셋 섀도 (책상 위 단어카드 물성)
+════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --ink:#1C2E17;            /* 잉크그린 (보더·텍스트) */
+  --paper:#EFF3E9;          /* 페이퍼민트 배경 */
+  --card:#FBFDF8;           /* 카드 표면 */
+  --card-soft:#F1F5EA;      /* 카드 내부 서브면 */
+  --leaf:#63B532;           /* 리프 그린 (주 액션) */
+  --leaf-deep:#3E7F1E;      /* 딥 리프 */
+  --leaf-tint:#E4F2D7;      /* 리프 틴트 */
+  --red:#E24E3B;            /* 태극레드 (포인트·오답) */
+  --red-tint:#FBE3DE;
+  --gold:#EFB63C;           /* 골드 (스트릭·하이라이트) */
+  --gold-tint:#FBEFD2;
+  --dim:#6C7A63;            /* 보조 텍스트 */
+  --line:#D7DFC9;           /* 옅은 구분선 */
+  --sh:#1C2E17;             /* 오프셋 섀도 색 */
+  --r:18px;                 /* 기본 라운드 */
+  --bw:2px;                 /* 시그니처 보더 두께 */
+  --off:5px;                /* 시그니처 섀도 오프셋 */
+  --f-body:'Be Vietnam Pro','Inter',sans-serif;
+  --f-kr:'Noto Serif KR',serif;
+  --f-mono:'JetBrains Mono',monospace;
 }
 body.dark{
-  background:
-    radial-gradient(900px 500px at 85% -10%, rgba(141,198,63,.09), transparent 60%),
-    radial-gradient(700px 450px at -10% 30%, rgba(240,180,41,.06), transparent 55%),
-    var(--bg);
-  background-attachment:fixed;
+  --ink:#DCE8CF;
+  --paper:#131A0F;
+  --card:#1C2716;
+  --card-soft:#232F1B;
+  --leaf:#7ECB4A;
+  --leaf-deep:#9BDD6B;
+  --leaf-tint:#28381C;
+  --red:#F0715F;
+  --red-tint:#3C221D;
+  --gold:#F2C25B;
+  --gold-tint:#3E3316;
+  --dim:#8B9A7E;
+  --line:#33422A;
+  --sh:#000000;
 }
 
-/* ── 카드: 글래스 + 진입 애니메이션 + 호버 리프트 ── */
+*{ box-sizing:border-box; margin:0; padding:0; }
+html{ scroll-behavior:smooth; }
+body{
+  background:var(--paper);
+  background-image:
+    radial-gradient(var(--line) 1px, transparent 1.5px);
+  background-size:26px 26px;
+  color:var(--ink);
+  font-family:var(--f-body);
+  min-height:100vh;
+  padding:18px 16px 120px;   /* 하단 고정 탭바 공간 */
+  transition:background-color .3s ease, color .3s ease;
+}
+.app{ max-width:560px; margin:0 auto; }
+.hidden{ display:none !important; }
+
+/* ── 상단 브랜드바 ─────────────────────────────── */
+.header{
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  gap:8px;
+  background:var(--card);
+  border:var(--bw) solid var(--ink);
+  border-radius:20px;
+  box-shadow:var(--off) var(--off) 0 var(--sh);
+  padding:22px 16px 18px;
+  margin-bottom:18px;
+}
+.header img.logo{
+  height:96px; width:auto; display:block;
+  border-radius:14px;
+}
+.header .tagline{
+  font-size:12.5px; font-weight:600; color:var(--dim);
+  letter-spacing:.02em; line-height:1.4;
+}
+.header .chip-row{
+  display:flex; gap:8px; margin-top:2px; flex-wrap:wrap; justify-content:center;
+}
+.streak-chip{
+  display:inline-flex; align-items:center; gap:5px;
+  margin:0; padding:7px 12px; border-radius:99px;
+  background:var(--gold-tint);
+  border:var(--bw) solid var(--ink);
+  box-shadow:3px 3px 0 var(--sh);
+  font-size:11px; font-weight:800; color:var(--ink); white-space:nowrap;
+}
+.streak-chip .fire{ font-size:13px; }
+@media(max-width:480px){
+  .header img.logo{ height:78px; }
+}
+
+.theme-toggle{
+  position:fixed; top:14px; right:14px; z-index:60;
+  width:44px; height:44px; border-radius:14px;
+  border:var(--bw) solid var(--ink);
+  background:var(--card);
+  box-shadow:4px 4px 0 var(--sh);
+  font-size:18px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.theme-toggle:hover{ transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--sh); }
+.theme-toggle:active{ transform:translate(2px,2px); box-shadow:2px 2px 0 var(--sh); }
+@media(max-width:560px){ .theme-toggle{ position:absolute; } }
+
+#confettiCanvas{ position:fixed; inset:0; pointer-events:none; z-index:999; }
+
+/* ── 카드: 시그니처 물성 ───────────────────────── */
 .card{
-  border-radius:22px;
-  background:color-mix(in srgb, var(--surface) 86%, transparent);
-  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
-  border:1px solid color-mix(in srgb, var(--border) 70%, transparent);
-  box-shadow:0 10px 32px rgba(47,94,34,.08), 0 1px 0 rgba(255,255,255,.5) inset;
-  animation:cardIn .4s cubic-bezier(.2,.7,.3,1) both;
-  transition:transform .18s ease, box-shadow .18s ease;
+  background:var(--card);
+  border:var(--bw) solid var(--ink);
+  border-radius:var(--r);
+  box-shadow:var(--off) var(--off) 0 var(--sh);
+  padding:22px 20px;
+  margin-bottom:18px;
+  animation:deal .35s cubic-bezier(.2,.75,.3,1) both;
 }
-body.dark .card{ box-shadow:0 10px 32px rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.03) inset; }
-@keyframes cardIn{ from{opacity:0; transform:translateY(14px) scale(.985);} to{opacity:1; transform:none;} }
-@media(prefers-reduced-motion:reduce){ .card{animation:none;} }
+@keyframes deal{
+  from{ opacity:0; transform:translateY(16px) rotate(.4deg); }
+  to{ opacity:1; transform:none; }
+}
+@media(prefers-reduced-motion:reduce){ .card{ animation:none; } }
 
-/* ── 버튼: 그라데이션 + 프레스 ── */
-.btn{ border-radius:13px; transition:all .16s ease; }
-.btn:active{ transform:scale(.965); }
+.section-title{
+  font-size:17px; font-weight:800; letter-spacing:-.01em;
+  display:flex; align-items:center; gap:8px; margin-bottom:6px;
+}
+.section-sub{ font-size:12.5px; color:var(--dim); font-weight:500; margin-bottom:16px; line-height:1.5; }
+
+/* ── 버튼 ─────────────────────────────────────── */
+.btn{
+  padding:12px 18px; border-radius:13px;
+  border:var(--bw) solid var(--ink);
+  background:var(--card);
+  color:var(--ink); font-family:var(--f-body);
+  font-size:13.5px; font-weight:700; cursor:pointer;
+  box-shadow:3px 3px 0 var(--sh);
+  transition:transform .12s ease, box-shadow .12s ease, background .12s;
+}
+.btn:hover{ transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--sh); }
+.btn:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--sh); }
 .btn.primary{
-  background:linear-gradient(135deg, var(--green) 0%, var(--green-dark) 120%);
-  border:none; box-shadow:0 5px 16px rgba(92,154,46,.35);
-  position:relative; overflow:hidden;
+  background:var(--leaf); color:#fff;
 }
-.btn.primary::after{
-  content:""; position:absolute; inset:0;
-  background:linear-gradient(105deg, transparent 35%, rgba(255,255,255,.28) 50%, transparent 65%);
-  transform:translateX(-120%); transition:transform .5s ease;
-}
-.btn.primary:hover::after{ transform:translateX(120%); }
-.btn.primary:hover{ box-shadow:0 7px 22px rgba(92,154,46,.48); }
+body.dark .btn.primary{ color:#10200A; }
+.btn.primary:hover{ background:var(--leaf); filter:brightness(1.05); }
+.btn.small{ padding:8px 13px; font-size:12px; box-shadow:2px 2px 0 var(--sh); }
 
-/* ── 서브탭: 하단 고정 내비 (모바일 앱 감성) ── */
+/* ── 하단 고정 탭바 (모바일 앱) ─────────────────── */
 .subtabs{
-  position:sticky; top:10px; z-index:30;
-  border-radius:18px; padding:5px; gap:5px;
-  background:color-mix(in srgb, var(--surface) 78%, transparent);
-  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
-  border:1px solid color-mix(in srgb, var(--border) 70%, transparent);
-  box-shadow:0 8px 24px rgba(47,94,34,.10);
+  position:fixed; left:50%; bottom:14px; transform:translateX(-50%);
+  z-index:50; width:min(560px, calc(100% - 24px));
+  display:flex; gap:5px;
+  background:var(--card);
+  border:var(--bw) solid var(--ink);
+  border-radius:18px;
+  box-shadow:var(--off) var(--off) 0 var(--sh);
+  padding:6px;
+  padding-bottom:calc(6px + env(safe-area-inset-bottom, 0px));
 }
-.subtab{ border-radius:13px; padding:12px 4px; transition:all .18s ease; position:relative; }
+.subtab{
+  flex:1; padding:11px 2px; text-align:center;
+  border-radius:12px; border:var(--bw) solid transparent;
+  font-size:11.5px; font-weight:800; color:var(--dim);
+  cursor:pointer; line-height:1.3;
+  transition:all .15s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.subtab:hover{ color:var(--ink); background:var(--card-soft); }
 .subtab.active{
-  background:linear-gradient(135deg, var(--green) 0%, var(--green-dark) 130%);
-  color:#fff; box-shadow:0 4px 14px rgba(92,154,46,.4);
+  background:var(--leaf-tint); color:var(--ink);
+  border-color:var(--ink);
+  box-shadow:2px 2px 0 var(--sh);
 }
-.subtab:not(.active):hover{ color:var(--green-dark); background:color-mix(in srgb, var(--green-soft) 55%, transparent); }
 
-/* ── 레벨 카드 ── */
+/* ── 레벨/레슨 선택 ─────────────────────────────── */
+.level-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:8px; }
+@media(max-width:480px){ .level-grid{ grid-template-columns:repeat(2,1fr); } }
 .level-card{
-  border-radius:18px; padding:18px 10px;
-  transition:transform .16s ease, box-shadow .16s ease, border-color .16s;
+  padding:16px 8px; text-align:center; cursor:pointer;
+  background:var(--card-soft);
+  border:var(--bw) solid var(--ink); border-radius:15px;
+  box-shadow:3px 3px 0 var(--sh);
   font-size:22px;
+  transition:transform .13s ease, box-shadow .13s ease, background .13s;
 }
-.level-card:hover{ transform:translateY(-3px); box-shadow:0 10px 24px rgba(92,154,46,.18); }
-.level-card.active{
-  background:linear-gradient(135deg, var(--green), var(--green-dark));
-  box-shadow:0 8px 20px rgba(92,154,46,.4);
-}
-.lesson-chip{ transition:all .15s ease; }
-.lesson-chip:hover{ transform:translateY(-2px); border-color:var(--green); box-shadow:0 5px 14px rgba(92,154,46,.18); }
-.lesson-chip.active{ background:linear-gradient(135deg,var(--green),var(--green-dark)); box-shadow:0 5px 14px rgba(92,154,46,.35); }
+.level-card:hover{ transform:translate(-2px,-2px); box-shadow:5px 5px 0 var(--sh); background:var(--leaf-tint); }
+.level-card:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--sh); }
+.level-card.active{ background:var(--leaf); }
+.level-card.active .lv-name{ color:#fff; }
+body.dark .level-card.active .lv-name{ color:#10200A; }
+.level-card .lv-name{ font-weight:800; font-size:12.5px; line-height:1.3; margin-top:4px; }
+.level-card .lv-count{ font-family:var(--f-mono); font-size:10.5px; color:var(--dim); margin-top:3px; }
+.level-card.active .lv-count{ color:rgba(255,255,255,.85); }
+body.dark .level-card.active .lv-count{ color:rgba(16,32,10,.7); }
+.level-card.empty{ opacity:.35; cursor:default; pointer-events:none; box-shadow:none; }
 
-/* ── 플래시카드: 프리미엄 그라데이션 보더 + 샤인 ── */
-.flash-card{
-  position:relative; border:none !important; border-radius:24px !important;
-  background:
-    linear-gradient(var(--surface), var(--surface)) padding-box,
-    linear-gradient(135deg, var(--green-light), var(--gold), var(--green)) border-box !important;
-  border:2px solid transparent !important;
-  box-shadow:0 14px 38px rgba(47,94,34,.14);
-  overflow:hidden;
-  transition:transform .18s ease, box-shadow .18s ease;
+.lesson-grid{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:8px; }
+.lesson-chip{
+  padding:10px 16px; border-radius:99px;
+  border:var(--bw) solid var(--ink); background:var(--card);
+  box-shadow:2px 2px 0 var(--sh);
+  cursor:pointer; font-size:13px; font-weight:700; color:var(--ink);
+  transition:transform .12s ease, box-shadow .12s ease, background .12s;
 }
-.flash-card:active{ transform:scale(.98); }
-.flash-card::before{
-  content:""; position:absolute; top:-60%; left:-30%; width:60%; height:220%;
-  background:linear-gradient(105deg, transparent, rgba(255,255,255,.14), transparent);
-  transform:rotate(18deg); animation:cardShine 4.5s ease-in-out infinite;
-  pointer-events:none;
+.lesson-chip:hover{ transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--sh); background:var(--leaf-tint); }
+.lesson-chip.active{ background:var(--leaf); color:#fff; }
+body.dark .lesson-chip.active{ color:#10200A; }
+
+.back-chip{
+  display:inline-flex; align-items:center; gap:5px; margin-bottom:14px;
+  font-size:12px; font-weight:700; color:var(--dim); cursor:pointer;
+  background:var(--card); border:var(--bw) solid var(--ink); border-radius:99px;
+  box-shadow:2px 2px 0 var(--sh); padding:7px 13px;
+  transition:transform .12s ease, box-shadow .12s ease;
 }
-@keyframes cardShine{ 0%,60%{left:-40%;} 100%{left:130%;} }
-body.dark .flash-card{
-  background:
-    linear-gradient(var(--surface), var(--surface)) padding-box,
-    linear-gradient(135deg, var(--green-light), var(--gold), var(--green)) border-box !important;
+.back-chip:hover{ transform:translate(-2px,0); color:var(--ink); box-shadow:4px 2px 0 var(--sh); }
+
+/* ── 이름줄 ─────────────────────────────────────── */
+.name-row{
+  display:flex; align-items:center; gap:10px; margin-bottom:16px;
+  background:var(--card); border:var(--bw) solid var(--ink);
+  border-radius:15px; padding:12px 16px;
+  box-shadow:var(--off) var(--off) 0 var(--sh);
+  cursor:pointer;
+  transition:transform .13s ease, box-shadow .13s ease;
+}
+.name-row:hover{ transform:translate(-1px,-1px); box-shadow:6px 6px 0 var(--sh); }
+.name-row label{ font-size:11.5px; color:var(--dim); white-space:nowrap; font-weight:700; }
+.name-row input{
+  flex:1; background:transparent; border:none; color:var(--ink);
+  font-family:var(--f-body); font-size:14px; font-weight:700;
+  padding:5px 4px; border-bottom:2px dashed var(--line);
+}
+.name-row input:focus{ outline:none; border-color:var(--leaf); }
+.name-row .name-display{ flex:1; font-size:14px; font-weight:800; }
+.name-row .name-change{ font-size:11px; color:var(--leaf-deep); font-weight:700; }
+
+/* ── 퀴즈 모드 세그 ─────────────────────────────── */
+.mode-seg{
+  display:flex; gap:5px; margin-bottom:16px;
+  background:var(--card-soft); border:var(--bw) solid var(--ink);
+  border-radius:14px; padding:5px;
+  box-shadow:inset 2px 2px 0 rgba(28,46,23,.08);
+}
+.mode-seg .seg{
+  flex:1; padding:9px 2px; text-align:center; border-radius:9px;
+  border:var(--bw) solid transparent;
+  font-size:11.5px; font-weight:800; color:var(--dim); cursor:pointer;
+  transition:all .14s ease;
+}
+.mode-seg .seg.active{
+  background:var(--card); color:var(--ink);
+  border-color:var(--ink); box-shadow:2px 2px 0 var(--sh);
 }
 
-/* ── 퀴즈: 질문 박스 + 진행바 ── */
-.question-box{ padding:22px 12px 14px; }
-.q-meaning{ font-size:24px; font-weight:800; letter-spacing:-0.01em; }
-.quiz-bar{ height:6px; border-radius:99px; background:var(--surface-soft); overflow:hidden; margin:-6px 0 18px; }
+/* ── 퀴즈 진행 ─────────────────────────────────── */
+.quiz-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.quiz-progress{ font-family:var(--f-mono); font-size:12px; font-weight:700; color:var(--dim); }
+.quiz-score{ font-family:var(--f-mono); font-size:12px; color:var(--leaf-deep); font-weight:800; }
+.quiz-bar{
+  height:10px; border-radius:99px; margin:0 0 20px;
+  background:var(--card-soft); border:var(--bw) solid var(--ink); overflow:hidden;
+}
 .quiz-bar i{
   display:block; height:100%; width:0%;
-  background:linear-gradient(90deg, var(--green-light), var(--green));
-  border-radius:99px; transition:width .35s cubic-bezier(.25,.8,.3,1);
+  background:repeating-linear-gradient(-45deg, var(--leaf) 0 8px, var(--leaf-deep) 8px 16px);
+  transition:width .35s cubic-bezier(.25,.8,.3,1);
 }
-.type-input{ border-radius:15px !important; font-size:17px !important; transition:all .18s ease; }
-.type-input:focus{ box-shadow:0 0 0 4px color-mix(in srgb, var(--green) 18%, transparent); }
-.mcq-opt{ border-radius:16px; }
-.mcq-opt:hover{ transform:translateY(-2px); box-shadow:0 6px 16px rgba(92,154,46,.16); }
-.mcq-opt.correct{ animation:popOk .3s ease; }
-@keyframes popOk{ 50%{transform:scale(1.04);} }
 
-/* ── 결과: 링 게이지 ── */
-.result-ring{ position:relative; width:150px; height:150px; margin:6px auto 4px; }
+.question-box{ text-align:center; padding:18px 10px 12px; }
+.q-meaning{ font-size:23px; font-weight:800; letter-spacing:-.01em; line-height:1.35; }
+.example-hint{ margin-top:14px; font-size:12.5px; color:var(--dim); font-style:italic; text-align:center; min-height:18px; }
+
+.type-input{
+  width:100%; padding:15px 16px; margin-top:6px;
+  border:var(--bw) solid var(--ink); border-radius:14px;
+  background:var(--card-soft); color:var(--ink);
+  font-family:var(--f-kr); font-size:17px; font-weight:700; text-align:center;
+  box-shadow:inset 2px 2px 0 rgba(28,46,23,.07);
+  transition:background .15s, border-color .15s;
+}
+.type-input:focus{ outline:none; background:var(--card); border-color:var(--leaf-deep); }
+.type-input.correct{ border-color:var(--leaf-deep); background:var(--leaf-tint); }
+.type-input.wrong{ border-color:var(--red); background:var(--red-tint); }
+.type-feedback{ min-height:22px; margin-top:10px; text-align:center; font-size:13.5px; font-weight:800; }
+.type-feedback.correct{ color:var(--leaf-deep); }
+.type-feedback.wrong{ color:var(--red); }
+.type-actions{ display:flex; gap:10px; margin-top:14px; }
+.type-actions .btn{ flex:1; }
+
+/* ── 객관식 ─────────────────────────────────────── */
+.mcq-grid{ display:grid; grid-template-columns:1fr; gap:10px; margin:14px 0; }
+.mcq-opt{
+  padding:15px 16px; text-align:center; cursor:pointer;
+  border:var(--bw) solid var(--ink); border-radius:14px;
+  background:var(--card); box-shadow:3px 3px 0 var(--sh);
+  font-family:var(--f-kr); font-size:16.5px; font-weight:700;
+  transition:transform .12s ease, box-shadow .12s ease, background .12s;
+}
+.mcq-opt:hover{ transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--sh); background:var(--leaf-tint); }
+.mcq-opt:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--sh); }
+.mcq-opt.correct{ background:var(--leaf); color:#fff; animation:pop .3s ease; }
+body.dark .mcq-opt.correct{ color:#10200A; }
+.mcq-opt.wrong{ background:var(--red-tint); border-color:var(--red); color:var(--red); }
+.mcq-opt.disabled{ pointer-events:none; }
+@keyframes pop{ 50%{ transform:scale(1.045); } }
+
+/* ── 결과 링 ────────────────────────────────────── */
+.result-score{ text-align:center; padding:12px 0 18px; }
+.result-ring{ position:relative; width:152px; height:152px; margin:4px auto 6px; }
 .result-ring svg{ transform:rotate(-90deg); }
-.result-ring .rr-track{ fill:none; stroke:var(--surface-soft); stroke-width:11; }
+.result-ring .rr-track{ fill:none; stroke:var(--card-soft); stroke-width:12; }
 .result-ring .rr-bar{
-  fill:none; stroke:url(#rrGrad); stroke-width:11; stroke-linecap:round;
+  fill:none; stroke:var(--leaf); stroke-width:12; stroke-linecap:round;
   transition:stroke-dashoffset 1.3s cubic-bezier(.25,.8,.3,1);
 }
 .result-ring .rr-num{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-family:'JetBrains Mono',monospace; font-weight:800; font-size:34px; color:var(--green-dark);
+  font-family:var(--f-mono); font-weight:800; font-size:34px; color:var(--ink);
+}
+.result-num{ font-family:var(--f-mono); font-weight:800; font-size:44px; color:var(--leaf-deep); }
+.result-label{ color:var(--dim); font-size:12.5px; font-weight:700; margin-top:2px; }
+.wrong-list{ margin-top:12px; }
+.wrong-item{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:11px 14px; margin-bottom:8px; font-size:13px; font-weight:600;
+  background:var(--red-tint); border:var(--bw) solid var(--red); border-radius:12px;
 }
 
-/* ── CTA 배너: 샤인 ── */
-.study-abroad-cta, .homework-cta{ position:relative; overflow:hidden; border-radius:18px; }
-.study-abroad-cta::after, .homework-cta::after{
-  content:""; position:absolute; inset:0;
-  background:linear-gradient(105deg, transparent 40%, rgba(255,255,255,.16) 50%, transparent 60%);
-  transform:translateX(-130%); animation:ctaShine 5s ease-in-out infinite;
+/* ── 플래시카드: 시그니처 오브젝트 ───────────────── */
+.flash-progress{
+  text-align:center; font-family:var(--f-mono); font-size:12px; font-weight:700;
+  color:var(--dim); margin-bottom:12px;
 }
-@keyframes ctaShine{ 0%,70%{transform:translateX(-130%);} 100%{transform:translateX(130%);} }
+.flash-card{
+  position:relative; min-height:230px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:10px; text-align:center; cursor:pointer; padding:28px 20px;
+  background:var(--card);
+  border:var(--bw) solid var(--ink); border-radius:22px;
+  box-shadow:7px 7px 0 var(--sh);
+  transition:transform .14s ease, box-shadow .14s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.flash-card::before{           /* 좌상단 태극레드 "단어" 스탬프 */
+  content:"단어"; position:absolute; top:12px; left:12px;
+  font-family:var(--f-kr); font-size:10.5px; font-weight:700; letter-spacing:.2em;
+  color:var(--red); border:1.5px solid var(--red); border-radius:6px;
+  padding:3px 7px 2px 9px; opacity:.85; transform:rotate(-4deg);
+}
+.flash-card::after{            /* 우하단 카드 홀 펀치 */
+  content:""; position:absolute; bottom:14px; right:16px;
+  width:12px; height:12px; border-radius:50%;
+  border:var(--bw) solid var(--ink); background:var(--paper);
+}
+.flash-card:hover{ transform:translate(-2px,-2px); box-shadow:9px 9px 0 var(--sh); }
+.flash-card:active{ transform:translate(3px,3px); box-shadow:2px 2px 0 var(--sh); }
+.flash-vi{ font-size:19px; font-weight:700; line-height:1.4; }
+.flash-ko{ font-family:var(--f-kr); font-size:34px; font-weight:900; color:var(--leaf-deep); letter-spacing:-.01em; }
+.flash-example{ font-size:13px; color:var(--dim); font-style:italic; line-height:1.55; max-width:92%; }
+.flash-tap-hint{ font-size:11px; font-weight:700; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; }
+.flash-nav{ display:flex; gap:10px; margin-top:16px; }
+.flash-nav .btn{ flex:1; }
+.speak-btn{
+  border:var(--bw) solid var(--ink); background:var(--gold-tint);
+  border-radius:12px; box-shadow:2px 2px 0 var(--sh);
+  font-size:16px; cursor:pointer; padding:8px 14px;
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+.speak-btn:hover{ transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--sh); }
 
-/* ── 이름줄 / 모달 / 칩 ── */
-.name-row{ border-radius:18px; backdrop-filter:blur(12px); background:color-mix(in srgb, var(--surface) 86%, transparent); }
-.modal-box{ border-radius:22px; box-shadow:0 24px 64px rgba(0,0,0,.28); animation:cardIn .28s ease both; }
-.name-chip{ transition:all .14s ease; }
-.name-chip:hover{ transform:translateY(-2px); }
-.stat-box{ border-radius:16px; transition:transform .16s ease; }
-.stat-box:hover{ transform:translateY(-3px); }
-.back-chip{ border-radius:99px; transition:all .15s ease; }
-.back-chip:hover{ transform:translateX(-3px); }
+/* ── 매칭 게임 ─────────────────────────────────── */
+.match-stats{
+  display:flex; justify-content:space-between; margin-bottom:14px;
+  font-family:var(--f-mono); font-size:12px; font-weight:800; color:var(--dim);
+}
+.match-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:9px; }
+.match-card{ aspect-ratio:3/2.5; cursor:pointer; perspective:600px; -webkit-tap-highlight-color:transparent; }
+.match-inner{
+  position:relative; width:100%; height:100%;
+  transform-style:preserve-3d; transition:transform .35s ease;
+}
+.match-card.flip .match-inner{ transform:rotateY(180deg); }
+.match-face{
+  position:absolute; inset:0; border-radius:13px; backface-visibility:hidden;
+  display:flex; align-items:center; justify-content:center; padding:5px;
+  text-align:center; font-weight:800; font-size:clamp(11px,3vw,14px); line-height:1.25;
+  overflow:hidden;
+  border:var(--bw) solid var(--ink);
+}
+.match-back{
+  background:repeating-linear-gradient(-45deg, var(--leaf) 0 10px, var(--leaf-deep) 10px 20px);
+  color:#fff; font-size:19px;
+  box-shadow:3px 3px 0 var(--sh);
+}
+.match-front{ background:var(--card); color:var(--ink); transform:rotateY(180deg); }
+.match-card.ko .match-front{ font-family:var(--f-kr); }
+.match-card.done{ pointer-events:none; }
+.match-card.done .match-front{ background:var(--leaf-tint); border-color:var(--leaf-deep); color:var(--leaf-deep); animation:pop .35s ease; }
+.match-card.shake .match-inner{ animation:mshake .3s ease; }
+@keyframes mshake{
+  0%,100%{ transform:rotateY(180deg) translateX(0); }
+  25%{ transform:rotateY(180deg) translateX(-5px); }
+  75%{ transform:rotateY(180deg) translateX(5px); }
+}
 
-/* ── 매칭 카드 뒷면 그라데이션 ── */
-.match-back{ background:linear-gradient(135deg, var(--green), var(--green-dark)); }
-.match-card.done .match-front{ animation:popOk .35s ease; }
+/* ── 오답노트 ─────────────────────────────────── */
+.wrongnote-item{
+  display:flex; align-items:center; gap:12px;
+  padding:13px 14px; margin-bottom:9px;
+  background:var(--card); border:var(--bw) solid var(--ink); border-radius:13px;
+  box-shadow:3px 3px 0 var(--sh);
+}
+.wrongnote-word{ font-family:var(--f-kr); font-size:16.5px; font-weight:800; }
+.wrongnote-meaning{ flex:1; font-size:13px; color:var(--dim); font-weight:600; }
+.wrongnote-count{
+  font-family:var(--f-mono); font-size:10.5px; font-weight:800;
+  background:var(--red-tint); color:var(--red);
+  border:1.5px solid var(--red); border-radius:99px; padding:3px 9px;
+  white-space:nowrap;
+}
+.wrongnote-actions{ display:flex; gap:6px; }
+.icon-btn{
+  border:var(--bw) solid var(--ink); background:var(--card-soft);
+  border-radius:10px; box-shadow:2px 2px 0 var(--sh);
+  font-size:13px; cursor:pointer; padding:6px 9px;
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+.icon-btn:hover{ transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--sh); }
 
-  .app{ width:100%; max-width:720px; margin:0 auto; }
+/* ── 통계 ─────────────────────────────────────── */
+.stats-summary{ display:grid; grid-template-columns:repeat(3,1fr); gap:11px; margin-bottom:18px; }
+.stat-box{
+  text-align:center; padding:15px 4px; border-radius:14px;
+  background:var(--card-soft); border:var(--bw) solid var(--ink);
+  box-shadow:3px 3px 0 var(--sh);
+}
+.stat-box .n{ font-family:var(--f-mono); font-weight:800; font-size:22px; color:var(--leaf-deep); }
+.stat-box .l{ font-size:10px; font-weight:700; color:var(--dim); margin-top:4px; letter-spacing:.03em; }
+.record-item{
+  display:flex; align-items:center; gap:12px; padding:12px 14px; margin-bottom:8px;
+  background:var(--card); border:var(--bw) solid var(--ink); border-radius:12px;
+  box-shadow:2px 2px 0 var(--sh); font-size:13px; font-weight:600;
+}
+.record-pct{ font-family:var(--f-mono); font-weight:800; font-size:15px; min-width:52px; }
+.record-pct.good{ color:var(--leaf-deep); }
+.record-pct.mid{ color:var(--gold); }
+.record-pct.low{ color:var(--red); }
+.record-meta{ flex:1; color:var(--dim); font-size:11.5px; }
 
-  .header{ text-align:center; margin-bottom:30px; }
-  .header img.logo{ width:120px; height:120px; object-fit:contain; }
-  .header .tagline{
-    font-size:13px; color:var(--text-dim); margin-top:2px; letter-spacing:0.02em;
-  }
+/* ── CTA 배너 2종 ─────────────────────────────── */
+.study-abroad-cta, .homework-cta{
+  display:flex; align-items:center; gap:14px; width:100%;
+  padding:16px 18px; margin-bottom:18px; cursor:pointer; text-align:left;
+  border:var(--bw) solid var(--ink); border-radius:var(--r);
+  box-shadow:var(--off) var(--off) 0 var(--sh);
+  font-family:var(--f-body); color:#fff;
+  transition:transform .13s ease, box-shadow .13s ease;
+}
+.study-abroad-cta{ background:linear-gradient(120deg,#2C5F4F,#1D4137); }
+.homework-cta{ background:linear-gradient(120deg,var(--red),#B93A29); }
+.study-abroad-cta:hover, .homework-cta:hover{ transform:translate(-2px,-2px); box-shadow:7px 7px 0 var(--sh); }
+.study-abroad-cta:active, .homework-cta:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--sh); }
+.study-abroad-cta .icon, .homework-cta .icon{ font-size:26px; }
+.study-abroad-cta .txt, .homework-cta .txt{ flex:1; }
+.study-abroad-cta .txt .t1, .homework-cta .txt .t1{ font-size:14.5px; font-weight:800; }
+.study-abroad-cta .txt .t2, .homework-cta .txt .t2{ font-size:11.5px; opacity:.85; margin-top:2px; font-weight:500; }
+.study-abroad-cta .arrow, .homework-cta .arrow{ font-size:18px; font-weight:800; }
 
-  .card{
-    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-    padding:26px 24px; margin-bottom:18px; box-shadow:var(--shadow);
-  }
-  .section-title{ font-weight:700; font-size:16px; margin-bottom:6px; color:var(--text); }
-  .section-sub{ font-size:13px; color:var(--text-dim); margin-bottom:18px; line-height:1.6; }
+/* ── 테이블 (교사 모드) ─────────────────────────── */
+.table-wrap{ overflow-x:auto; border:var(--bw) solid var(--ink); border-radius:14px; box-shadow:3px 3px 0 var(--sh); }
+table{ width:100%; border-collapse:collapse; background:var(--card); font-size:12.5px; }
+th, td{ padding:9px 10px; border-bottom:1.5px solid var(--line); text-align:left; }
+th{ background:var(--card-soft); font-weight:800; font-size:11px; letter-spacing:.04em; }
+td input{
+  width:100%; background:transparent; border:none; border-bottom:1.5px dashed var(--line);
+  color:var(--ink); font-family:var(--f-body); font-size:12.5px; font-weight:600; padding:3px 2px;
+}
+td input:focus{ outline:none; border-color:var(--leaf); }
+.row-del{ background:none; border:none; color:var(--red); font-size:15px; cursor:pointer; }
+.hw-table-wrap{ overflow-x:auto; border:var(--bw) solid var(--ink); border-radius:14px; box-shadow:3px 3px 0 var(--sh); }
+table.hw-table{ width:100%; border-collapse:collapse; background:var(--card); font-size:12px; }
+table.hw-table th, table.hw-table td{ padding:8px 9px; border-bottom:1.5px solid var(--line); }
+table.hw-table th{ background:var(--card-soft); font-weight:800; font-size:10.5px; }
+table.hw-table td:first-child, table.hw-table th:first-child{ text-align:center; }
+table.hw-table input[type=checkbox]{ width:16px; height:16px; accent-color:var(--leaf); }
 
-  .upload-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
-  .file-label{
-    flex:1; min-width:200px; padding:16px; border-radius:14px; border:1.5px dashed var(--border);
-    text-align:center; cursor:pointer; font-size:13px; color:var(--text-dim); background:var(--surface-soft);
-  }
-  .file-label:hover{ border-color:var(--green); color:var(--green-dark); }
-  input[type=file]{ display:none; }
-  .btn{
-    padding:12px 18px; border-radius:12px; border:1px solid var(--border);
-    background:var(--surface); color:var(--text); font-weight:600; font-size:13px; cursor:pointer;
-    white-space:nowrap;
-  }
-  .btn:hover{ border-color:var(--green); color:var(--green-dark); }
-  .btn.primary{ background:var(--green); color:#fff; border-color:var(--green); }
-  .btn.primary:hover{ background:var(--green-dark); border-color:var(--green-dark); color:#fff; }
-  .btn.small{ padding:9px 13px; font-size:12px; }
+.upload-row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+.file-label{
+  display:inline-flex; align-items:center; gap:7px; cursor:pointer;
+  padding:11px 16px; border-radius:13px; font-size:13px; font-weight:700;
+  border:var(--bw) dashed var(--ink); background:var(--card-soft);
+  transition:background .13s;
+}
+.file-label:hover{ background:var(--leaf-tint); }
+input[type=file]{ display:none; }
+#sheetUrlInput{
+  flex:1; min-width:200px; padding:11px 13px;
+  border:var(--bw) solid var(--ink); border-radius:12px;
+  background:var(--card-soft); color:var(--ink);
+  font-family:var(--f-mono); font-size:11.5px;
+}
+#sheetUrlInput:focus{ outline:none; border-color:var(--leaf-deep); background:var(--card); }
 
-  table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
-  th, td{ text-align:left; padding:9px 8px; border-bottom:1px solid var(--border); }
-  th{ font-family:'JetBrains Mono',monospace; font-size:10.5px; text-transform:uppercase; color:var(--text-dim); letter-spacing:0.05em; }
-  td input{
-    width:100%; background:transparent; border:none; color:var(--text); font-size:13px;
-    font-family:'Inter',sans-serif; padding:4px;
-  }
-  td input:focus{ outline:1px solid var(--green); border-radius:6px; }
-  .row-del{ cursor:pointer; color:var(--rose); font-size:13px; }
-  .table-wrap{ max-height:340px; overflow-y:auto; border-radius:10px; }
-  .empty-state{ text-align:center; padding:30px 10px; color:var(--text-dim); font-size:13px; }
+.teacher-toggle{ text-align:center; margin-top:6px; }
+.teacher-toggle button{
+  background:none; border:none; color:var(--dim); font-family:var(--f-body);
+  font-size:11px; font-weight:600; cursor:pointer; text-decoration:underline dotted;
+}
+.teacher-toggle button:hover{ color:var(--ink); }
+.back-row{ margin-bottom:14px; }
+.back-btn{
+  background:var(--card); border:var(--bw) solid var(--ink); border-radius:99px;
+  box-shadow:2px 2px 0 var(--sh); color:var(--ink);
+  font-family:var(--f-body); font-size:12px; font-weight:700; cursor:pointer; padding:7px 14px;
+}
+.back-btn:hover{ transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--sh); }
 
-  /* 이름 입력 */
-  .name-row{
-    display:flex; align-items:center; gap:10px; margin-bottom:14px;
-    background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:13px 16px;
-    box-shadow:var(--shadow);
-  }
-  .name-row label{ font-size:12px; color:var(--text-dim); white-space:nowrap; font-weight:600; }
-  .name-row input{
-    flex:1; background:transparent; border:none; color:var(--text); font-size:14px; font-weight:600;
-    padding:6px 4px; border-bottom:1px solid var(--border);
-  }
-  .name-row input:focus{ outline:none; border-color:var(--green); }
+.roster-preview{ margin-top:14px; }
+.roster-group{ margin-bottom:12px; }
+.roster-group-title{ font-size:12px; font-weight:800; color:var(--leaf-deep); margin-bottom:7px; }
+.roster-name-chip{
+  display:inline-flex; align-items:center; gap:6px; margin:0 6px 6px 0;
+  padding:6px 11px; border-radius:99px; font-size:12px; font-weight:700;
+  background:var(--card-soft); border:1.5px solid var(--ink);
+}
+.roster-name-chip .del-btn{ background:none; border:none; color:var(--red); cursor:pointer; font-size:13px; padding:0; }
+.roster-name-chip .del-btn:hover{ transform:scale(1.2); }
+.roster-add{ display:flex; gap:8px; margin-top:10px; }
+.roster-add input{
+  flex:1; padding:10px 12px; border:var(--bw) solid var(--ink); border-radius:12px;
+  background:var(--card-soft); color:var(--ink); font-family:var(--f-body); font-size:13px; font-weight:600;
+}
 
-  /* 서브탭 */
-  .subtabs{
-    display:flex; gap:4px; margin-bottom:18px; background:var(--surface-soft);
-    border-radius:14px; padding:4px;
-  }
-  .subtab{
-    flex:1; padding:11px 4px; text-align:center; border-radius:11px; font-size:12.5px; font-weight:700;
-    color:var(--text-dim); cursor:pointer;
-  }
-  .subtab.active{ background:var(--surface); color:var(--green-dark); box-shadow:0 2px 8px rgba(60,90,40,0.10); }
+.empty-state{ text-align:center; padding:30px 10px; color:var(--dim); font-size:13px; font-weight:600; }
+.notice{
+  font-size:12px; font-weight:600; color:var(--dim); line-height:1.6;
+  background:var(--gold-tint); border:1.5px dashed var(--gold);
+  border-radius:12px; padding:12px 14px; margin-top:14px;
+}
 
-  .lesson-grid{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:8px; }
-  .lesson-chip{
-    padding:10px 16px; border-radius:100px; border:1px solid var(--border);
-    background:var(--surface-soft); cursor:pointer; font-size:13px; font-weight:600; color:var(--text);
-  }
-  .lesson-chip.active{ background:var(--green); border-color:var(--green); color:#fff; }
+/* ── 모달 ─────────────────────────────────────── */
+.modal-overlay{
+  position:fixed; inset:0; z-index:100;
+  background:rgba(28,46,23,.55); backdrop-filter:blur(3px);
+  display:flex; align-items:center; justify-content:center; padding:20px;
+}
+.modal-box{
+  width:100%; max-width:400px; padding:26px 22px;
+  background:var(--card); border:var(--bw) solid var(--ink); border-radius:20px;
+  box-shadow:8px 8px 0 var(--sh);
+  animation:deal .3s ease both;
+}
+.modal-box .modal-title{ font-size:17px; font-weight:800; margin-bottom:6px; }
+.modal-box .modal-sub{ font-size:12.5px; color:var(--dim); font-weight:500; margin-bottom:16px; line-height:1.5; }
+.modal-input{
+  width:100%; padding:13px 15px;
+  border:var(--bw) solid var(--ink); border-radius:13px;
+  background:var(--card-soft); color:var(--ink);
+  font-family:var(--f-body); font-size:14.5px; font-weight:700;
+}
+.modal-input:focus{ outline:none; border-color:var(--leaf-deep); background:var(--card); }
+.modal-actions{ display:flex; gap:10px; margin-top:16px; }
+.modal-actions .btn{ flex:1; }
+.modal-error{ color:var(--red); font-size:12px; font-weight:700; margin-top:8px; min-height:16px; }
+.name-grid{ display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 4px; max-height:220px; overflow-y:auto; }
+.name-chip{
+  padding:9px 15px; border-radius:99px; cursor:pointer;
+  font-size:13px; font-weight:700;
+  background:var(--card-soft); border:1.5px solid var(--ink);
+  box-shadow:2px 2px 0 var(--sh);
+  transition:transform .12s ease, box-shadow .12s ease, background .12s;
+}
+.name-chip:hover{ transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--sh); background:var(--leaf-tint); }
+.name-chip.selected{ background:var(--leaf); color:#fff; }
+body.dark .name-chip.selected{ color:#10200A; }
 
-  .quiz-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
-  .quiz-progress{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-dim); }
-  .quiz-score{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--green-dark); font-weight:700; }
+/* ── XP 성장 시스템 ─────────────────────────────── */
+.xp-chip{
+  display:inline-flex; align-items:center; gap:5px;
+  margin:0; padding:7px 12px; border-radius:99px;
+  background:var(--leaf-tint);
+  border:var(--bw) solid var(--ink);
+  box-shadow:3px 3px 0 var(--sh);
+  font-family:var(--f-mono); font-size:11px; font-weight:800; white-space:nowrap;
+}
+.xp-panel{
+  background:var(--card-soft); border:var(--bw) solid var(--ink); border-radius:15px;
+  box-shadow:3px 3px 0 var(--sh);
+  padding:15px 16px; margin-bottom:18px;
+}
+.xp-panel-top{ display:flex; justify-content:space-between; align-items:baseline; font-size:13px; font-weight:800; margin-bottom:9px; }
+.xp-panel-top .xp-num{ font-family:var(--f-mono); font-size:12px; color:var(--leaf-deep); }
+.xp-bar{
+  height:11px; border-radius:99px; overflow:hidden;
+  background:var(--card); border:1.5px solid var(--ink);
+}
+.xp-bar i{
+  display:block; height:100%; width:0%;
+  background:repeating-linear-gradient(-45deg, var(--gold) 0 8px, #D99C1E 8px 16px);
+  transition:width .5s cubic-bezier(.25,.8,.3,1);
+}
+.xp-next{ font-size:11px; font-weight:700; color:var(--dim); margin-top:7px; text-align:right; }
 
-  .question-box{ text-align:center; padding:14px 10px 8px; }
-  .q-meaning{ font-size:19px; color:var(--text); font-weight:600; }
+/* ── 학습 히트맵 ─────────────────────────────── */
+.heatmap-wrap{ margin-bottom:16px; }
+.heatmap-title{ font-size:12.5px; font-weight:800; margin-bottom:9px; }
+.heatmap{
+  display:grid; grid-auto-flow:column; grid-template-rows:repeat(7,1fr);
+  gap:3px; overflow-x:auto; padding-bottom:4px;
+}
+.heatmap i, .heatmap-legend i{
+  width:12px; height:12px; border-radius:3px;
+  border:1px solid var(--ink); display:block; flex:none;
+}
+.heatmap i[data-l="0"], .heatmap-legend i[data-l="0"]{ background:var(--card-soft); opacity:.55; }
+.heatmap i[data-l="1"], .heatmap-legend i[data-l="1"]{ background:#CBE6AE; }
+.heatmap i[data-l="2"], .heatmap-legend i[data-l="2"]{ background:#9AD064; }
+.heatmap i[data-l="3"], .heatmap-legend i[data-l="3"]{ background:var(--leaf); }
+.heatmap i[data-l="4"], .heatmap-legend i[data-l="4"]{ background:var(--leaf-deep); }
+body.dark .heatmap i[data-l="1"], body.dark .heatmap-legend i[data-l="1"]{ background:#39511F; }
+body.dark .heatmap i[data-l="2"], body.dark .heatmap-legend i[data-l="2"]{ background:#4F7328; }
+.heatmap-legend{
+  display:flex; align-items:center; gap:4px; justify-content:flex-end;
+  font-size:10px; font-weight:700; color:var(--dim); margin-top:7px;
+}
 
-  .example-hint{ margin-top:16px; font-size:12.5px; color:var(--text-dim); font-style:italic; text-align:center; min-height:18px; }
+/* ── 발음 자가진단 ─────────────────────────────── */
+.flash-btn-row{ display:flex; gap:10px; }
+.mic-btn{ background:var(--red-tint); }
+.mic-btn.listening{
+  background:var(--red); color:#fff;
+  animation:micPulse 1s ease-in-out infinite;
+}
+@keyframes micPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.12); } }
+.pron-fb{
+  min-height:0; font-size:12.5px; font-weight:700; line-height:1.5;
+  text-align:center; max-width:94%;
+}
+.pron-fb.ok{ color:var(--leaf-deep); }
+.pron-fb.mid{ color:#B7860B; }
+.pron-fb.no{ color:var(--red); }
 
-  .result-score{ text-align:center; padding:14px 0 20px; }
-  .result-num{ font-family:'JetBrains Mono',monospace; font-weight:800; font-size:46px; color:var(--green-dark); }
-  .result-label{ color:var(--text-dim); font-size:13px; margin-top:4px; }
-  .wrong-list{ margin-top:10px; }
-  .wrong-item{
-    display:flex; justify-content:space-between; padding:10px 12px; border-radius:10px;
-    background:var(--rose-soft); margin-bottom:6px; font-size:13px;
-  }
+/* ── 딕테이션 모드 ─────────────────────────────── */
+.dict-play{
+  padding:16px 26px; border-radius:16px; cursor:pointer;
+  border:var(--bw) solid var(--ink);
+  background:var(--gold-tint); color:var(--ink);
+  font-family:var(--f-body); font-size:16px; font-weight:800;
+  box-shadow:4px 4px 0 var(--sh);
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+.dict-play:hover{ transform:translate(-1px,-1px); box-shadow:5px 5px 0 var(--sh); }
+.dict-play:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--sh); }
 
-  .notice{ font-size:12px; color:var(--text-dim); line-height:1.7; }
-  .hidden{ display:none !important; }
-
-  /* 플래시카드 */
-  .flash-progress{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-dim); margin-bottom:14px; text-align:center; }
-  .flash-card{
-    min-height:220px; border-radius:18px; border:1px solid var(--border);
-    background:var(--surface-soft); display:flex; flex-direction:column;
-    align-items:center; justify-content:center; padding:30px 20px; text-align:center; cursor:pointer;
-  }
-  .flash-vi{ font-size:21px; font-weight:600; color:var(--text); margin-bottom:8px; }
-  .flash-tap-hint{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); margin-top:14px; }
-  .flash-ko{ font-family:'Noto Serif KR',serif; font-weight:700; font-size:clamp(28px,7vw,38px); margin-bottom:10px; color:var(--green-dark); }
-  .flash-example{ font-size:13px; color:var(--text-dim); margin-top:6px; }
-  .flash-nav{ display:flex; gap:10px; margin-top:16px; }
-  .flash-nav .btn{ flex:1; }
-  .speak-btn{
-    width:56px; height:56px; border-radius:50%; border:none;
-    background:var(--green); color:#fff;
-    font-size:20px; cursor:pointer; margin:6px auto 0; display:flex; align-items:center; justify-content:center;
-    box-shadow:0 6px 16px rgba(92,154,46,0.30);
-  }
-  .speak-btn:hover{ background:var(--green-dark); }
-
-  /* 타이핑 퀴즈 */
-  .type-input{
-    width:100%; padding:16px 16px; border-radius:14px; border:1.5px solid var(--border);
-    background:var(--surface-soft); color:var(--text); font-size:20px;
-    font-family:'Noto Serif KR',serif; text-align:center; margin-top:18px;
-  }
-  .type-input:focus{ outline:none; border-color:var(--green); background:#fff; }
-  .type-input.correct{ border-color:var(--green); background:var(--green-soft); }
-  .type-input.wrong{ border-color:var(--rose); background:var(--rose-soft); }
-  .type-feedback{ text-align:center; font-size:13px; margin-top:10px; min-height:18px; font-weight:600; }
-  .type-feedback.correct{ color:var(--green-dark); }
-  .type-feedback.wrong{ color:var(--rose); }
-  .type-actions{ display:flex; gap:10px; margin-top:16px; }
-  .type-actions .btn{ flex:1; }
-
-  /* 오답노트 */
-  .wrongnote-item{
-    display:flex; justify-content:space-between; align-items:center; padding:13px 14px; border-radius:12px;
-    background:var(--surface-soft); margin-bottom:8px; gap:10px;
-  }
-  .wrongnote-word{ font-family:'Noto Serif KR',serif; font-weight:700; font-size:16px; color:var(--green-dark); }
-  .wrongnote-meaning{ font-size:12.5px; color:var(--text-dim); }
-  .wrongnote-count{
-    font-family:'JetBrains Mono',monospace; font-size:11px; padding:3px 8px; border-radius:100px;
-    background:var(--rose-soft); color:var(--rose); white-space:nowrap; font-weight:700;
-  }
-  .wrongnote-actions{ display:flex; gap:6px; }
-  .icon-btn{
-    border:1px solid var(--border); background:#fff; color:var(--text-dim); border-radius:8px;
-    width:30px; height:30px; cursor:pointer; font-size:13px;
-  }
-  .icon-btn:hover{ border-color:var(--green); color:var(--green-dark); }
-
-  /* 내 기록 */
-  .stats-summary{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:18px; }
-  .stat-box{ text-align:center; padding:14px 4px; border-radius:12px; background:var(--surface-soft); }
-  .stat-box .n{ font-family:'JetBrains Mono',monospace; font-weight:800; font-size:22px; color:var(--green-dark); }
-  .stat-box .l{ font-size:10.5px; color:var(--text-dim); margin-top:4px; }
-  .record-item{
-    display:flex; justify-content:space-between; align-items:center; padding:11px 12px; border-radius:10px;
-    background:var(--surface-soft); margin-bottom:6px; font-size:13px;
-  }
-  .record-pct{ font-family:'JetBrains Mono',monospace; font-weight:800; }
-  .record-pct.good{ color:var(--green-dark); } .record-pct.mid{ color:var(--copper); } .record-pct.low{ color:var(--rose); }
-  .record-meta{ font-size:11px; color:var(--text-dim); }
-
-  /* 교사 모드 진입/복귀 */
-  .teacher-toggle{ text-align:center; margin-top:24px; }
-  .teacher-toggle button{
-    background:none; border:none; color:var(--text-dim); font-size:12.5px; cursor:pointer;
-    text-decoration:underline; text-underline-offset:3px;
-  }
-  .teacher-toggle button:hover{ color:var(--green-dark); }
-  .back-row{ margin-bottom:18px; }
-  .back-btn{
-    background:none; border:none; color:var(--text-dim); font-size:13px; cursor:pointer; font-weight:600;
-  }
-  .back-btn:hover{ color:var(--green-dark); }
-
-  /* 선생님 - 숙제 관리 */
-  .hw-table-wrap{ overflow-x:auto; }
-  table.hw-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
-  table.hw-table th, table.hw-table td{ text-align:center; padding:8px 10px; border-bottom:1px solid var(--border); white-space:nowrap; }
-  table.hw-table th{ font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-dim); text-transform:uppercase; }
-  table.hw-table td:first-child, table.hw-table th:first-child{ text-align:left; position:sticky; left:0; background:var(--surface); }
-  table.hw-table input[type=checkbox]{ width:18px; height:18px; accent-color:var(--green); cursor:pointer; }
-  .roster-add{ display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
-  .roster-add input{
-    flex:1; min-width:160px; padding:10px 12px; border-radius:10px; border:1px solid var(--border);
-    background:var(--surface-soft); color:var(--text); font-size:13px;
-  }
-  #sheetUrlInput{
-    flex:2; min-width:240px; padding:13px 14px; border-radius:12px; border:1px solid var(--border);
-    background:var(--surface-soft); color:var(--text); font-size:13px;
-  }
-
-  /* ── 레벨 선택 카드 ── */
-  .level-grid{
-    display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:8px;
-  }
-  @media(max-width:480px){ .level-grid{ grid-template-columns:repeat(2,1fr); } }
-  .level-card{
-    padding:16px 10px; border-radius:14px; border:1.5px solid var(--border);
-    background:var(--surface-soft); cursor:pointer; text-align:center; transition:all 0.12s;
-  }
-  .level-card:hover{ border-color:var(--green); background:#f0f8e8; }
-  .level-card.active{ background:var(--green); color:#fff; border-color:var(--green); }
-  .level-card .lv-name{ font-weight:800; font-size:13px; line-height:1.3; }
-  .level-card .lv-count{ font-size:11px; color:var(--text-dim); margin-top:3px; }
-  .level-card.active .lv-count{ color:rgba(255,255,255,0.75); }
-  .level-card.empty{ opacity:0.4; cursor:default; pointer-events:none; }
-
-  /* ── 뒤로가기 칩 ── */
-  .back-chip{
-    display:inline-flex; align-items:center; gap:5px; margin-bottom:12px; font-size:12.5px;
-    font-weight:600; color:var(--text-dim); cursor:pointer; background:var(--surface);
-    border:1px solid var(--border); border-radius:100px; padding:6px 12px;
-  }
-  .back-chip:hover{ color:var(--green-dark); border-color:var(--green); }
-
-  /* ── 학생 명단 미리보기 ── */
-  .roster-preview{ margin-top:14px; }
-  .roster-group{ margin-bottom:12px; }
-  .roster-group-title{
-    font-family:'JetBrains Mono',monospace; font-size:10px; text-transform:uppercase;
-    color:var(--text-dim); letter-spacing:0.08em; margin-bottom:6px;
-  }
-  .roster-name-chip{
-    display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:8px;
-    background:var(--surface-soft); font-size:12.5px; margin:2px 4px 2px 0; border:1px solid var(--border);
-  }
-  .roster-name-chip .del-btn{
-    background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:11px; padding:0;
-  }
-  .roster-name-chip .del-btn:hover{ color:var(--rose); }
-
-  /* ── 모달 공통 ── */
-  .modal-overlay{
-    position:fixed; inset:0; background:rgba(30,50,20,0.45); backdrop-filter:blur(4px);
-    display:flex; align-items:center; justify-content:center; z-index:1000; padding:20px;
-  }
-  .modal-box{
-    background:var(--surface); border-radius:22px; padding:32px 28px; width:100%; max-width:420px;
-    box-shadow:0 20px 60px rgba(30,50,20,0.22);
-  }
-  .modal-box .modal-title{
-    font-size:18px; font-weight:800; margin-bottom:6px; color:var(--green-dark);
-  }
-  .modal-box .modal-sub{
-    font-size:13px; color:var(--text-dim); margin-bottom:20px; line-height:1.5;
-  }
-  .modal-input{
-    width:100%; padding:14px 16px; border-radius:12px; border:1.5px solid var(--border);
-    background:var(--surface-soft); color:var(--text); font-size:16px; margin-bottom:14px;
-  }
-  .modal-input:focus{ outline:none; border-color:var(--green); }
-  .modal-actions{ display:flex; gap:10px; }
-  .modal-actions .btn{ flex:1; padding:13px; }
-  .modal-error{
-    font-size:12.5px; color:var(--rose); margin-bottom:10px; min-height:18px; font-weight:600;
-  }
-
-  /* ── 이름 선택 그리드 ── */
-  .name-grid{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px; }
-  .name-chip{
-    padding:12px 18px; border-radius:12px; border:1.5px solid var(--border);
-    background:var(--surface-soft); cursor:pointer; font-size:14px; font-weight:700; color:var(--text);
-    transition:all 0.12s;
-  }
-  .name-chip:hover{ background:var(--green); color:#fff; border-color:var(--green); }
-  .name-chip.selected{ background:var(--green-dark); color:#fff; border-color:var(--green-dark); }
-
-  /* ── 현재 학생 이름 표시 ── */
-  .name-row{
-    display:flex; align-items:center; gap:10px; margin-bottom:14px;
-    background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:13px 16px;
-    box-shadow:var(--shadow); cursor:pointer;
-  }
-  .name-row:hover{ border-color:var(--green); }
-  .name-row label{ font-size:12px; color:var(--text-dim); white-space:nowrap; font-weight:600; cursor:pointer; }
-  .name-row .name-display{ flex:1; font-size:14px; font-weight:700; color:var(--text); }
-  .name-row .name-change{ font-size:11px; color:var(--text-dim); }
-
-
-/* ===================== 유학 CTA + 비행기 트랜지션 ===================== */
-  .study-abroad-cta{
-    display:flex; align-items:center; gap:12px;
-    background:linear-gradient(135deg,#2C5F4F 0%,#1D4137 100%);
-    border-radius:16px; padding:16px 18px; margin:16px 0 22px;
-    cursor:pointer; border:none; width:100%; text-align:left;
-    box-shadow:0 8px 20px rgba(29,65,55,0.25);
-    transition:transform .15s ease, box-shadow .15s ease;
-  }
-  .study-abroad-cta:hover{ transform:translateY(-1px); box-shadow:0 10px 24px rgba(29,65,55,0.32); }
-  .study-abroad-cta:active{ transform:translateY(0) scale(.99); }
-  .study-abroad-cta .icon{
-    font-size:26px; flex:none;
-    filter:drop-shadow(0 2px 3px rgba(0,0,0,.2));
-  }
-  .study-abroad-cta .txt{ flex:1; }
-  .study-abroad-cta .txt .t1{ color:#F3E6C4; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
-  .study-abroad-cta .txt .t2{ color:#fff; font-size:14.5px; font-weight:700; margin-top:2px; }
-  .study-abroad-cta .arrow{ color:#F3E6C4; font-size:18px; flex:none; }
-
-  .flight-overlay{
-    position:fixed; inset:0; z-index:9999;
-    display:flex; align-items:center; justify-content:center;
-    opacity:0; pointer-events:none;
-    transition:opacity .28s ease;
-    overflow:hidden;
-  }
-  .flight-overlay.active{ opacity:1; pointer-events:all; }
-  .flight-sky{
-    position:absolute; inset:0;
-    background:linear-gradient(180deg,#B9E0F7 0%,#E3F2FB 55%,#F6F9F2 100%);
-  }
-  .flight-cloud{
-    position:absolute; background:#fff; border-radius:100px; opacity:.85;
-    box-shadow:22px 6px 0 -2px #fff, -20px 10px 0 -4px #fff;
-  }
-  .flight-overlay .flight-cloud{ transform:translateX(-40px); opacity:0; transition:none; }
-  .flight-overlay.active .flight-cloud{ animation:cloudDrift 1.6s ease-out forwards; }
-  .fc1{ width:70px; height:26px; top:22%; left:10%; animation-delay:.05s !important; }
-  .fc2{ width:54px; height:20px; top:38%; left:60%; animation-delay:.2s !important; }
-  .fc3{ width:60px; height:22px; top:64%; left:30%; animation-delay:.1s !important; }
-  @keyframes cloudDrift{
-    0%{ opacity:0; transform:translateX(-30px); }
-    20%{ opacity:.85; }
-    100%{ opacity:.85; transform:translateX(40px); }
-  }
-  .flight-trail{ position:absolute; inset:0; width:100%; height:100%; }
-  .flight-trail path{
-    fill:none; stroke:#2C5F4F; stroke-width:2.5; stroke-linecap:round;
-    stroke-dasharray:900; stroke-dashoffset:900; opacity:.35;
-  }
-  .flight-overlay.active .flight-trail path{
-    animation:trailDraw 1.15s cubic-bezier(.4,0,.2,1) forwards;
-  }
-  @keyframes trailDraw{ to{ stroke-dashoffset:0; } }
-  .flight-plane{
-    position:absolute; left:6%; bottom:14%; font-size:38px;
-    transform:rotate(-12deg) scale(.9); opacity:0;
-  }
-  .flight-overlay.active .flight-plane{
-    animation:planeFly 1.25s cubic-bezier(.45,0,.4,1) forwards;
-  }
-  @keyframes planeFly{
-    0%{ left:6%; bottom:12%; transform:rotate(-10deg) scale(.85); opacity:0; }
-    10%{ opacity:1; }
-    55%{ left:52%; bottom:56%; transform:rotate(-18deg) scale(1.15); opacity:1; }
-    100%{ left:104%; bottom:98%; transform:rotate(-22deg) scale(1.35); opacity:0; }
-  }
-  .flight-caption{
-    position:absolute; bottom:14%; left:50%; transform:translateX(-50%);
-    color:var(--green-dark); font-weight:700; font-size:14px;
-    background:#fff; padding:10px 20px; border-radius:100px;
-    box-shadow:0 6px 16px rgba(60,90,40,.18);
-    opacity:0; white-space:nowrap;
-  }
-  .flight-overlay.active .flight-caption{
-    animation:capIn .4s ease .68s forwards;
-  }
-  @keyframes capIn{ from{opacity:0; transform:translateX(-50%) translateY(8px);} to{opacity:1; transform:translateX(-50%) translateY(0);} }
-
-  @media (prefers-reduced-motion: reduce){
-    .flight-overlay.active .flight-plane,
-    .flight-overlay.active .flight-trail path,
-    .flight-overlay.active .flight-cloud,
-    .flight-overlay.active .flight-caption{ animation:none !important; opacity:1 !important; }
-  }
-
-  .homework-cta{
-    display:flex; align-items:center; gap:12px;
-    background:linear-gradient(135deg,#FFFFFF 0%,#FCEFC7 100%);
-    border-radius:16px; padding:15px 18px; margin:-6px 0 22px;
-    cursor:pointer; border:1px solid var(--border); width:100%; text-align:left;
-    box-shadow:0 6px 18px rgba(60,90,40,0.08);
-    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-  }
-  .homework-cta:hover{ transform:translateY(-1px); box-shadow:0 9px 22px rgba(60,90,40,0.14); border-color:var(--gold); }
-  .homework-cta:active{ transform:translateY(0) scale(.99); }
-  .homework-cta .icon{ font-size:24px; flex:none; }
-  .homework-cta .txt{ flex:1; }
-  .homework-cta .txt .t1{ color:var(--text-dim); font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
-  .homework-cta .txt .t2{ color:var(--green-dark); font-size:14px; font-weight:800; margin-top:2px; }
-  .homework-cta .arrow{ color:var(--green-dark); font-size:18px; flex:none; }
+/* ── 비행기 트랜지션 (유학 CTA) ─────────────────── */
+.flight-overlay{
+  position:fixed; inset:0; z-index:200; pointer-events:none;
+  opacity:0; transition:opacity .25s ease;
+}
+.flight-overlay.active{ opacity:1; pointer-events:all; }
+.flight-sky{
+  position:absolute; inset:0;
+  background:linear-gradient(160deg,#183a2e 0%,#2C5F4F 55%,#4a8a6f 100%);
+}
+.flight-cloud{
+  position:absolute; width:130px; height:44px; border-radius:99px;
+  background:rgba(255,255,255,.18); filter:blur(2px);
+}
+.flight-overlay .flight-cloud{ opacity:0; }
+.flight-overlay.active .flight-cloud{ animation:cloudDrift 1.4s ease-out forwards; }
+.fc1{ top:22%; left:8%; }
+.fc2{ top:48%; right:10%; width:170px; animation-delay:.1s !important; }
+.fc3{ top:72%; left:22%; width:100px; animation-delay:.2s !important; }
+@keyframes cloudDrift{
+  0%{ opacity:0; transform:translateX(-30px); }
+  20%{ opacity:1; }
+  100%{ opacity:.8; transform:translateX(40px); }
+}
+.flight-trail{ position:absolute; inset:0; width:100%; height:100%; }
+.flight-trail path{
+  fill:none; stroke:rgba(255,255,255,.75); stroke-width:3; stroke-dasharray:8 10;
+  stroke-dashoffset:600;
+}
+.flight-overlay.active .flight-trail path{ animation:trailDraw 1.2s ease-in-out forwards; }
+@keyframes trailDraw{ to{ stroke-dashoffset:0; } }
+.flight-plane{
+  position:absolute; top:60%; left:-70px; font-size:44px;
+  transform:rotate(-18deg);
+}
+.flight-overlay.active .flight-plane{ animation:planeFly 1.25s cubic-bezier(.3,.5,.5,1) forwards; }
+@keyframes planeFly{
+  0%{ left:-70px; top:64%; transform:rotate(-14deg) scale(.9); }
+  10%{ opacity:1; }
+  55%{ top:42%; transform:rotate(-20deg) scale(1.05); }
+  100%{ left:105%; top:22%; transform:rotate(-24deg) scale(1.12); }
+}
+.flight-caption{
+  position:absolute; left:50%; top:58%; transform:translateX(-50%);
+  color:#fff; font-family:var(--f-body); font-size:15px; font-weight:800;
+  letter-spacing:.02em; opacity:0; text-shadow:0 2px 10px rgba(0,0,0,.3);
+}
+.flight-overlay.active .flight-caption{ animation:capIn .5s ease .45s forwards; }
+@keyframes capIn{ from{ opacity:0; transform:translate(-50%,10px); } to{ opacity:1; transform:translate(-50%,0); } }
+@media (prefers-reduced-motion: reduce){
+  .flight-overlay.active .flight-plane,
+  .flight-overlay.active .flight-trail path,
+  .flight-overlay.active .flight-cloud,
+  .flight-overlay.active .flight-caption{ animation:none; opacity:1; }
+}
 
 </style>
 </head>
@@ -667,7 +734,10 @@ body.dark .flash-card{
   <div class="header">
     <img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAYAAAB5fY51AABgqUlEQVR42u2dd5xdVbn3f89au5wyJTOTmXQCoSdUQ2+TKEgHuXAGK9arXq+KXhW7J0evir1er6BXbPjKHJSOImoySJcAUoaWhDTSM/XUvddaz/vH3vvMJCSUEDDE9f0Qkpyc2WefXX77eZ71FMBisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVh2W8geghcPAwR+7qNKeM53WCwWy04WJgZxHoIZkhfC4V5IZogX9LN5CO6Nf24hHGYIZvuAsFishbVzRUpgEQTmwRDBbPM9vTm5MrynxafNXpPPolIB0i1kymUg1TIraD3zoSEi4m3/LOSiTtC8RTBU2Pb2LRaLFazntIYwD4LmQ20pXnPd0Zue3icj+WAjeL+A3UMc0p2G5UQD0UmENIEEwDDMDAAkRNUYs4aYhwGxyUH4DxXScibzQJM8+ik644/18RYcAAHAEFkX0mKxgvVcQtULiRx4vCVVv2XSQYbCeULzayFwsDJir0yaJFwnikoZgtaANtEvQvQyQYCJIQE4DiAIgOBIjpRGucwswE8LqL8zxK114yyccNaGZc+1LxaLxQoWuBeSeqCTv9dunHwgZHABBJ3FoMNTWemCCWFICBUZNjCRLhkCCASGAQRRfAiZQQRwHGonAjODCQQes5wczwW5HgMwKJe56oDv1IaKmsXvW85YtzGxuopFiJ5x+2exWP4FBWtLoSKUrus4y/PM+zTxKams52slUQ3AAGswmMAiPkaJNjGDKHL+GCISJoqXBZnASKSLmZgA4ugIsyBmZgJAhgkQQriZFAPQqJXVRlb6eihckTl38I5YuAQWADbOZbH8iwkWMwhFiEismOo3TXwTO7jY8+gokhLlqgAYIcGQYUgCAUQgZoKAYQYRgdmAGkcsUifDTGjEnyL/kECg6DcwwMwMEvF2on9nIkFgAyYiOA45ng8EVQU26o+Bci9tOWNd3zhX0ca4LJZ/BcFamIczvxAF00u/b3+9n9Z5J+sdZ9hDpWo0RTaSiK2o6G+UHJzEZiJmMIPJEAAmkq6EcCRDOJGLF/105B42bKLx9hmh8brRhFALKM2GiBUbAgSYiJyMzzIINUxdXa1r6stN5w0/uC031mKxgrW7WVUAEcFs/E3H1NY28xXHpbdDOqjUpQIbIiIBRiRKiPQmPijEgGEGA8JAQPgOpOtHqlMdUczgDcRYQYJXGBbLwWYlh6gIx6mycEqKwa7QGU3CdVD3QOzBuHux1vuQI/cC8Z6OI9qdVCR0OiTUQ2MACplJZrPs1GphaALz/U2DTV+e+ZaVg9wLiR4Ym5RqsYK1e4mViFbbCJUbWi8Snvi6n/UmlcowMMQkWJCJV/fiGFPk9nESONcGJDIehPQMVEUjCM1yV4rbQfrOMND31WvyyfaeoeEd0w4C/35Kx6gbzPY850iB8CgwHykcOUumJUwoUK0jgCTKpo0blINlSuEj2TM238AMwgKQjW1ZrGDtDmK1EA7Nh9r0q/aWponqB37Wv6gWOFCKQ2J2mKiRqh67eUQiCjQBpIUgN502UDUDFepHjNHXE8RNwwPeP6ZctL78rM/rhUTnVsdxY6RiizpB87b+gY3gbbl23Ds9PZqqzyVJ5zgun+G5Yo5wCKWKDIWA40tFQTX4zj33Dl4yvwBlXUSLFazdRKwGr209vDlLv5LZ1JzSqFAwWhAoiaVHaVMc20bMAJESBDedZtTLYVlAXQXh/cId3nTHeFFoiNO8KM3hJQTCo5XGIgQ6QVuL2MJ8t3Pk8Utf5yB4J9ic42e9dKVGyPgGQb2+aLSKt048e+CZ5Pvay9hiBetVKlaVa1oudJrk5dJLtVRqFAjWDjNF63ZxTJzi3Ckm0ixINqU1hZVgRGu+ol7zfjDh3zYuHb/d4kZw7mVeqUvyr3KdoPEiVPvD1P3JDd7BwLt8T3bBFQhG9ZJQpy5sOn3l/Va0LFawXqViVb4+++FMi/+9mkpBKaMFcRxUpy2+bOT/kck2kRNUagGH6mcs6JvpM0aWNiwpAP+sADcDhN7Ic00sr41/6pjaIvgjDOe9fovTGo6GQ5WK88YJZ6+9xYqWxQrWq0ysSje0fDrb6n2lUveUMSABIxpuH8ZyFZhhhIRIpzUFpfpCqoeXeG+o3hf/m8QC8K4U0N66znH0D5PmOIILqSZxvlaMTSPpcyefvfx6K1oWK1ivErEaua7l880d7herVT9krSVAUXqVADciTYLBECqTYlcFYS2sB5/JnjX6nV1VqLblMmIRZCJKlT905py0/J6bxpTRIXS3nLruNmZIIhuIt+y+iFfrjjcsq+uaPtnc4X6xUvNDo41kEIHigFXcZ48BMAuVzSg3qFYfrVZ4fvas0e/Eva4EEfSuniZABKb5UEmfrczpG4vrNjhHhpqv9rzwr5tunHkgEXTDnbVYrIW1a4nV6LXpjza1Z75drbuhMSyTYFWUUMXUWAwkobMZ5Qal2tWr/yHfs/enBodf7S7UmDVFqCyc9Dmq1z9YqaaP7DhvzSrOQ9g8LYsVrF3hRo3zj4auaXlza5tzZVWlQ6O1pKioj8kwGcSVMgBISJ1JBU51qPa9zDnljwC825S5cB4CC0BE0KU/df07CdOTkZvOxjwEeGlpFxaLdQlfKr2x0JSL6SOyLfInNZPSRhsxFlNnmMgTBBMZIaROu3WnOhx8JnNO6SPcy5LzSRH0bvC0KcAQQfN9cJtev+EnhuRPRtWUjxDBoPjqdfctlle9hZWUpODIPVoDZ/Q+kcnMqle1IkBGplRsTCRpoSR0xg3d0qi6uPmcoe/zQjiYB727Wh2Jizv0hz1PrTmpkcmnPH5X0mXCXuYWa2G9wixaBEkFmKoZvdxrSc+qVTmkKI4T1SgDSdMEBkhn0qFbHQ0+nYgVzYfanW9emg/FDDHh9OW3DIr2gfvum+tasbLsbjivCuuhN1rOr17X9O5Um3NBdZRDwcaJSmuo0aeYCWCIMJtW/uhg/Yct54xe+q+Un0SU9O6684n77pvr2svbYl3CV1qsosAyV/7QPk1Keth4qWYEmsYMqkSqADZQ2Qy71cHadZk3jL6Be/lfo/kdg3qLOfFo5wYqzO+zyaMWK1j/VOuqB7pyY0sx3Za5oDQKJQgSxFEvmESKmLWbEo6u1R9bt84ct+fy4RFg920xHNUe5gRyQA8VG4sI+Xxe7H3cX46EDN/iQV7zxpPvXMicF0SFnXYcuvPdW1rmi/rQ17d9KzaXg9wwu3uLa60PfQZbnZvubjiY1/28n9/V38fF2WDs6LllUPe8btn1n108+9HZXFhQYADII0+LFiwSWAT09fVpvPiyLOrujrebm80FFJgB9BRzYsOjG6irv4+LxWQ+wAskD9G9qFs09rVQMPl8XvTP6acNj26gbR1Hyz9RrACgdEPmVN3XweU/TQkrf5qsy7dMNqVbJpvyLZNM+ZYuXf7jJF378yQV/LmjNnhN52Hjf3a3s6R6c7K3N7fFd7vzzmPSP7z58Ndd/tfXfPunfznigf/9y1z+5e1H8O9vPm7vSMT+ibHKl3F4LDMol3tR55lyudwLfv+Ley929ntf8L7m83mBf5F257vsl0xWBZ86Gu40bl3sN2fm1KqsKVkoiNouxA6hUNlU6JY2VT/YfH75f3aruBWDcsWcmL2Vu/fLWw7Jltk9LkB4vmJ+fXtbai82hKeWVTBrD59lHde+65TF/5ZniMLOGR1GAHh2rrOpqWXCW0DkBNWQpUNOvaIGHimuvHIblgMB4INyM8/zPDlTM4dEYKHJC7S+55HiiruQh0ABpjvf7Wx6+Ok3uSm/TQijDZtoWwZgBYKMOkx7Lmkh6enNqwceW/bnwZUNUYxLRZ9v/wFgjxMzUzr2nHS647vHk6A9hJAZRPnGJSnEE7VyePuTf37y1pHVGHhB246/Q8tstB949F5naHLmac0z/YyXhYFSgRoF0SO1SuXPj/x21UIAKp+HKGzfMmrs68zu1j07prWf6Tf5JzGJyZ4nUoZRNsybw2p419DKTX946s8Dj8U/J4Dd29radQUrFp3qjU3vTrVnfloedRTByMalEzdcZ7DOZoVTGSjdkj139LTdRazyDDGnmKOenjF374orZqaGu9pOZNb/Ro48TQuzp+9JtGVSWLGqph9dOsKHz27myR1ptzoUnv/vp9/3+/zCbmenxLXim3JSd+ueBxyx59OZCSnoQMNNSWxeObr27sv6pzXODMC5HGSxF2bfM6ceOnX/iQ80taehAgPHkahXAgys3nzs/VeuuLu7G05fHxRmInXcGQevbJ/R1KnqOt4KN6KUSWsgMEOHBrquR8NALR5dX7n8weKy/7f1jf6s6zxqz+8dcdHen2ue2PwhL+tOEIIAQWAdPfxE3HufDaM6Uluzae3otx/57dPfeg7RonweVCjAHPamPS9u6Wr5VKbZn0yOACPq7U+JbUuEsKZQG60/sHnVwCceu27NX5Jjuk2x6kDzkefu+9Vsa/rt6eZUEwmCMXGhGRGEIDADtdFavTJc711+76qPr3+ovGF3Fy1nlxXSedB8xcxUVQx/Mgxcpjh2zkkKezSMhh2XKChXyyrEh+I+7q/ak5XPQ2BetyjM79ORVVTEt3qPSaOlegxrvGET4TTH4f2EdFCtK7R6jmr2s+auxUNyzaaq6D5qgmnKOE55RC9Pi+AWArBgXp8u7IydizcSlIVWypRUXaeMMppAUji0cRuOD0BFbn1n9muZCWkEVVWFAWmCN7ixfNn9V664O5eDLBbHkniFKzbrwLTpujHJiEfAmHh2WtJ8g4Qg6WW85vSE1LxMW2beUe92zry378l343AoPDtGlIhK5oiL9r1myj4TTwkDA610GA+cNBTPktQAwCRJEqdb0lP3aEt/03u7mHs/LX17LgfzrPhTDqJQgD78or3/Z/Je7R+AEdDKhKw0GGzQcAIYREKQIDGhq/lwL+X9SZ4v3/RIYVXvVpaWQB6Yftf0tj33nfDHCZObjwzrhnVoQm00E2BAkXYrhhCSyE95XrYt8zbpOnNDWvr6zQ9W18RNdXdL0dol87B4YZRfVZ048oZ0i79vUGdNYDE2qDS6EkiQ9n0t6zX11dYLRp/CIshX2+TkfB4iv7DbAUdP6tga4u/fcNihX7/xsEuDdOVhA/zVSdOHhRT7VWrG1Os6nD6hydQqnrjy5nXuuqGaeP0J7RAChhzAFeLKi059qPyFhd3Ozl8hrQIwgkAOmB2AHWZOjb+WIiEq6gN7Zp7R0tX0elVTyij2yRFeZbRWW7103dfBoOLssX2bMhHCKOXDsMMwktm4YHakFL50hScd6Tme9KVDHhhGhcrUK4Fm5nrHnm1vOeSIPb+JInQut+U1ncvlRKEA85q37/OTyft2nFKrBnUVhoaNkSRIptKu72cc30u7KS/tpoQkh412wnpodF3XJ+8z8U2HvGWvLxWL0LlcbovviCL0YW/Z8+JJs9o/oBXXwyA0hrUjBKSXkr6XEr6blr6f9nwQC9ZG1MpB6GcdMWFy609mnDxjaqEARhJjzAMowEyd0XTFhClNRwbloGaUYsNGep70vJSTcl3hO55Iub70DBuhtUa9HNTbpzXN3vuw6VcQAfl8frd1CXdNC2sRDPdCVh3+uNYOC5gk3WpscCmzdj12qkPB0qFgwrc5XxKY9+oouWEGLVjQLbGgzxQIBoU+AwBfLh50iJeWpxvmcypkjvIz0kGdoEOjgjqzYYiJrb5ISc+56x9l3P/ECPaZmcIJh7VQPTDMBBnWORSMKwEA8/peHvHmaFxHI54uGk0xAACzZ+d59uyCN6Et9TXPdzmshURCaOGQO7K58sP1fcPLcz05WSwW9VhYYkp8aJItE4w2qJXrm5gRxl4VS0dMTDX7ntACRhk2oXaJEHZMa/vgrJNrvygW192HWEwQC+d+Z0193cRpbW8KaxywNh5AkK6kei1AaaD8RynoziA0zSRxRKbZn+/6LqnQsFHsItB6wsTmj86YP+MnxWJxaezGcbEIPfXI5o7mtqbPQ7PRoXaIBEmXqF4KUN1QuwHge43mFtdz5mU7mo4kAQOGo2qhapnU1DKpqt+/CvhCN7plV66PigXog86bcUprZ/acsKJCY9iDIHY9IUcHy8+oSni1AS8BMN1Lu2c1tWXm6NAwM7ywEqrWyc2nHHDWnicVCoW+ra1XK1gv182cpDHcPKHbSztz6wFrgGUsVo07HiC4kikw+tI9elZXOQ+HaNeNXSVpCEUUEXVZ6FMoAN/64+H7GK3PDY05T2k+hlIkOTQI68xq1IREJFQImfYlOltTWL1e8+L+zbRxOMThB2bp0P3TXKlpFoBuanKdekX/+X2vv/exfH6nBdu3oCaiGihKBsVGMZ+GYHXnIQuFgjrkzTPfle3MHqRDrQAI6QpZGqis27Ru49eYQbSgyNtaYIiTgZkcSapaG1760PIT1/aXVqMZEsugZ541ZXr7xPS5Ezqa837a81WooUODTKuPzj0n/PsyrLsvl8uhWCwi+b25K/sOJyU5rIYEQexIiVo1GFr39IYLH79m7a3jd2Hf8yadOWPvyb/yM35rGGiY0HC2Pe1N3KP2rlXAZ7vRLbpyfVwsQrfNaDsj05rq0AohiKRwiGuloLT6ybW5pTdtvGX8dg9/66yvdu3Z9ik2UEaDWBv2UvKC2Tn8922F24KT8t0O0IdUS/otbsrhoKYAAruepJGB0ftX3r/87FV3VteM2+QXj/mP/a9qn9R6VlhTShtiL+1ypt07H0BflEbSZy2sV+4Gp3dIzweFxoAgOAmcRhjPJVkZCZYNPFW6Mh5+uis+TSjXC5FDDkRFDUQB9G//bu6UQJrTNKnz6mHwOi8lMqQAKKBSCsIo4EFCGzhsGBMn+GAt0be4jGc21IgNY+6BWczeJ8WVejx0WgoWggCNX0TWVbdILLed/qUaAxzjzyZK5nkQLYBpm9vWmp2Q+ZwgabTRQggyIHbKg9WvrP7TyEBPT2wBjWPt+rU8i9oMEQFETESQjgimTm3etLavVMKm6H0rblz7+Arg8UPetKc/bb/OAmkRGsPCGIabco4DgKsvvFoDoOKFRZ3PQ/x1IDWXtSbDLIjALFgObyh/7PFr1t4697K5btNvmhjzgP2nlujy9y2+KfO27Fen75v6ulAUGs0EJs5m3dcjhy/0LejT3Qu6JdAHP+MeL13JuqpAIC1d4dZGqr9cetPGW3L5nId+6GVty8T9P7k/fODXy75w7PsPfEtrV9N0o43WysDxnFmbN7ROZQwvn4d5pg995PrOwcxMzEaQENChEYPPjH521Z3VNft8aB//8HVL1KOYLfuL/ZUV/c98Ip1Nnep6rjSBNsyMbLN/CAD0LejTKOx2erVrxbCYQdQDPfz75g4hxNnVKrFhlsnYCIruETYg47iKoMIf7vExVLEIchcaLkp5juNSABd7oHt6ivrS3rmtX77h4Au+eO2c35RE7WFK6Z8JD2eHIWcqo1qFVVaRPyQcMIlQAWlPYnpnGivXKNz0tyGsH6gDBBy0Txqz902hWo0mxUpBLCXcalmv8prcGxAH21+Wc2SYmBrVm8lThIAoQRIFmKl7N32suSMzzShtADbSd+To5vLjD9y29Cf5fF7EwestmD49vhyZQRx1xjEaojwQugAIX4jnaOfh5HI5OTRYu7o6GmgiOADDaIbjO237nNbewszI5SJH9dd3tU2TrphhFEDMLIWQ9Uo4uHFD7TrkIRavWaz7+vpUX6FPXb5msUYOcv3qgd7KUK1CQjgMkNGGhCv3xu1oA4G7+rsYAPxmbwqb+NIUgFYGQRDegzzEBmwwxWJRL758cXjBBRdIACEM/iakJCEEBBEJIjflZ1IAUCgUTOuhra2u50zh+MxJQTKsqbLrycfBoCXtS8JiEbq/2B8CoLXLS8t1YFa6niuElAARacPTADjRiODdLzdr17KwFkECUK6Up6danI5SmZUwLDmadkpgBgk2jiCnPhoO6DL/KrIm/vnWVZSc2S0KhT5VIDDQZ7g3J7+Ix04g11xYR/UczxHThCMQ1A2qZaWYQDIyT2Ry82sTmYudEzyYUOKv95axdlOApjShUmUctF8K+++VQqXCEAIsiIgAncpIUR/mq95zwp2j+YXdDtFOLtGJAsJI+2kCUWORn8EQJBiA6M0VzfTu9ukTJrd8mEBaGyOkJKOVpuFNpQVYgVp/f0FucwVrNYDXJL2BknxTNoGRUcb5AgCFKLu9iKJpPyo9wrqzRkTZZF+EoPSUjqbsEgyMbNgQ3axDo2F2mjZNjXlJksDGrFvduno4TimgcSuhTIBZh6ENe8+eNphq9jMcRk9SY9hBKkn4LCZinW5YmRw1CREQOr6WG2zYsIEAUHW0NuIPecxEWrBCWA/Zy3Dj871wWBk2YTR6PHkEG63gaFB8DsY9O/LvyAd/XH3VqOvVWYdaaa1lqFS0O7tpMdquJVjxAFL2xGkgyZQMnI8XtJkBGBg/zbJSVte2vKW0iXv/eX3ME5FasKBPR6uTfaa3Nycf8544woThuQXRfyYEH+KlBcIao1rWSggCmAQTJAEwY/mv0IqRzQhkUy6eXhXikSUlgICWrMBISeHQ/dO0/14prlQZjozvmShC7QQ1pbTiX75swfbYvajWqxwHsZIAfGMKLRH4Ne9s+2xze7ZV1XRIDJKedAbXDd/16FWrivES/gs4V42RbMSat2klUAgTOdEEMogWAQjQOr3F+10XRCI+wPGxDkPDKMJsM2srzkPQiOKhcQtbCCJkNEQFQBIfCgO1KdlfZoJwJLyUeyQK+E3pvSWZhJD6+qKHR21Af3EwGPihm3YpVMQem7Cla9rTwDowMxFRae+TzAYStAcTYJi1l3ZbUr4+EMCqbkD2YSy1olAo8CEX7nVhdTTwSBCzYUpn/DoQLVIAu18N7S4jWHHvJr3x2o5mGD45rIFgWEb92aNMFiIGkxRhtc5a45f8TzB5k+D5o48WOcqf6TOFAvCNGw45qKrMeY/oR3NkcLCbkdDKQAXGVEdZk4AAQTDHHXCSpCJiKAOWQlBnu4tSidF3XxmbRxQyvgAzMFIyeM3sLPbew+dylSFEklNJAMN4Wcepl9TtHz5z8cMvV7A9IZ3klsSBw7jsnMDQB54/cd/m9uzbdWgMM0vpCBNUQwysG70EgCn0P0dJyvTpoNhyY4qsaSGIkd2GmgGoVokpuTbiPE0YlqOytFWYw2tMz01WCZgNNcR+O6dZGDSUMtY1qiTP1f6NAgDCSvA4EBmczCxZwXjN/rundHdctvjyxY83kmJjHr9l5VoAa7f8qKcBAD09PQKA1qFZToLnCiY2mslNu+xn058HcOu8BXnTh8L4ZFN+6Kqnn8S/ELuOhRV1yNQpqCP8jDepHkI3psqPPWSNL1nWSnrZulWlu1sARu4VyLtiUC7u4BlZc1Hw/LO/PnAmC5zuONwzGoYn+L50TQCEyhhdYS0IgkCCCU58F275dRikDLg5LSnjO/T4koCfWFmH6xC1ZCTqIXOtqnHkwVnMnOajWmPIRtUYNe4mRxIUiyte7mD71qZI0jeRAQECZ94x4WvpllQ6rCoFIha+cIdWjfzuyWvX3p7LNdIYtokOVxOorWHhUDSoext6Fb3DzxrXgJz4nDSWA4Qk3sZDZpyxwckrz2l9GB7ftyj62HQaVAXQuaHfAMDwYOXaluFq3s+4gjVDKc2ZlnTzXgdOvsoM1k7p6ytv6M53O32FhntOyG/1kI3FZ8OGIgFArVS9JgyyF4AAARJhoFVrZ/MJh7911mUFKryXCODcuEWLbdWJFmym+8tPZ2J987HSE0DABsSSeZxcMRnHYwniv+x3Meov81gryvVCzH60mwrUp4qIPucrvz+go6bEaYpMj9Z6fibrNhtmqJrmquIwSpomCbDTaCaRREqokfgMw4Ak4vaswHAJdOcDZS5VNDJpATBQrzOqgcHRh2QwY4qHas2wENH4MgECCWYiYimFrJXUGmfEXJcE21/WxSFKMzFxQyQEYICh/c+dcuqESS1v0HWtASYphQjKwab66MjHwaDittIYtmBKJBKR2QlmBjOckHRklS2Ij10OlAPk30eyaQFOseGGtclAQFUVbLndoCE4UQNtAkNsX7DiZ4qQpJPoFMe/VePT2dcHk8/nRaFQeKh9cvPNTe2dZ9VLYUgEN6yFuqUre8h+J+21sH3Pgbf2FfoeyOchComQFLb9uX190GDQpiOCa5smVJZNmNy8V1hVGhrSQKmuPdv/fe47pLP4z0/9J4qodnd3O319fepfrVPDriNYcfwKJI8GS8RTbxq+U6RmgmBCMNEfXra4FENgQRQ8L/ZAA33IXzY3Y9or3az5TZUApzpp7nKYoFigVtEKxCSYBAhO7GtQI3bMW8SamDlKKMv4BICof6nC8rUKjgtKpwnGgMPQQIWM4w7PYmqXi2oNJEU8vZqSiKyAMdDZZiErQ+rq9/UsHn5Zgu1b44OYWHCjnpNBBm1dMyd+zc+4qFcDEAlDDrnBSPjjf1y1fnn3AVtYGdthLYCORrApMSKdtC+Tdiqz87MFFoALVDAH9zSdnmr2HRVqBTCRIGilhx8srhsEAX1diTB4jSuIxq6n543tUBJG5+iPAkCmCo7dQi6gQMygfU4d+Wi2NdPd1JZpDqqBhiCpg1A1dWRmS4/uyF6U+XShsOR7QFIBsN0HLKMHcu3itZWOPdwPp1vTN3qeA6VC1gaOAKuumRPeecI5sw/btHLwPX039t2/hRBawXrl41eP9MKDQwepkABhKPI1wPHtz1LAqZbUqAjcu+On7k4JKjZW+BYkNXx9Jp/vdsyc9cdrxvkBymc4gvZ2PIKqcyRSkXiIyJqiKHg+ZkHFTkhcNRuXaRsDuA4o5QpeP2Dw5PIAtbrhdEoQm6joNgwNlAZOmJvhiRNdVGqAFFFYW1CylhhVBgtBslrWgTDy/wCgf2Pfyx5krQ5VOepJzQAgdGiQbfH3c6REUA0NgQQMMxFBKXMIAMQ5Rs9vvAmMdzNh2JhH71pTevSqcb28CnAOOG/6uW1TW/JsYJK5kkJC1svB/QBU7qqcLD46ZtFFT77IZIvdvOdP54lN4+T5oBmE9BYrioYAgT9tXEKec8HkvTuuaWrJZHQQKhBJVVc6lfZTmb3S3z3uA7NPXfn4un8vFgee2TqutVVYREeitvKm2T348NS9Or4vXWlUoDUblqquVUtn0+Gu793mXeh9oVBY8e0XIIRWsF6WgAjAezudM1hgShiO5ZCMhX6IfZdRDZ3+pvM3rY1FzrwUkdw6eI4C8MVrDzk8rIe5kNe/QQg60PMJYaAR1lmHdWZEC0ZyzFE1kSxFq1pMY/bBWJ6rIYIAZ1MCtSr4waWKNg4Z9l2w7wPaGCYA9SD6yROPyHBbq4NajRsiJUTjY+LbiXQqI9xayfR9+Ix7HorbyLz8F20aEBQNJ0q+sRAEbUx0A0dfWZrQmFTWP3v/cyYfUSgUFj/fTWXaJxHFZVdMRFoZlp5sOvbM2TexNoqZhBBshOt0+Bl3tuc70KE2BCbpSKqVA4yuH/pRdOMXgdlbXV3RaaBoRQ8C2+tqEIetNJvkr8mES65s3uoBWYCJvtfaP+lTw9P2mDOlmG1JTwqrSjEglTIstNGtk5pP38d37p40tflDfb9ece1ztayJaxZlsbf4A5ynSl17TfxxujnlqboOmdkJqkp5GTc7eb/Ob2Xfnzl13VMbP1QsbnryX0W0dg3BKkanTzv1vbOpVLocsBJAXOzMya1h4JAUxjwAoJGztTOC5x//+T57CynOlp44rx6GJ6QyQgSBgaqz0aHRHKU7CW4kICWXHPP4fBdqPM/jJHAisAF8HxBEtHy14hVrDBkGp3wQm9gMM0ClzvAc0PFzM9zS5FC9DjgyslWi7x+vRWFsJ+I//BIAYVG3AF6BYHs1UWQeC3ePdWeJG8EYGM063ey7qbbsfwF4M5BDkr+0LcSAYGYwMTeOriOlN6Gr6djYDY5TKACtjNYqikcJRyjpC3fT6uHvPnb9utsawf18cp6J43UOSvJdX9CDLkkJSwKRTNjCwhonMN3dcPpu2fQ3wXTC5H0n/jTblu0mDWZjjAFJrqow3Zye7qXdaw5/u/vVB2jJZ+IY2HZEqxht85o1V9TPCJ+YvFfn/zVPzB7AodFaM+lQGyFJt09peX0q7d6daU//R7G46qrntN52E3aNTPexgPuBcOLwT2MxJzZViAGtoQ0/uAPBc5nPdzugKPO82AOd753d/rmrDnzrZ3oPuMlJyYdSLfI7jkcn6dBQuaTCsK51fP844CgzMrkzkzhUYyEpjsya2N5iMKIWS0TpNFGpxHzfIyEvXWXIccC+CxjDzFHzFKpWNbku4cQjs9yclagHzFImgZfI6qLof4mNYBwXTq2iVorhyrUA+OXKbB/zm2MDa0KaON6rKBwdaQwJYsAIA2Mi346lDgy3tKX/bdbJE/cdLyLPZfWOj3MzM6tA1cN6WA9ruh7WgjCsh5q1FgxD0hFCSuEOPTP8o8U/f+pjcZeILcSIJYuG3USNEno8T9AdTiy/USgrOu/pdJq2EzBXuRzk0j9tXHLH/zz22g1Pb/5srRIYx3OcuGuNE9RDzQw1ac+2Tx/57v1+USgUTNxZYrvb7O6Gs/TmjXc+cmP/sRuWDVyuQiNd35UAaTZwgkqo/CavbereE3976Jv2+mCyH1awXqmdYTUDQkaCgHEP8EiupAk0NMJHtwjSP0dcKp8fK48pFPrUZdfPzXyud/Y5n/3NgVeGbPplin7leOIMYsrUKyoMqia56ZN0w3goKwPM0aM6+ViOrn6KF6g4+lMchyZ4bmRgPfW04Qce1whConSKkgBXJDyaUakYpFIC3UdmkElLCkJAikSyCcQ0lkbUMOfIeGmHWPHVH+zpL+VfljYy2xEVw2OZ7nHDOyLWjifE5nWlb4d1vUimJEBgE2rd0p7xW6a2vB8AcnNy9NxBd447XzVyNoRwhA9JvnDgkyAXkTvHUgpUK9XNa5/e2HPnj5/4TzC22S89UEFj4aNhqdELy98by7uPn1XV6naPcbGISJAZ/OCVT3/lmcc3nTi0ubRY+tIBwYAhjGbJCvXOGRMuOuSNe329uI12OFuLFnKQwyswdP+vlr5v9RPrzx0dKC33Mo4LgmIiGda1cT1XTdqr7QeHvnHmeYlLaQXrFVghJM/rihUqeq5xMsiLWQohaiGPOmiO2uI+im3l21Bcw4dCAaZQ6FO9vTmZv/rAk/JXH/D9FbXRhyD5OieLNzN4Uq2sVL2slDHGEJNDBBEHoca5ejz2X/R6I+TMjNhMAhGY2EQxp7QHGho2tLhfYe1mg5QfxaCMiWI+zGCjQeWyQVNWcPdRWU75gsOAIUQjv4rGx1+oIYhgQSSDiqqzcf4vco9fAVcwzpWohWQSR5UZYAMjXUcObyxvuP+KJZ8uDY1ew8YkbRaFCZmzLam37nFCa1uxp2jwPMm+yXEVksgYPTKwdvi9G1cO5Das3HxRvRYOCIcoTmSA0SyWPLxxUT6fF+iB2JbV5MFLNJCjLkWEqG8fmJ6j9bHBuOR4Tizc53koFGBA4O48nKW3rLnrrh/1n7hxxeC3iCAdV0TZtaH2jOawY4+WT+x7ztSTi3EbnOcIl+jIS8jJJ65fc/2DD644atPqwd+5nnClIC0EUVBX5LgOt3Q2/2jqkc0dsZVJVrBeLuLkTwb2gSKQaKRQN8JBriSQMSODa9du2t4KIRE4aQf8xd/OOfRzvfsXHuSH71fMfeTShxjYO6wpXS1ppTUbAqQgkoIgkmdpYsWQiCM1PF45iBph9bEYBxtmGA323UjRnlxu8NiyyGWM3b9YASNd1ppRKhu0tQp0H5WF4wgKQ5CQ4wSSt8gvJR5LkTdeRgij+I6Lz7i3P8/55+oNvvNj7lyNY2rR36Ugo7Wm4U3lBQCCzcvW/668uTogXCENAUob1dye7Wqe0XIRAO7ufo6bM6nHicWEFddWP/DUlQ/+8umrH/jF8l/VS/XrpSMBCGMUq6a2bNs+B03+VKFQMN0burddwkMUe/BjiaO0pfe3Xf8UyaoPEYiIK9WtfiQP8axfAPoKkWVEhOriny/5+Lrlm/4jDDVLVxgQoOuK0lmfJ05p+QIAys/O8/Nsk4s9RZ3LQZZuL22896dPXrB59dDXScARggwRiTAIVXNHZvK0A6Z8AAB357t3Sytrl6olZDYpZm481piY41rgaFUaojJ1DYLxlsf4azD/u4P3Eg6/tRaEp1VUcKSfEo4JDMIAJgxYAyQJNGbDABw9ihKZ4oZpwyZ6kahRiNt4A4M4Di0xR/EOdhxgw2ZgxVpDRgO+R0njgaTLE4HBShkulRmTOyWOPizFDEApTvxKThwikXhdSd+psWYuEAIgmJ9H1tWif1o7XAYMHOGUBsqrHr0bV8QB73VtMys/zbSnLhGAZs0ElzjTnPlPAP/btwhhI4F2vEUTThqXH5ysELPomjW9bb+m1UFXF/gf60u/zrRl3yGlIKOMMFpwttW/sP2o9kJfX98ott/TPTqPjfjjttYFt/xqBMGNSBo4SmpNbztLfXuWEQM0971zncWXL/7x7JzJzNiv61skSBsNqQOGn/WP2++sKfsXCoXHG/3dn2ObiduZm5OjYk/xk0e8a9/pk2a0vTkMtNIGAiD2mv0LAPx33F6GsJvVE+4SFlbcCgMEGRepm0Y8KG4sw1IaAHiGCqTiSEfjROQXRG8rbapNL1fVe5ta3WOJ4NRLqq5CNhQVljqCWIyz6hvLjzz+2n2eqg2KC+c4fmanPII2wGNLNS1ZyUQgOE7s/sUXexKJUyFTqcyYNtnBsa/JMLOAiQYVMMU5AZQYcuOsRo5vYWJAuuRUSnqdVu51AFB4uYPtW5OJ0npjDykSWEMjWLGi1tvbawDQyNKh/6kO18vCkZKZhQ6UaWlL7zs7N+M0EHj7cZv4eyLJPCCE5bru64MqzgY/+eia2yuD1SekFA5AMIHW2fb0tOn7NOW2Z1WwO66ui6PFAmaO0hp4O4GreCVxzIpOihu3/IkZ8zv33uu0rkOO6Jl+0GE90w496Pxph3R3bzGzkRdfvljleiH7i6u+XRquPux4UlKUyaL8jCvTrakjACDXn6OZ3TNTs07uOnjfMzsPPfDsSXP2OWfq4Xuc2TVra5EsFotgBi3r33xJZbQ6IiRJZoIODTmemLn/OTOmPGelpBWsl/6oTp6ojTKKsSWjKE5KBDJmGOCk7nDsHMZPpW+9/6nbvv6mx/d65qnKAqVNxc86vhTQYyGJRiAi1pEoajxW5DrmBmzR3ZS58dhPOixISeS7wIYBxkNPMoZLAim/kaIYm19RdNoYRr1mqFRh3msPF0cdlobSIMNRenyj/3MSax/33RstoaMvoL20hGDx64vPuHckvzBa+XxFz1V1nLeEeA0z+pokiDjXmxPL7hhcWR6qXi8cIiGEZsPw0i6aWtMfBYDZs7exz5PGhbnHzpLQjhEAMHftXIklqJdHq780xiAeIkNSCqSbM+8DIOZhnnn2Qk6oKZkDER9JEkTPE+MRzElpVbzCkFT1jF2vomNa8w0z50z5R+se7fdP3LPrwbYpbQuHu55p29rz3PBo5K7WRsO/kohWT5iZ4+z8CZH1VNQTJuCAaftOemjGgdMe7Npn8v17zp50/7Rp7T9tuIrjrLcFC/I0cPfAM7Vy8BBJEa3LMhvpiFbSakocNiErWC+rcIm4qiVaGTNxvg8npgeb58ox4XhgaPijDy4rPLO8evzgYHib6wvXdYUEs2YTjdqJVpp4qyyqRiI0jX80ceMXwzCgOHL3lAI/ttRg6QoDQUyuk0zSo0YQRghmYxhBwKjVGPvNcnH4bB9BnWE081jOAjC+NwAl/aDJxJuLolggFmGVQxPwLwBgwbx5L9oV5N6cvO/6szIv+twkvZj8NLEggTFXFXEFYHQwi1Gu1dDmkR9VR+sAQTIgVN3oprbMvP3PnTSvUABvHWgWA+uZGgG8sbRUqYQBgFmDiw0ADA1WrioP1+rkSMlgUnWtMy2pIw94w9SjC4WC2Xq7QR0wPJY5xgwIIfzpx0z3tmfkxXrpjp15BstxjSOix6rItKScdJMP4TgkUw4cTwS1sPIcswbVEBsGSEDEq5aO6zTuQfIVuxmHvZTHXsoRXtpjz5eV7Yorg4zhMuLLLrmcpSejbfZbwXqZMdzotpvU42DMvni+fL/Y0qJ8vtv5zefWPPj9dy2bv2FV+IFalTekm6RLAgxmHc2MonG+ISfj3gjcyLcGkhrfaDUMQoI8F7RuI+PhpxijFUIqBYpi4knFLpIGlFAho1YzXK8zDtrf5zn7pVCtxek9ghqF0CK26Wh8wCrqpdPIz2QD46elNCHf8ZGz73skn9+x8fMPuk82T8SKAyKF37HzPz4wkriG4+Ishhm07MaNd4wOVO5y3KhxMxtjUlkfLR0t/wmAc8httdUpkShH5m+jU4LxIwUpzgbn83mx6o8blwY19WfpEgmCYTbGz7hobsu+J1q/ySWuEwNAStEmGN6clNgYY1g6Yhr8+rRcLicxfhEgB3FB7gI59cS2Ti/ltBsVVWNHlpkYKZdRHreAa4xmwyaqDzKhYQAd8NGRy+Vk94Kx7XZho4hWJUVb1JvLNHx9rVWlsVg+UK9orRQzExsDowwZgz0BcK6/8WgjALQIi0Qc6O2MC1SjknjNtYznDgMAZu9+TuEuIViJB0RsTKPlbsNlS7KNCYbcNIBtpjSM31yh0KfyeQhm8I8vXva/S58uz934TPhzQUL4aZKxocSN+rKoewIZE634cfx3mCjtCETwPUAFjMeXMq9YCzgy+qUNcVxIGKdiRRd4oAyCkBGGEIfM8bHPXh6qVYagyMmgcRH+JDXR8JiM8rgUoNihiQIrAV8GAJi36EWdu6R+fG+f3Kyj2mKX4YVT2MK6GOvWEHWP2CIBct48SABcHq5+px4oCBJgQ1IF2qRbU2fteWrH/sVi0Yx3czrbDTElEy6S7n20RQO/RYsKAgAqo7Wf6dBACAEYkqyYUy3++RNPnDhl3JI+M4NW3z0yoJVeJhzJAsxQRmdaUt6ESZn3FYtFjT6ohoNYhC4Wi3rijNb3pZu9DGujiAQLQaxq6hGsRzmXy8kvfOEL0UKH4NUQIk6VYO03+W7WT/9nsVjUfQWoRF6Khf4AU5BJNXlnagWGgWRmqeuKXMFPJN9vdM2mzVqb4Xihh7Q22k07B84+b+o5xSJ0knMPAvcV+tTU17Udm2n1DuXQGAYJ6RB0qNb//e6nV44XbStYL9veOKaRhExjCU9RHAgwQja/0BNRKESTV3O9kNcUnln9Px9Y+s5nnq6dPjysH/bT0hECgg3MuAFVnIjEWAwK5EiGI5me2QB6dClQrROl/UZeTsMGHJ80FdR1o4j58IN97DXNRbXKLEX0YE0cXzHWDn0Ly4UaXtZYZxTHFbI2qp4ZXFG5EQAWzH+Rwfb4iI26Mi2JUzvqEqZM0kkRW2Tgj39r0irliYefub46XHtSeFJCMLNhnWlNpTqntb8fAHeju3H9ub6Il4QZFAcDSIBJZjkWV+7ri3KShu9Y8YfKUO1p6ToSxGyU0U1tmdY99mx56/jg+7wF0e/1anBN1D6R2DAkDOuuPdo++pqLZuW7js5OStZZmg9Ax8EXzvzsxGmtn1TKaGaOusJqQ9XR6nVA1O54ERbFDfzC26M8F2Jmlkaxbu1q+uBhb94zP+PkjqlgSDD8/c+ZfMSxb9j/uqa27N4q1IYJkK5AUAk2jGwu/wMAcr05OdKPAVUN/k4STMzMypCfcjFxxoSfz85Nf3PHsR3NAAQmounAc6e8YdaBk3/rZ3yhDUelZoIQVsP7sQK1XG/00LCC9XKwICnNEQMU1YwxYYuxEqQ1AMNdC/NwqCEuz0+xB5o5Ks/5xWdW/LH3R5VjVj1d+1K1xhU/7ThMrA3HviY33DACg30PXKkCjy0Fr9kAdhyC6wBax/kQY6VDUZgWjKDOCDVgNHDkISnsMcXlSo0hRVJWM1aOGNcHgqJci/Gdh+Pj0ZhPo72UIID+X+GD/aXe3tyLH7qRHONwdBLpoDMO3r7wGEdsYdXDmtl6SY2fXXPL3QsgsQT16nDtcoCJSBg2LKGYMy3+W6a+rrmjL7KECQDCuhlzvxEnT4GJ/TKN23/u7u6Wq1ejWhuu/IaixmDGxCkjmZbU+6Yfg3Tfgj4NgPoK0e+Dq0d/XtpUGpSelACMUSwcz6HOme0L9nnNzEePfu8BDxzzvgPuPfR1s/un7N3x347rSqNYAKylL2VpqLKqsnz4SgDU19en++KazaG19V+PDlZq0iUCwRhjyPVd6po1ccFec6Y9cuz7D3jo+P848NHJs7rube1sOVmHbAgQJCgkCVEZqf10yR8HRnK5nExif+XB2mVhoEk60hARKWU405xtmzKr68o5c6c+etz7DvzHseft3z99v0nXNLVl91BB9IyXrkStFGBosPzd+NzuluwSgrVoXrwfurYEDpC0RUZj9oSJcqKgmw/YG/54i+EFxVziGsJcb9Rv6Ocfe/oLTz9RPmHjuvAWSOkIR0ijWWvD0IYhBENKptVrDT3xNFM9BHwPxIZZ6yR1tLESRCAmo5nCuobS0Y139GEpTOqUqFUZjhjTBZFUtSVhNErWBRtFKePzGhOH0alVQsVQP9/ha3FOtF2pzUxjKu2RH/YiBCu2sHw3JaJYExuOihGMAOmtz0hf1Ludlt6/6eeVwepmxxESYKOUCVLNqc6uro63AsCNa+fKsfNEzCBDUUmmIYaWuskkFhYA9MX96suDI7+ojdRqFNluUIEO0q3pvZtnzDgnzjaXQJRCsezW9RsG14y8X9WVcD1HgKC1MtCBUU0d2Y62yS2HtXY1H5lpy3axgdLKMBEr6UpXB5qCkdrFT9y5eTROx+CoS0NOLv3T6iXlgeoC6ZHjOpIJMFobZmVUutlvm9DVMru5s3lvL+MhrGsdG46hn3H9wbWjDy67e8ml+TxEsVg0SY7Vw79bdd3m1UPXehnHk44MGYAKjRGCdKYlNaOlq+mg1sktM+A6OqxrQ2AjHQodT7qjm0o/fOz3q+MC8N2zc8MuIVjzkjtUm83jV2uocWsThRoMku0Zd+K0LR7vL4KoIR8on4dz/dfWPHDZB5ectmZ59Z2lkl6danIcAZDngep18OPLwOs2EzyPWAqATSOfERwVITdS3o0GhwFTEACCiI853EdHu0StzlF0h59dA0Lj/CgaS7qiRkiPG/OztJeWQoV823+d/o9H83mIYk/xxV+MndHSuiPoYJCzw6tH7DEJKdNuyhGOK1zHdwRJmdnG+eBcLidGHx/dXB6p/lr6Qjie40hH+H7axYRJTRdPP2Z6evFli1XiEgLkuZ4U0pWum5KCSGT8epTW0Fiij8XisZs2PTUyWP6Ll3al60opJPmpJg+tHdkPRNdU3sSLADqXg3zkd6t6N6zY/B+1aj1wfelIVwgQkQlNoAJd16Gum9AERATHE8JJOW5QC0c3rxp6599/ueyardu3FItR5vkDv172tfXLBr6hjXak7zhCCAECaaWDMFB1Fag6Ga2kJDi+FG7a8UY3lu4d2lA5Y/MTGC0sGBeUKEQr3Q/8edlb1i8fvAqSPdeTUsqoXapSpq6Vruu6CShaPCDpSQcEf+PKwV/c94slH91WAfjuxC6V6R5Ib1mU+y3AUT+i5A4GAzqbkqlytTITwJMvyp15VlAeKk6BQOHTK35+yvsn3TzrkOYvZbPyHRs2sbNuY9TB0neJdexvNJq7IKkhjNTEaGatDIUhw/MIRx+eQlOGUK8zpBiLRCUJoZEP2GiztEV7do5Gp0SfJxLrMmqJ7GiKg+072LM9bu4nuL5nKJybo9dehJ0au4RKBUF5qPqEqoUeEwKCSFWqtZXd3ZBbtzYpRrYglTaM/t8GIc900i4bbYTnuUqHKjVpL5q7mnA7AHLTkkcHSkt11NAndH1H1iv1kbovtpsmUB0JfzawZmQ2mAIGhByoi1olmHz0O2btWygUnkqyx5N6vYd+u+LH+51WvbNjj/ZPppr90z3faZOelHF7ZTAbqLpBWA7XhfXgTwOrRr/Uf8PqJdvrNVUsQkeTgJZeckhu2h9bOls+lcq4J7gpLy1cKeMSDbBhBDWFeqX6ZL0U/vTuW5/4AVaghjzEVkvfHHWcQeXenz7xxiPetudNTe3ZD7q+d4Sbdlwi0QgoaGUQVMKgGgT3lDbXvvvAb5b9nnn8ALbdk10iTyMZTz96TXZeZkLLwkpAioxJBlklbaDCbJq90kDlI83/Nvo9XgiH5r/03j+5XsjY8kKuMOtHoev8ByujGORENdjjynWARuYCRa1hEAaGagGjOStw1GEu+55AqAhSJHn6nHRiIlDciG/ccW/kMEah26Q3eRzQJiMdkmzEqnaecOBFp95a2TKE/uJWCYu9veL1mf+6x+jgXe3nbniI8xD0YusQI7ndVkD3+aw+udUSAGEuBBY3RlIlD9CXsl0AELNzs6m/2B8861yPE57Dz5kxVXa4hxI5h7BBSsFAQAeSxQMblm+6e0Xf8NDWP7NdbzkaX2YAYM6FnXu3trYdUa+q/VhCKDbsS3fQBLh38f1PPYD+uLSMt5hk/uz7khv/x1Hv3PNQCPeYoB5OlkIKFmwcIVaVB8K7Hr12xWMvYHvWwtqpxGkKAbylqKlRIb2muK6FaFyaFARBCDl7Z350sQc6l4eHOdD1f5gHUlkgMMSsicev3HG8etiIghtAhQbVANzeIuiIQz12HCKliCVR7Mk2et1FPmTjxXEWVCNkR2PhqyQLidikso6sjegrLzr11nJ+YbeTFHe/qAW+WJhWu5+eqoyeNWrSI5GXtUOPOAagXmSRGm1TeBY/6zX1ovfm2dvV/cX+bZ/rOE6URx6FQmENgDUAtjkfIJfLyeLsIhdfwBzFQtx5tLcXhmjjUmDj0u29Nx4eoZ9HXBg0Jpb3XrH8HwD+sb135nogivSv0SJ517CwYsNiYR7OEUdNfNhPpQ4IQqXZsEiGoTNIZ1PkVMq1vzedPXjUOGPkJZNYWefn93y9aPJvUYHRWpPYosVM0rcdDGMYYcio1RmTuyQdNsdlMEHrqJeVILAZ67YHIkSWFScvjGUCbNGlNM5yb6wAEpHjCsU1ddjFZzzYH7dBftHu4MKFcObPh1p7zYwLfVf/cDi774y95vfVXsIxpG0bcS/5Z16u7W73Ro+Goo7R1d+3zb5aL2JxQuT6c7Rh9oadtt18HmLRuBSQaKUqXoCwU3P+CapJ4NgtVKM3moddlw8IAjIkIi8p9qqoFjkP+5du7JxMtHHdzhKt2bGF58B/MgxNTQpKmShHi8Z19gYQ1REGIVCtMmZMkTh0jstKxfWFImrkq+Mawka1IoGNAYm4ScyYoxllYCY1trTF5E7WqazrhiX950is8qKwA5nt4xc1fKlPIdYbXqJY7WiMhP+J292mpRiNbuvbuRdzAaa4k3MKGjMHtqYP/3LsOomjyRK75nsgxvUiitNyACKtWaXSXovR4dFxVFfspAuCAWB4QK91JK923Sg4zsQcNVIYqy5UoUEYMmbt4eKwgxwEQRQ+lwIYrzdIkooavVMp8QwTEWu4fsnfuaFbcVfSqFvgjwBgTrGfdlBZCPOjVicC+gwF9974CS1hsVjB2kHiFSuj1B21smIG5Ni8koalxdKTECRP3kLkdoJXmmeIP/5gSb1e5+XSTRodRxVobOJgiWKqVw0kgQ/ZL4WM58PAwLBp5E7R2MBUbFFDTWO/8XgtS7rZN8qgCYbBriecWlk/RWbkVmZQT88OLlX3QhDAQ9fMPLSlVU4JTfquOJpir36LFawdDyRFvnilnHlY1cNnPBfCJI03kxYvxCKoMRg47cnvwaf5UMw7R7T64zQJV4olQiCq+UsKruPuCcYYVhro7CRaubGCTZsVprRkkfUFa6UbKkRsGg0mxoIsiUvZKAfDmG4lNY3c6P7rpwQE+BcXn7GkvmBR946XWcS1wNoJ3szCQDj6LgAovgIzDJ9l6f0L8UK/7/bex+N77Vh2PcFK4lhTLlpfZja3e27cLZ3H+VhMItBQnif3njyx6RgGaGe5hUnPIq30E7EtNC7SBBjNCAOG6wJdEyWkJNo4WsPjqyrwkEZXa1TmyAwDEqahozy+xoggBDElFdI05jk2OmARM0E49YqpGvaujNy3He/ZTgT95M2n+R7pN5VGeO1t5dQTAJDr2bFgLY+bIzP+ZosHhRDn84LzeTFmuuZF0ri1tzcnn/Uz4x44+TzE893ozCDexnaiz4Lo7d1yAMPW+7mN12mL13iL9xNvZ5+2cRwahfqcz4v4GUf57XTEyOchGu/L58X44zCu9Iq3+X22Om7J9v4VBGuXUvAkt2r02pY3NrVm/t9olRQxy3EpKWCQas7CHdlc/knr+aPvTXK4XrKBl6wUfnGfs1JN8oZa1SilIA1HzRjCukGpbDBtqoOZMwTCMBo5bBCtGHa2ZdHR7JiaCmVsjYUgklEZ3ZYFzkRJ35rx+VhJeQ6pdJN0a2X+/X+ddv/5LyXYnqwODt04/bTWifoPw5vx8wlnrn3nzjpmL8oz/VYu3fOxYvUVvK7/qTlJl+XnZt5XWFx5vvddke9OvbPQV9v69e58tzMP80yhUDCNTt2WXSvTfcGieBhFkPlLuWSGpOu1Gh0CjdyGaGJ9tUbsOM55q3/R/GnqGd28M1YLk5XCUqn+tOOnQAQJioYNGm1i64owuUuQ1swytpAkCI5PGC6XlRKe2+zKDcQmyDS50ysVpZNm9CJJXUim3cX5pEnAyzRqCZmiK9T8FNjxYDsAzJsXH0+jPgiSCJS+GQAWvfjYX6Ndy53fPuFnDHEwtIErYWTThHlDg4PdnRnn86W69l1Jg5r4s8d+9PZ7ANDfvz3vOCHxHa3W7Xnft0+6cXWoLn7DJ+8cXfiN7oMmN4mfDJTDrx3/8duvzechXt900v9JwdMHnOxZZ1z8x3pyXi+77L3uwcOP/RbM+4FIS0m3rh9pyZ9TuLGy8BvdB7nG/NgwN/mSqnXN3zvpU7f/FgBuu/SEL6VdOr2i4Ehw1hDOP+mS2x8CgNu/fsJXXKIT15TE2ecV+obi1/497YuLNo3ULjr18/c+ffOl3dMnuvyrquY7uy/522fz+bxYUCgwAXznN47/jSA6uK54c1qKiXWDB0785N/edvOXD+vsTLf8rwBOWvzNEx4f1eLd8z5521NJcmmSrPuXr83fv83n7xqjD7vnmyfds7lu/v2e4HWbC4WCuePbJ13sMV9C+Ev4ukuP+zJ96s6fLFzY7cyf36f6vnHsSRPT/lfXD6tLXvvZ2+8AgJu/ctKR7T59MwzV20781B0rd2bKj3UJn4NCAYZ7IVt61m00hv+YTjGBSFE8kSJ2nEhpqEyznNjaTG+KXKaXvuKVtHvKpN2NxLxJSIqnEQJGAUHAmNQl4HnMxiRiMzaMuKXDc1Wgb39mbXVuJp05LKjh5ylfSs8jCbBqJJ+axvgycBKeQyMAbxxXOvWyfmxoOPjLSwm298btRQZ+13mon8apoxv15pFh7ouFbIesqzi7//XEZr0Bvhsa+tnctnRdKDNDMY41RvyP1iYlFd/wSD7nxR7yr7VGOQC9g4C3TyTxYQDQJmzLeM4xgvAeADghffx0SXiH1nzkhOVDAgAWxPWD++33BDPzSXWgX4H/zxH08YnZkU8AgM/UmvHk8WD8X2CwPO2K39z5rddOAwBH4Oh6yNlQm5+Gmv+nSnpd47sY/reOZveE5gwf3LDwDfbuak6dkHHdM5lBrRKnzOxIzRNM+wPAnDn9RIgaCSpN19e1WOi7TrcSuLaqzDUA0OQ05Ynw+prhtymIbJPkXwHAgrh6vBjPZsw65juhNoePhvzvgnB6h0ffLhQK5k9fO+6IVk9+VzN/pRzSj9sz3uW3feOE2fPidkJa0cldE/zjpMPzk/32hJ6Q9sVJFe20RE/+/G4b+9pl/V6j9RUcW1ds4tI7bhhbIlQOQ4gP8GVwMS8etPzSFMsAwDWFZRu0wTrpRO2TYBihYnI9YHIXQYVxEqiIBoh6LolMs+OEZf5u6jH5uh+8d8nqD53y982fOOPBd+qyOZcUnso2SxdkDAE6sbLGdTkd8w0NjJcScIh+UejpD15KsD0XxwUd13w43S4dzfSHfS5av4F7IV9K/pUgBDC88KRLbv/1CZ/424+pp6h9CVWrq/qJn7ztZ0qpz0khOkenb27L5yG05kmh4e+d8LHbbq4pdYsj6HgASMHB5tEA0HwM9+ZkkyMPa047AFOjAH5B3KHhta/tU0QIBWjhSZfc/oNyoP/EbE6IHhgmqIVKu+mwV3WJdwpBDK0PHhdXu/vkz9zxw/mfueO7p37irg0AcMc35s8UxOnNo2rIgzli7GbgehAYCDJnEIFTQneP1BSEwOj4gzCnv59O+tTtv60q+pExRqla9nuv/+wdv49vqONGa+r/Hf/xv91SDsPLQmMOv+Ubp2SpUDD5PERPXLiutT6grtQV8z95+42s1Y8lTBcAZOAeNlxRo8d8/G//89fq5m9XAq0kMDdxCQVw4NPrKoMe4dCGmyS4VKmG2tEV3vLxawXr5Q8+xP2rWtXkRZVS+JjvQRJBN+pkIstG1ELoplb/wFJHS44IvCj/0q2sfDSqBUT8ZDz3GVpFPa66OgmuK+JFPCIwlJeSDgkxGlbM27964WMfLRT6g7jTKfX25uTH3/Dw9SNL0kfUR+gnni+k4wsHgBo3SadhYTEAIeDUy6pq2LvqpQTbe3shkYPZdPPk2a4n36hGDVjQVTvoDm7tGxJJygBAbzxhWDhxjTYAknI6EWPzpnQwB7MdEAIpTBgFkkUysQYkRaameAWBa7evXPlawfza4UrwFAPKawlpvIV11VU5CYZkUHZhvtuRQlSJ4AEACSYmyMGya/QmPcv3HQFJ1UjMWAM84Y/fOqb97u+d1sJxADuEniuk3Bgq81dnXH6HNuytGa5vcITYq+9LR8yQQk7ZPBIuAdD87GOck2lhuhjkmExl4lhwnNMggd7enJRRl7Mwa8ri2UF7EkRRXvJRl9x58RGfuOPU6B+0a8BmYb7bOTwzwTcMBSNcALj5e0e1eFLODkPuZcbc6/NRb34TCsFb1FTmrWC9oiyCpJ7+AOD/dT1DLMg0hggm87WYEShikvg898725i2IK2deyscuiMof2PByKQlaMYeK4bvEkzoljGYIyQxilW5yXaNwb1DRR33tLY//Mu7wSEmn056eou7tzcnCxfeOfOKcB99bH+ZTdKgfyTQLN7awTNI7PpJBVn7WIWhzy0dPv2d5nrHDA1IT68o1/MXUBDdTK+nH2yhzKzNo/kssGJeEUQ/igw9+58SH9j5u/acAQEGIlCecu755wpVNnvyaIr76rE/fNNgJeKxYsHb8np6iZgM3GQupoVxJKAtCnzTybSB9KAM3EUx6WYu7hQWYy/UaIWAEGzm/0KeYjaYk1y0EBAgTXPrxRJd+V6/V7129unYvAAiDgYwnz57I3mpZL32OYutGanUUmJaT0L+ShGN787O92IXsMlovMppXQ/rvYebNMLxYgKP5E+MS2Ht6ihoERWDjGQoTywlElca/M2shiMOs++yhv2AhHXf4vm8e+4anL5tfvPPrx78vMpcoJJCZV+jTXY5RbAwxGR8AUoF3ILNuEmH4PQJ1taRG9gcAx436rHmet9sH3XdNwYpdvPqI+EVpOFzrOuQA0HHT5KjBMLOsB1DZVv+AIaz6ABEMFu6c7G0B0a9NlN0ehoyJEyV8n8CaDYHIzzhuvcw/D9ZOmPftdz75eD7f7cQdH7a4MHt6ijqytiA/fcHDfy6XzLHVYf01QYCflpKZdaMuHyRgGA7Jy6Jge27HMtuTzhfXTpvv+855CBiSwp/QGUvqOyPWx4Y8Zfgubfg7LPjvkf9OUjNVDPiAugYeneC8DQCCksMsYAimsWxvdCTCQgtDoDQgbsh48sLIWJL9JERT0/JNWwn1AmImQcQ6n4cgpmTyLUIXYHCNBGaFGvuA5Vt6vnN3NVaFTMi4xwhcaFz5m3ycbkGCDpMCbMjNsJRdezS17wMAgiWREEoZedvEVu8/NfCEIFQF0XbvE2YQybG+89GUN46+r4lWibFxW5YqGWbOwBXrhivqSNbmQwBAmgSBaUG+W24aCaNOlnHAVBpzuBRSiow7lYk0C54bm2sOQFDaROkO/f02hvWKuoUERh5y4tsGRqDMt1KeFibqm4dGv88oJ1zUAqH9lPP5Tb3t0zAPml9CPkrXnCiZMlThMqMMiCEcCXRNIijNykkJ6bika8Pq4m+87bF3fudjd1ej1Z/td1CIrC3o3l7IQk9/6ZJzHv6UDJ0Tofnu5lbXEYIEMQWeJ0RYQ/8cv+XP2MFge2Jhcu9sj9zgu74vqFzS6wOZ/TkzCPNeeioDE6cC5nvnfuz2K464+G9/AgAhAa11WGV6G5i79ttsIjdrMiAAISTXo3Zihh0yKQCQAqwNp4dD/9bQsATTPSbUy9iwi3322eIzi8V+Yga0gSoUYJjYI47GW7khYAzLinTeGCheVVHmjeP21tPaPH3Uf912w9Ef7XuwUCiY3vxsj4C9DPA6T+CrngAbFochNskEyFWOuKEl5XSUdfg3Q8SKt31NGQjBANcqYxOYIEg6QtaIwK4nFAR4FKVtnEsjSGn/iIvvuHu4pn4tRNT3i8kwczRIpTZnliICHKIAADymub5DEwHx/bQnfA/m+EgkoxF2KpABEZiKRW0F65VmQRTLagq9y0rD4Qo/iv+YRn4eE9iQCAJwutlvd4T6LhF40Uv4TklqQ0b4y8PAVFmz7OwU7HpGu750BbDCVOXrvvPup76f64UERy7gC9l2T080mCG/sNv56DkP3JUuOifpsv6c56KSyko/k5EkDX49f36fyu9osH1hZF2NuBs/m83KQ8BMoTKXTzht9QAWvbRg+5gACxZAM/fm5H1xDIWYtQBNGLj39ifAZpHQ5gsA4JXa6iDUWeHc3k+f0JlyxRxBvHrcxeef8pm/bNYsvqGF/zvpUhMzCSx5tovLMEKQnHDXd7r3TLvyJIZ4GgAcSewJcoPyyAhgfusJ+nDi4gHCkBZ73X1p9/S7vtO958KF3c6UVGa6BO1Tq4vTKymaU1dmmRB8cuSNQRO4bf4lfQ+u3FD6RdnbeAeYszDbPmwuRaXrgWv0OBN0je/w0b35Y9qlwBkMHjh7weIqR9cKj3ugrnEFuns/eXJrynXmOYLKAKBJL23OOG13f/X4Qyev3HjihKybIqMei7/ra6uB+cGK0UmHV0LzTSHEOVEMURjXIXIzZlrft0+ccs9XXtdhBeufYWUVIahnY4m0XuBLRcbEiVFoDDwCAXKkSmHLBPeCzb0tF84vQPHCHcsvS4qglwxU1hF4UDqCu7qE9tKuowJzfVASx37rPY/d1nABX6wAELgwv0/leiHf95PF4YdO+8eXvZpzDCnzl1pFVUjzb6Jg2o4MSIWk+VBDv590VDqDz1RDaUql+qZqTf6AGYRFL6kNScPF0GwYbALqKepRjJpoxQvKsKk/OrublBGXSmGOvvWrxx4+v9CnWIiPSYd7Zk3U/UKgXtO4FAAUQWnW6vr83MwxH7vt08d97K/31lmnmEwVWxpYuGsVPABDnsMfk5oXA3i8bsTXI9UADCP0jN8C4V/GhAnTmjpOiYPoQ45jjtSk7vTY3Nf8MPZRwp2twIPOPp0Pzf9gX0mD/8ysj4/fX0++6fGfvusdZ1y8pA6w1ITgWQoKgAMtJbF2PC0S91ATfVESTZvV6vYLKU6pMj5GBC4WcwIAF/tzcQyPPicd2nfPztpDgviAOps8A1T2Wu+oBer30qW70kLfMFTTV95cvvOe67589CQDTDREt/YUikE9CG81zM1/+trJUwOIgXqo6w7Tb5pAD7OrPh9dE7ndrsB9l/d143winO603J5qaTqmUmVFZEQUsk4cITKuS0RhbZOpitdkewae2aFumvHyDQO48NJZC1snut2TOiSqI+rL33rHk58DtuxQ+pK/G+dkD0Xm++U3HbLfe8986MkdMn+SwukbpqRqfriYZGp/3zNUGqx+vPncwW/tzMz26y89fo800sOnfOrPw0kG9i3fOCSbqnntf1VnPlMoFMzfLp27x2hVDp1RuHcEAP785aMnzZzoTfvrmsrjSfb3nd86Jl0OZeft1TtWL1gQLZvekJ+bzjpe52s/d9fK8dYgM+i2b504PQirrlCuft3n71qR/NvN3zvNbw2GJwclb/38Ql/t5vxR09PN6dr8j/dtuvUrR3Y4JJoDxeQ5xE8+rZ6ZtLef8l3ZdPp//W0tM+i6S/Zvam7JtL/u8w+sWJifOxFZ4cy/5O/rkuvntu+d0BmwJ07+yF/Xb30s7vzoMen0Hv4knSk9c8T7FoeNEqRLT27dr0kdsGK4uvzcz96zfnvH8pp894R9J5v9lq2rLDunsHjT+Iz2e7/bfdBoTfHrPnXHowCwMN+dqjvlzlPVfc+gAL78vXOdfWZ4U4Xy1i9CX3Csc+I0Qt1py3pUq2L0pM/evhGWVx6OBavc23JU/eYONXrT5HDk+kl69MZJeuSGLh69oUsPX99lhq7vCs1fJ3P5+rY+XtjtcC/kjhRGd+cj6+xt39n3p5+8anbp87856DwgqtV6Oeq1xm9zRwu5E4uyfHPbFXzbVK79ZYYu39D+GH8PPvPz1+e9rOdvq2O2s4rVt7WdnbXtnXU+t/X9t/e+7V1bbAugX72iNfi7ti/xok4evn5SMHzDJBP96jLD13eZ4RsmmaEbJwe8qJOHr27+3/E38o5ccJ/56f5HfOZnB7wmErFu55W+0F/wsbkPLgCUbmz7ON8+mUt/mlZTf5nEm65tP3n8sduZ+7mNm2iLIt/4z1sWOW9V4Lud7/ycxcLjHhrb3c74/UuKj7d62GxROMzjPnNbRcXbeu35ztv2vu+LeR/nIfh5RG3r75382hWE+1/WJWw8ZXoh0NlNoyMP3ZHNekeNVkgJYhmNqIj6ZhExM4RuSSt3YIg/1XH+5q/xZXDpfVsMOnhR7EwXcKcfl7hYvHRd5zsyE8QV1bqsZZo4NbSxflnbuQPv/2cUOVss//KCFT+NBBHMyNVNB3hp714jvUwYcmNoVlKQx0QsBemUo9zKiHpba27o13wfXDrixYlWYwzYLtozOxHiwes7z2/KUm9gXOU65Olq5eGhTe6xk1Pra8hFSaz2MrdYwfonuYbUAz1wdceb29roytGqDI1hB3FvUDTaS7GRjmAXAZVL/JaOnsHf3ncZ3CNegqW1K4rVyA3tF6TT4v+F7BKIjIQywWBwVHNu6KHeXsgea11ZrGDtGm7QyO/bv9Hc5nx8tESBYbixqRVNA4/yS40jiRwOEdT4na3nD/ySF8LBPOhXq9XBHDUspB7o0nUT3u41eT8LjMtsjG5KGW9oQL+n7bxN/7ezZjZaLLsar74uhfOhuRey5d8GPlEeUVc2N8EDQSFpZhxLsGBIFQIhXGSbxC+Gr+74RHIT86uwO2PSZYF6oCs3tn0y2+L+PFQO2LBqajbe6ED9O1asLFawdj2TkJGDYYbIrrvgnZXRYGFrFq6JClG36DpMxEIboKId3dImv166ofN7PT05QQWYHU0u/adZlT3Qj/yws6l2U9sv0y3+pZXAVVqzamoyfnVAFVvOG/ovzsPBfOsGWqxLuOvdxHkIFMDLr2htnTzR+aPf5B09XEJIRjuNgYBjvdQZBN3aZNz6SL2vVsK7JrxleBkzBBYAtIsG1nt7IXNx4Hywt/WwVDNdkWpKHVYui8AQuDnLfjBS/6uXbj4T81YESGaEWSxWsHZN0aICzNCVe7T5zeU/ppqco4ZLCMDsIundEs1gjRqWglRLBm4QBhtVzXys6byhXyUWzK4U2+I8BOaAopQEQvn6to+6nvgS+V62VkMIMJqaya0P1+5cuQSn73fxwMgOZ/ZbLFawXsGbO053WPmT6e0dk6rXZprdE4crCKDZiSsdeMvUB2jHF07WUShX9PXa0CWtb9j8xK4gXMwQKCZCBaz/fecJLWn136m0112uSxhDIWC4udl49ZHgttJmOnvi2wZGkmNgL2eLFaxXkWjdd/3czBxa8ZNUE715dFQqE3W3pHHTuiIEGTBzSxM59boaUQF+VFIt35ly/rINwLjs8B6Yl3taSbLyhxw4EZ3hqyfu62bMJ0iI9/gpj8o1hDBGkhA626zd2lB43dBm9y3RSDQrVhYrWK9a9xAAyte1/Xc67Xy2HEhozQoMmczVAjNIxhN4CFpKuE0ZoFoxa4zCZXUdXtFx3uCqxnYXwsHGKNC/sywvzkMsAsS8OdGqX3Iqhq5tP0I4+A/HoZ50xmsarcAQR7NXSUA2ZRRVR+o/zJw1/GEgalVi3UCLFaxXr6VFxSJETw/08DWT3+al9f86UmRLVQoJHBdDJ/5h3FWdmEGkPSncTIpRKQfDYFzHWvxmzcrWRftdvKTe2H6jRAiEjeAigNyjYCzYjpAtAGFO/EHxz2xdKrPpV/u0eK0Dp0jod0E6p2WaXFGuAmwoBLFkhk750mVdD1Q9+Ej27JH/5TzEAuy6WfgWixWsFyNcSUb876YdmnJrl6ez4qjhsmA2rEEQAASBwBwNNOVEj4i0dMltTjHC0CAM+QkK9a3G6FtIyPuzb9i8Zmcc8jU3zpzZrIePFgKvh5SvT6fkDAhCqUogRgiwBINZEJqzLGul2hNhhd7dcsHgHRwPmLCrgRYrWLuXtSWJoO9771x3vzOevsT18BnP9zLDFdJgAwEImLjjMpJJrYgiXswaQgjfhUz7DBUYVGpmGMxLHcKDBugH+CEd0KCXdjcGlcqoqjsq5AFtquCpAEoTZzXVfd2B0kBrOi0naY2DhBCHCIH9QxL7tWRFGiRQC4FAkYJhCMECIDYgk/bJJRMiDPRla1dP+OTe71s2zHk4VLBJoRYrWLunaI2L8Yxe03Ww56qvCFeeBZIYrUELw2wYkojiVK1o/CFRNLWViIxhMIjIEZCeB3gOgWCgAoNAMTRTibWuMkkNsBbEHMkgZUCiyXXZdSVBOlEcP1BAGAKaSYGZAZZRsiszg4zrkpNOGdTK9UeCuvPJ1vM23TzearSXrMUK1u4sWgAhD5lYJrVrJ57JrvmU68kTDEuUakKDmQUZYsNirOcjJQPaEc++YERDmxkEFlEgTApBRAKNuJiIp6NqMIxmZoIBw4Ab2yJGNIY1DqgZMOB55KR8hdposFor/v5AMPzDPXpQtS6gxfIvJFjjrS0gyWonjPxh0r+5Wn+YhehOpwQqVUaoWTODiSgKcMWSRdtKjQBHc+yJObHMAIAEmKMtRH+PX2ZOwmRggEw0rApuJkWQQqNeVU8bwz8Z2JS6fPrb12y2VpXF8i8sWA2Z6YUUPfEkaQAjv+88wXHUOzTjzHRKTpZSohII1EM2Asn7WMR5pyI2urY8iCJ2JaO5iWjMhk5iYiDDDCJiSElOymM4DlAua+VQeDtr/atq1flde8/gcLKPr0QOmMViBetVJFzjXa2hG/doc031tYLUG7QUxxGLWZmUAJNEPQBCDWhjDANMnMzsiVTIRCYV01hrm8gzFCRdSfBdQDqADjRqdR4B+B8I9B9Y8vXN5w4+muzTwoVw5r2K299YLFawXmZ6eyFzAMa7Xnz9lEyI2qEa/JpQ0zFCmMOI5CQm6vRdBgkJ6Yj46MW2F48lpmqlYRiohaZG4A0Sst8Y/ZgB3R6a1N87zlszlpjKoEULIOctsEJlsVjBeqEWV1Iis5V4IZIjGr1+SocOK3v4VG/WXnZGqDBdQHuAIAFwYAxAQjlCDvq6vpQpKIVOx8YWmV5JZ4wlnzY+axEkFsHYTHWLxfKSxYt7IXkhnJ0xdYbzEMm28q/C5oEWi7WwXk0CBoyF0IugRY+C5s17jh/YGL87Ltuxrp7FYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovF8s/i/wOkyfRtzmKfBgAAAABJRU5ErkJggg==" alt="KROSS">
     <div class="tagline">Ứng dụng học từ vựng tiếng Hàn</div>
-    <div class="streak-chip hidden" id="streakChip"><span class="fire">🔥</span><span id="streakText">Học liên tục 1 ngày</span></div>
+    <div class="chip-row">
+      <div class="streak-chip hidden" id="streakChip"><span class="fire">🔥</span><span id="streakText">Học liên tục 1 ngày</span></div>
+      <div class="xp-chip hidden" id="xpChip"><span id="xpEmoji">🌱</span><span id="xpText">Lv.1</span></div>
+    </div>
   </div>
 
   <button class="theme-toggle" id="btnTheme" title="Chế độ sáng/tối">🌙</button>
@@ -822,6 +892,7 @@ body.dark .flash-card{
         <div class="mode-seg" id="quizModeSeg">
           <div class="seg active" data-mode="type">✍️ Tự luận</div>
           <div class="seg" data-mode="mcq">🔘 Trắc nghiệm</div>
+          <div class="seg" data-mode="dict">🎧 Nghe viết</div>
           <div class="seg" data-mode="match">🃏 Ghép thẻ</div>
         </div>
         <div class="level-grid" id="quizLevelGrid"></div>
@@ -930,6 +1001,19 @@ body.dark .flash-card{
           <div class="stat-box"><div class="n" id="statAttempts">0</div><div class="l">Số lần làm bài</div></div>
           <div class="stat-box"><div class="n" id="statAvg">0%</div><div class="l">Tỷ lệ đúng TB</div></div>
           <div class="stat-box"><div class="n" id="statBest">0%</div><div class="l">Cao nhất</div></div>
+        </div>
+        <div class="xp-panel" id="xpPanel">
+          <div class="xp-panel-top">
+            <span id="xpPanelLevel">🌱 Hạt mầm · Lv.1</span>
+            <span class="xp-num" id="xpPanelNum">0 XP</span>
+          </div>
+          <div class="xp-bar"><i id="xpBarFill"></i></div>
+          <div class="xp-next" id="xpNext">Còn 150 XP để lên cấp</div>
+        </div>
+        <div class="heatmap-wrap">
+          <div class="heatmap-title">📅 12 tuần học tập</div>
+          <div class="heatmap" id="heatmap"></div>
+          <div class="heatmap-legend">Ít <i data-l="0"></i><i data-l="1"></i><i data-l="2"></i><i data-l="3"></i><i data-l="4"></i> Nhiều</div>
         </div>
         <div id="statsList"></div>
       </div>
@@ -1874,6 +1958,8 @@ function recordAttempt(lesson, type, correct, total, pct){
     correct, total, pct, time: new Date().toLocaleString()
   };
   studentRecords.unshift(record);
+  logActivity();
+  addXP(correct * 2 + 5);
   renderHomeworkGrid();
   renderRecordsList();
   saveAll();
@@ -1971,7 +2057,11 @@ function renderFlashcard(){
   } else {
     card.innerHTML = `
       <div class="flash-ko">${escapeHtml(w.단어)}</div>
-      <button class="speak-btn" id="flashSpeakBtn">🔊</button>
+      <div class="flash-btn-row">
+        <button class="speak-btn" id="flashSpeakBtn">🔊</button>
+        ${PRON_SUPPORTED ? `<button class="speak-btn mic-btn" id="flashMicBtn">🎤</button>` : ""}
+      </div>
+      <div class="pron-fb" id="pronFb"></div>
       ${w.예문 ? `<div class="flash-example">${escapeHtml(w.예문)}</div>` : ""}
       <div class="flash-tap-hint">Nhấn để ẩn lại</div>
     `;
@@ -1980,12 +2070,13 @@ function renderFlashcard(){
 }
 
 el("flashCard").addEventListener("click", (e) => {
-  if(e.target.id === "flashSpeakBtn") return;
+  if(e.target.id === "flashSpeakBtn" || e.target.id === "flashMicBtn" || e.target.closest(".pron-fb") || e.target.closest(".flash-btn-row")) return;
   studyRevealed = !studyRevealed;
   renderFlashcard();
 });
 document.addEventListener("click", (e) => {
   if(e.target.id === "flashSpeakBtn") speak(studyWords[studyIdx].단어);
+  if(e.target.id === "flashMicBtn") startPronCheck(studyWords[studyIdx].단어);
 });
 
 el("btnFlashPrev").addEventListener("click", () => {
@@ -2051,7 +2142,7 @@ function startQuiz(){
   const lessonWords = words.filter(w => w.급수===quizLevel && w.과===quizLesson);
   if(lessonWords.length < 1){ alert("Bài học này chưa có từ nào."); return; }
   if(quizMode === "match"){ startMatchGame(lessonWords); return; }
-  quizQueue = shuffle(lessonWords);
+  quizQueue = srsOrder(lessonWords);
   quizIndex = 0; quizCorrect = 0; wrongAnswers = [];
   el("quizLessonCard").classList.add("hidden");
   el("resultCard").classList.add("hidden");
@@ -2065,7 +2156,13 @@ function renderTypeQuestion(){
   el("quizProgress").textContent = `${quizIndex+1} / ${quizQueue.length}`;
   el("quizScore").textContent = `Đúng ${quizCorrect}`;
   el("quizBarFill").style.width = Math.round((quizIndex / quizQueue.length) * 100) + "%";
-  el("qMeaning").textContent = w.뜻;
+  if(quizMode === "dict"){
+    el("qMeaning").innerHTML = `<button class="dict-play" id="dictPlayBtn">🔊 Nghe lại</button>`;
+    el("qMeaning").querySelector("#dictPlayBtn").addEventListener("click", () => speak(w.단어));
+    setTimeout(() => speak(w.단어), 350);
+  } else {
+    el("qMeaning").textContent = w.뜻;
+  }
   el("exampleHint").textContent = "";
   el("typeFeedback").textContent = ""; el("typeFeedback").className = "type-feedback";
 
@@ -2113,6 +2210,7 @@ function submitMcqAnswer(optEl, w){
     wrongAnswers.push(w);
     addToWrongNote(w);
   }
+  srsUpdate(w.단어, isCorrect);
   speak(w.단어);
   if(w.예문) el("exampleHint").textContent = `Ví dụ: ${w.예문}`;
   setTimeout(() => {
@@ -2141,6 +2239,7 @@ function submitTypeAnswer(){
     wrongAnswers.push(w);
     addToWrongNote(w);
   }
+  srsUpdate(w.단어, isCorrect);
   speak(w.단어);
   if(w.예문) el("exampleHint").textContent = `Ví dụ: ${w.예문}`;
 
@@ -2161,7 +2260,7 @@ function showQuizResult(){
   const pct = Math.round((quizCorrect / quizQueue.length) * 100);
   setResultRing(pct);
 
-  recordAttempt(quizLesson, quizMode==="mcq" ? "Trắc nghiệm" : "Kiểm tra", quizCorrect, quizQueue.length, pct);
+  recordAttempt(quizLesson, quizMode==="mcq" ? "Trắc nghiệm" : quizMode==="dict" ? "Nghe viết" : "Kiểm tra", quizCorrect, quizQueue.length, pct);
   updateStreak();
   if(pct >= 80) fireConfetti();
 
@@ -2644,6 +2743,7 @@ let quizMode = localStorage.getItem("kross_quiz_mode") || "type";
 const MODE_DESC = {
   type:  "Khi thấy nghĩa tiếng Việt, hãy nhập từ tiếng Hàn tương ứng.",
   mcq:   "Chọn từ tiếng Hàn đúng trong 4 đáp án.",
+  dict:  "Nghe phát âm và viết lại từ tiếng Hàn (chính tả).",
   match: "Lật thẻ và ghép cặp từ tiếng Hàn với nghĩa tiếng Việt. Càng nhanh càng tốt!"
 };
 function applyModeSeg(){
@@ -2742,6 +2842,226 @@ el("btnMatchQuit").addEventListener("click", () => {
   el("matchCard").classList.add("hidden");
   el("quizLessonCard").classList.remove("hidden");
 });
+
+// ===================== SRS 간격 반복 엔진 =====================
+// 단어별 {c:정답수, w:오답수, t:마지막 학습 시각} → 약한 단어를 더 자주 출제
+let srsData = {};
+try{ srsData = JSON.parse(localStorage.getItem("kross_srs") || "{}"); }catch(e){}
+
+function srsUpdate(word, ok){
+  const s = srsData[word] || {c:0, w:0, t:0};
+  if(ok) s.c++; else s.w++;
+  s.t = Date.now();
+  srsData[word] = s;
+  localStorage.setItem("kross_srs", JSON.stringify(srsData));
+}
+
+function srsWeight(word){
+  const s = srsData[word];
+  if(!s) return 2.5;                                  // 처음 보는 단어 = 높은 우선순위
+  const errRatio = (1 + 2*s.w) / (1 + s.c);           // 오답 많을수록 ↑
+  const days = (Date.now() - s.t) / 86400000;
+  const decay = 1 + Math.min(days, 7) * 0.35;         // 오래 안 본 단어 ↑ (망각곡선)
+  return errRatio * decay;
+}
+
+function srsOrder(list){
+  // 가중치 × 랜덤 지터로 정렬 → 약한 단어가 앞에, 그러나 매번 순서는 다르게
+  return [...list]
+    .map(w => ({w, k: srsWeight(w.단어) * (0.7 + Math.random()*0.6)}))
+    .sort((a,b) => b.k - a.k)
+    .map(x => x.w);
+}
+
+// ===================== 발음 자가진단 (브라우저 STT) =====================
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+const PRON_SUPPORTED = !!SpeechRec;
+
+function levDist(a, b){
+  const m = a.length, n = b.length;
+  if(!m) return n; if(!n) return m;
+  const d = Array.from({length:m+1}, (_,i) => [i, ...Array(n).fill(0)]);
+  for(let j=1; j<=n; j++) d[0][j] = j;
+  for(let i=1; i<=m; i++)
+    for(let j=1; j<=n; j++)
+      d[i][j] = Math.min(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1] + (a[i-1]===b[j-1]?0:1));
+  return d[m][n];
+}
+function pronNorm(s){ return (s||"").replace(/[\s.,!?~]/g, ""); }
+
+// 매번 new SpeechRecognition()을 새로 만들면 일부 브라우저/웹뷰가 인스턴스마다
+// 마이크 권한을 다시 확인한다 → 인스턴스를 하나만 만들어 재사용(싱글톤)
+let pronRec = null;
+function getPronRec(){
+  if(pronRec) return pronRec;
+  pronRec = new SpeechRec();
+  pronRec.lang = "ko-KR";
+  pronRec.interimResults = false;
+  pronRec.maxAlternatives = 3;
+  return pronRec;
+}
+
+// 마이크 권한을 앱 진입 시 한 번만 명시적으로 요청해 브라우저의 영구 허용을
+// 미리 확정시켜 둔다 (이후 SpeechRecognition 호출에서 재확인 창이 뜨는 것을 방지)
+let micPermPrimed = false;
+async function primeMicPermission(){
+  if(micPermPrimed || !PRON_SUPPORTED) return;
+  try{
+    if(navigator.permissions?.query){
+      const status = await navigator.permissions.query({ name: "microphone" });
+      if(status.state === "granted"){ micPermPrimed = true; return; }
+    }
+  }catch(e){ /* 일부 브라우저는 microphone permission query 미지원 — 무시 */ }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(t => t.stop());   // 승인만 받고 즉시 트랙 정리 (배터리·프라이버시)
+    micPermPrimed = true;
+  }catch(e){ /* 거부됨 — 실제 사용 시 다시 안내 */ }
+}
+
+let pronActive = false;
+async function startPronCheck(word){
+  if(!PRON_SUPPORTED || pronActive) return;
+  const fb = el("pronFb");
+  const mic = el("flashMicBtn");
+  if(!fb || !mic) return;
+
+  await primeMicPermission();
+
+  pronActive = true;
+  mic.classList.add("listening");
+  fb.className = "pron-fb";
+  fb.textContent = "🎙 Đang nghe... hãy đọc to từ này";
+
+  const rec = getPronRec();
+  const stop = () => { pronActive = false; mic.classList.remove("listening"); };
+
+  rec.onresult = (e) => {
+    stop();
+    const alts = Array.from(e.results[0]).map(r => pronNorm(r.transcript));
+    const target = pronNorm(word);
+    // 대안 인식결과 중 최고 유사도 채택
+    let best = 0, heard = alts[0] || "";
+    alts.forEach(t => {
+      const sim = 1 - levDist(t, target) / Math.max(t.length, target.length, 1);
+      if(sim > best){ best = sim; heard = t; }
+    });
+    const pct = Math.round(best * 100);
+    if(pct >= 90){
+      fb.className = "pron-fb ok";
+      fb.textContent = `✅ ${pct}% — Phát âm rất tốt!`;
+    } else if(pct >= 60){
+      fb.className = "pron-fb mid";
+      fb.textContent = `🟡 ${pct}% — Gần đúng (nghe thành "${heard}"). Thử lại nhé`;
+    } else {
+      fb.className = "pron-fb no";
+      fb.textContent = `🔁 Nghe thành "${heard || '...'}" — nhấn 🔊 nghe lại rồi thử lần nữa`;
+    }
+  };
+  rec.onerror = (e) => {
+    stop();
+    fb.className = "pron-fb no";
+    if(e.error === "not-allowed"){
+      fb.textContent = "⚠️ Cần cho phép dùng micro trong trình duyệt";
+      micPermPrimed = false;   // 거부됐다면 다음 시도 때 다시 확인
+    } else {
+      fb.textContent = "⚠️ Không nghe rõ, thử lại ở nơi yên tĩnh hơn";
+    }
+  };
+  rec.onend = stop;
+  try{ rec.start(); }catch(err){
+    // 싱글톤 인스턴스가 이미 실행 중일 때(연타 등) InvalidStateError 방어
+    stop();
+  }
+}
+
+// 플래시카드 첫 진입 시 미리 권한 확인 (지원 브라우저에서만, 조용히)
+if(PRON_SUPPORTED){
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", () => { primeMicPermission(); });
+  } else {
+    primeMicPermission();
+  }
+}
+
+// ===================== 학습 활동 로그 + 히트맵 =====================
+function logActivity(){
+  let a = {};
+  try{ a = JSON.parse(localStorage.getItem("kross_activity") || "{}"); }catch(e){}
+  const today = new Date().toISOString().slice(0,10);
+  a[today] = (a[today] || 0) + 1;
+  localStorage.setItem("kross_activity", JSON.stringify(a));
+  renderHeatmap();
+}
+
+function renderHeatmap(){
+  const grid = el("heatmap");
+  if(!grid) return;
+  let a = {};
+  try{ a = JSON.parse(localStorage.getItem("kross_activity") || "{}"); }catch(e){}
+  // 오늘 포함 최근 12주(84일), 주 단위 세로 7칸
+  const days = 84;
+  const end = new Date(); end.setHours(0,0,0,0);
+  // 시작을 일요일에 맞춤
+  const start = new Date(end.getTime() - (days-1)*86400000);
+  start.setDate(start.getDate() - start.getDay());
+  let html = "";
+  for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)){
+    const key = d.toISOString().slice(0,10);
+    const n = a[key] || 0;
+    const lv = n===0 ? 0 : n===1 ? 1 : n<=3 ? 2 : n<=6 ? 3 : 4;
+    html += `<i data-l="${lv}" title="${key}: ${n} lần"></i>`;
+  }
+  grid.innerHTML = html;
+}
+
+// ===================== XP 성장 시스템 =====================
+const XP_LEVELS = [
+  { min:0,    emoji:"🌱", name:"Hạt mầm" },
+  { min:150,  emoji:"🌿", name:"Cây non" },
+  { min:400,  emoji:"🌳", name:"Cây lớn" },
+  { min:1000, emoji:"🌲", name:"Cổ thụ" },
+  { min:2500, emoji:"🏞️", name:"Rừng xanh" }
+];
+function getXP(){ return parseInt(localStorage.getItem("kross_xp") || "0", 10); }
+function xpLevel(xp){
+  let idx = 0;
+  XP_LEVELS.forEach((l,i) => { if(xp >= l.min) idx = i; });
+  return idx;
+}
+function addXP(n){
+  const before = xpLevel(getXP());
+  const xp = getXP() + n;
+  localStorage.setItem("kross_xp", String(xp));
+  renderXP();
+  if(xpLevel(xp) > before) fireConfetti();   // 레벨업 축하
+}
+function renderXP(){
+  const xp = getXP();
+  if(xp <= 0) return;
+  const idx = xpLevel(xp);
+  const cur = XP_LEVELS[idx];
+  const next = XP_LEVELS[idx+1];
+  // 헤더 칩
+  el("xpChip").classList.remove("hidden");
+  el("xpEmoji").textContent = cur.emoji;
+  el("xpText").textContent = `Lv.${idx+1}`;
+  // 통계 패널
+  if(el("xpPanelLevel")){
+    el("xpPanelLevel").textContent = `${cur.emoji} ${cur.name} · Lv.${idx+1}`;
+    el("xpPanelNum").textContent = `${xp} XP`;
+    if(next){
+      const span = next.min - cur.min;
+      el("xpBarFill").style.width = Math.round((xp - cur.min) / span * 100) + "%";
+      el("xpNext").textContent = `Còn ${next.min - xp} XP để lên ${next.emoji} ${next.name}`;
+    } else {
+      el("xpBarFill").style.width = "100%";
+      el("xpNext").textContent = "Cấp cao nhất! 🎉";
+    }
+  }
+}
+renderXP();
+renderHeatmap();
 
 // ===================== 연속 학습 스트릭 =====================
 function updateStreak(){
