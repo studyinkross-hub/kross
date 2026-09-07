@@ -113,34 +113,36 @@ function RoleSwitch({
 function Art() {
   return (
     <div className="lesson-art">
-      <div className="row spread">
-        <span className="light-pill">KROSS CLASSROOM</span>
-        <span>한국어 01</span>
+      <img className="course-photo" src="/course-cafe.jpg" alt="" />
+      <div className="cover-shade" />
+      <div className="cover-top">
+        <span className="subject-tag">KOREAN · 01</span>
+        <span className="lesson-number">LESSON 04</span>
       </div>
       <div className="lesson-lettering">
-        <span>오늘의 한국어</span>
+        <span>카페에서 주문하기</span>
         <h2>
           커피 한 잔<br />
           주세요.
         </h2>
         <p>Một ly cà phê, làm ơn.</p>
       </div>
-      <span className="art-caption">
-        <Play size={14} /> LEARN · PRACTICE · CONNECT
+      <span className="cover-play" aria-hidden="true">
+        <Play size={22} fill="currentColor" />
       </span>
     </div>
   );
 }
 function Dashboard({ lang, entries, go }: Props) {
   const t = (v: string, k: string) => (lang === 'vi' ? v : k);
-  const points = getPoints(entries);
-  const complete = points.filter((p) =>
-    entries.some((e) => e.id === 'attempt:' + p.id && e.payload.correct),
-  ).length;
-  const progress = entries.find((e) => e.id === 'progress')?.payload;
-  const config = entries.find((e) => e.id === 'config')?.payload || {
-    duration: 60,
-  };
+  const points = getPoints(entries),
+    complete = points.filter((p) =>
+      entries.some((e) => e.id === 'attempt:' + p.id && e.payload.correct),
+    ).length;
+  const progress = entries.find((e) => e.id === 'progress')?.payload,
+    config = entries.find((e) => e.id === 'config')?.payload || {
+      duration: 60,
+    };
   const percent = Math.min(
     100,
     Math.round(((progress?.furthest || 0) / config.duration) * 100),
@@ -149,231 +151,306 @@ function Dashboard({ lang, entries, go }: Props) {
   const known = words.filter((w) =>
     entries.some((e) => e.id === 'vocab:' + w.id && e.payload.known),
   ).length;
-  const date = new Date();
-  const dateText = new Intl.DateTimeFormat(lang === 'vi' ? 'vi-VN' : 'ko-KR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    timeZone: 'Asia/Ho_Chi_Minh',
-  }).format(date);
-  const tzDay = (d: Date) =>
-    new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'Asia/Ho_Chi_Minh',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).format(d);
-  const activity = new Set(
+  const activities = new Set(
     entries.filter((e) => e.kind === 'activity').map((e) => e.payload.day),
   );
-  const steps = [
-    [
-      t('Xem bài học & hoàn thành nhiệm vụ', '영상 수업과 미션 완료하기'),
-      t(
-        'Dừng đúng lúc để thực hành điều vừa học.',
-        '배운 내용을 알맞은 시점에 바로 연습해요.',
-      ),
-      'lesson',
-      complete === points.length,
-    ],
-    [
-      t('Ghi nhớ từ vựng trong bài', '수업에서 만난 단어 기억하기'),
-      t(
-        'Thẻ từ, phát âm và ôn lại những từ còn khó.',
-        '단어 카드, 발음, 어려운 단어를 다시 연습해요.',
-      ),
-      'vocab',
-      known === words.length,
-    ],
-    [
-      t('Gửi câu của bạn cho giáo viên', '나만의 문장을 선생님께 제출하기'),
-      t(
-        'Nhận góp ý, sửa lại và tiến bộ mỗi ngày.',
-        '피드백을 받고 수정하며 매일 성장해요.',
-      ),
-      'feedback',
-      assignment?.status === 'approved',
-    ],
-  ];
+  const date = new Date(),
+    dateText = new Intl.DateTimeFormat(lang === 'vi' ? 'vi-VN' : 'ko-KR', {
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'Asia/Ho_Chi_Minh',
+    }).format(date);
+  const doneSteps =
+    Number(complete === points.length) +
+    Number(known === 8) +
+    Number(assignment?.status === 'approved');
+  const ring = (complete / points.length) * 100;
   return (
     <>
       <div className="greeting">
-        <div className="eyebrow">{dateText.toUpperCase()}</div>
-        <h1>
-          {t('Chào Minh Anh, cùng học nhé', 'Minh Anh, 오늘도 함께 배워요')}{' '}
-          <span className="green">↗</span>
-        </h1>
-        <p>
-          {t(
-            'Một chút mỗi ngày. Tự tin hơn trong từng câu nói.',
-            '매일 조금씩. 말할 때마다 더 자신 있게.',
-          )}
-        </p>
+        <div>
+          <div className="eyebrow">
+            {t('KHÔNG GIAN CỦA BẠN', '나의 학습 공간')}
+          </div>
+          <h1>{t('Chào Minh Anh.', '안녕하세요, Minh Anh님.')}</h1>
+          <p>
+            {t(
+              'Tiếp tục bài học và hoàn thành mục tiêu hôm nay.',
+              '이어서 학습하고, 오늘의 목표를 완성해 보세요.',
+            )}
+          </p>
+        </div>
+        <div className="greeting-date">
+          <span>{dateText}</span>
+          <strong>
+            {t('Sơ cấp 1', '초급 1')}
+            <GraduationCap size={18} />
+          </strong>
+        </div>
       </div>
       <div className="dashboard-grid">
-        <section>
+        <section className="main-learning">
           <div className="section-heading">
-            <h2>{t('Tiếp tục hành trình', '오늘의 수업 이어가기')}</h2>
-            <span>{t('SƠ CẤP 1 · BÀI 04', '초급 1 · 04강')}</span>
+            <h2>{t('Bài học đang học', '이어서 학습하기')}</h2>
+            <button className="text-button" onClick={() => go('lessons')}>
+              {t('Tất cả bài học', '전체 수업')}
+              <ArrowUpRight size={16} />
+            </button>
           </div>
-          <div className="continue-card">
-            <Art />
+          <article className="continue-card">
+            <button
+              className="cover-link"
+              aria-label={t(
+                'Mở bài Gọi món ở quán cà phê',
+                '카페에서 주문하기 수업 열기',
+              )}
+              onClick={() => go('lesson')}
+            >
+              <Art />
+            </button>
             <div className="continue-body">
-              <span className="eyebrow green">
-                {t('HỌC BÙ · CÙNG LỚP CỦA BẠN', '보충 수업 · 우리 반과 함께')}
-              </span>
-              <h2>{t('Gọi món ở quán cà phê', '카페에서 주문하기')}</h2>
-              <p>{t('카페에서 주문하기', 'Gọi món ở quán cà phê')}</p>
+              <div className="course-title-row">
+                <div>
+                  <span className="eyebrow">
+                    {t('GIAO TIẾP HẰNG NGÀY', '일상 속 한국어')}
+                  </span>
+                  <h2>{t('Gọi món ở quán cà phê', '카페에서 주문하기')}</h2>
+                </div>
+                <span className="course-unit">04</span>
+              </div>
               <div className="lesson-meta">
                 <span>
                   <Clock size={16} />
-                  {formatTime(config.duration)} {t('video', '영상')}
+                  {formatTime(config.duration)}
                 </span>
                 <span>
-                  <Sparkles size={16} />
+                  <CheckCircle2 size={16} />
                   {complete}/{points.length} {t('nhiệm vụ', '미션')}
                 </span>
-              </div>
-              <Progress
-                aria-label={t('Tiến độ xem video', '영상 시청 진도')}
-                value={percent}
-              />
-              <div className="row spread progress-label">
                 <span>
-                  {percent > 0
-                    ? t('Đã xem video', '영상 시청')
-                    : t('Sẵn sàng bắt đầu', '시작할 준비가 됐어요')}
+                  <Layers size={16} />8 {t('từ vựng', '단어')}
                 </span>
-                <span>{percent}%</span>
               </div>
-              <button className="primary" onClick={() => go('lesson')}>
-                <Play size={18} />
-                {percent > 0
-                  ? t('Tiếp tục học', '이어서 학습하기')
-                  : t('Vào học ngay', '지금 수업 시작')}
-                <ChevronRight size={18} />
-              </button>
+              <div className="continue-bottom">
+                <div className="course-progress">
+                  <div className="row spread">
+                    <span>{t('Tiến độ xem', '시청 진도')}</span>
+                    <strong>{percent}%</strong>
+                  </div>
+                  <Progress
+                    aria-label={t('Tiến độ xem video', '영상 시청 진도')}
+                    value={percent}
+                  />
+                </div>
+                <button className="primary" onClick={() => go('lesson')}>
+                  <Play size={16} fill="currentColor" />
+                  {percent > 0
+                    ? t('Tiếp tục học', '이어서 학습하기')
+                    : t('Bắt đầu học', '수업 시작하기')}
+                  <ChevronRight size={16} />
+                </button>
+              </div>
             </div>
-          </div>
+          </article>
           <div className="section-heading lower">
-            <h2>{t('Lộ trình hôm nay', '오늘의 학습 순서')}</h2>
-            <span>{t('3 bước nhỏ, 1 mục tiêu', '세 걸음, 하나의 목표')}</span>
+            <h2>{t('Thực hành sau bài học', '배운 내용을 내 것으로')}</h2>
+            <span>{t('Học xong, thử ngay', '배운 뒤 바로 연습해요')}</span>
           </div>
-          {steps.map(([title, desc, v, done], i) => (
+          <div className="practice-grid">
             <button
-              className="journey-row"
-              key={String(v)}
-              onClick={() => go(String(v))}
+              className="practice-tile vocabulary-tile"
+              onClick={() => go('vocab')}
             >
-              <span className={'step-number ' + (done ? 'is-done' : '')}>
-                {done ? <Check size={18} /> : '0' + (i + 1)}
-              </span>
-              <div>
-                <strong>{String(title)}</strong>
-                <p>{String(desc)}</p>
+              <div className="row spread">
+                <span className="practice-icon">
+                  <Layers size={23} />
+                </span>
+                <ArrowUpRight size={20} />
               </div>
-              <ArrowUpRight />
+              <div>
+                <span className="eyebrow">VOCABULARY</span>
+                <h3>{t('Sổ từ vựng', '나의 단어장')}</h3>
+                <p>
+                  {t('8 từ trong bài · ', '수업 단어 8개 · ')}
+                  {known}
+                  {t(' từ đã nhớ', '개 기억 완료')}
+                </p>
+              </div>
+              <div className="mini-word-line">
+                <span>커피</span>
+                <span>잔</span>
+                <span>주세요</span>
+              </div>
             </button>
-          ))}
+            <button
+              className="practice-tile feedback-tile"
+              onClick={() => go('feedback')}
+            >
+              <div className="row spread">
+                <span className="practice-icon">
+                  <MessageCircle size={23} />
+                </span>
+                <ArrowUpRight size={20} />
+              </div>
+              <div>
+                <span className="eyebrow">WITH YOUR TEACHER</span>
+                <h3>{t('Câu của bạn', '나만의 주문 대화')}</h3>
+                <p>
+                  {t(
+                    'Viết 2–3 câu. Nhận góp ý từ giáo viên.',
+                    '2~3문장을 쓰고 선생님의 피드백을 받아요.',
+                  )}
+                </p>
+              </div>
+              <div className="assignment-mini">
+                <span className="small-avatar">K</span>
+                <span>
+                  {assignment?.status === 'approved'
+                    ? t('Đã hoàn thành', '과제 완료')
+                    : assignment?.status === 'revise'
+                      ? t('Có góp ý mới', '새 피드백이 있어요')
+                      : assignment
+                        ? t('Đang chờ góp ý', '피드백 대기 중')
+                        : t('Sẵn sàng để thực hành', '지금 연습할 수 있어요')}
+                </span>
+              </div>
+            </button>
+          </div>
         </section>
-        <aside>
-          <div className="section-heading">
-            <h2>{t('Nhịp học của bạn', '나의 학습 리듬')}</h2>
+        <aside className="dashboard-side">
+          <div className="progress-panel">
+            <div className="section-heading">
+              <h2>{t('Mục tiêu hôm nay', '오늘의 학습 목표')}</h2>
+              <span>{doneSteps}/3</span>
+            </div>
+            <div className="mastery-ring">
+              <svg
+                viewBox="0 0 140 140"
+                aria-label={t('Tiến độ nhiệm vụ', '미션 이해 진도')}
+                role="img"
+              >
+                <circle
+                  cx="70"
+                  cy="70"
+                  r="57"
+                  fill="none"
+                  stroke="#edf0f5"
+                  strokeWidth="9"
+                />
+                <circle
+                  cx="70"
+                  cy="70"
+                  r="57"
+                  fill="none"
+                  stroke="var(--primary)"
+                  strokeWidth="9"
+                  strokeLinecap="round"
+                  strokeDasharray="358.14"
+                  strokeDashoffset={358.14 * (1 - ring / 100)}
+                  transform="rotate(-90 70 70)"
+                />
+              </svg>
+              <div>
+                <strong>
+                  {complete}
+                  <small>/{points.length}</small>
+                </strong>
+                <span>{t('nhiệm vụ đã hiểu', '미션 이해 완료')}</span>
+              </div>
+            </div>
+            <div className="learning-checklist">
+              {[
+                [
+                  t('Hoàn thành nhiệm vụ', '영상 미션 완료'),
+                  complete === points.length,
+                  'lesson',
+                ],
+                [t('Ôn 8 từ vựng', '단어 8개 복습'), known === 8, 'vocab'],
+                [
+                  t('Nhận nhận xét của giáo viên', '선생님 피드백 받기'),
+                  assignment?.status === 'approved',
+                  'feedback',
+                ],
+              ].map(([title, done, v], i) => (
+                <button key={String(v)} onClick={() => go(String(v))}>
+                  <span className={'task-indicator ' + (done ? 'is-done' : '')}>
+                    {done ? <Check size={13} /> : i + 1}
+                  </span>
+                  <span>{String(title)}</span>
+                  <ChevronRight size={15} />
+                </button>
+              ))}
+            </div>
           </div>
           <div className="week-card">
-            <div className="row spread">
-              <span className="icon-tile">
-                <Sparkles />
-              </span>
-              <span className="eyebrow">
-                {t('TỪNG NGÀY, TỪNG TIẾN BỘ', '하루하루, 차곡차곡')}
+            <div className="section-heading">
+              <h2>{t('Tuần học của bạn', '나의 학습 기록')}</h2>
+              <span>
+                <Clock size={16} />
               </span>
             </div>
-            <h3>
-              {activity.size > 0
-                ? t('Bạn đã bắt đầu.', '좋은 시작이에요.')
-                : t('Xin chào,', '반가워요,')}
-              <br />
-              {activity.size > 0
-                ? t('Cứ tiếp tục nhé.', '계속 이어 가요.')
-                : t('thói quen mới.', '새로운 습관.')}
-            </h3>
-            <p>
-              {t(
-                'Mỗi nhiệm vụ hoàn thành là một dấu mốc trên hành trình học.',
-                '완료한 미션 하나하나가 나의 학습 기록이 돼요.',
-              )}
-            </p>
             <div className="week-days">
               {Array.from({ length: 7 }, (_, i) => {
-                const day = new Date(date.getTime() - (6 - i) * 86400000);
-                const key = tzDay(day);
+                const d = new Date(date.getTime() - (6 - i) * 86400000);
+                const key = new Intl.DateTimeFormat('en-CA', {
+                  timeZone: 'Asia/Ho_Chi_Minh',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                }).format(d);
                 return (
                   <div key={key}>
                     <span>
                       {new Intl.DateTimeFormat(
                         lang === 'vi' ? 'vi-VN' : 'ko-KR',
                         { weekday: 'short', timeZone: 'Asia/Ho_Chi_Minh' },
-                      ).format(day)}
+                      )
+                        .format(d)
+                        .replace('Thứ ', 'T')}
                     </span>
                     <i
                       className={
-                        activity.has(key) ? 'studied' : i === 6 ? 'today' : ''
+                        activities.has(key) ? 'studied' : i === 6 ? 'today' : ''
                       }
                     >
-                      {activity.has(key) ? (
-                        <Check size={14} />
-                      ) : i === 6 ? (
-                        '•'
-                      ) : (
-                        '–'
-                      )}
+                      {activities.has(key) ? <Check size={14} /> : d.getDate()}
                     </i>
                   </div>
                 );
               })}
             </div>
+            <p>
+              {t(
+                'Một lần thực hành, một ngày tiến bộ.',
+                '한 번의 연습이 하루의 기록으로 남아요.',
+              )}
+            </p>
           </div>
-          <div className="vocab-teaser">
-            <div className="row spread">
-              <Layers size={24} />
-              <span className="tiny-pill">
-                {known}/8 {t('ĐÃ NHỚ', '기억 완료')}
-              </span>
+          <div className="teacher-message">
+            <div className="row">
+              <span className="mentor-avatar">K</span>
+              <div>
+                <strong>{t('Giáo viên KROSS', 'KROSS 선생님')}</strong>
+                <span>{t('Đồng hành cùng bạn', '배움을 함께해요')}</span>
+              </div>
             </div>
-            <h3>
-              {t('Học trong bài.', '수업에서 배우고,')}
-              <br />
-              {t('Nhớ ngoài đời.', '일상에서 기억해요.')}
-            </h3>
-            <p>커피 · 주문하다 · 주세요</p>
-            <button className="text-button" onClick={() => go('vocab')}>
-              {t('Mở sổ từ vựng', '단어장 열기')}
-              <ArrowUpRight size={17} />
+            <p>
+              {t(
+                'Bạn có thể hỏi ngay tại đoạn video chưa hiểu. Mình cùng tìm câu trả lời nhé.',
+                '이해가 안 되는 영상 시점에 질문을 남겨 주세요. 함께 답을 찾아봐요.',
+              )}
+            </p>
+            <button className="text-button" onClick={() => go('lesson')}>
+              {t('Mở lớp học', '수업에서 질문하기')}
+              <ArrowUpRight size={16} />
             </button>
-          </div>
-          <div className="mentor-note">
-            <span className="avatar">K</span>
-            <div>
-              <strong>
-                {t(
-                  'Mỗi câu hỏi đều đáng được lắng nghe.',
-                  '모든 질문은 소중해요.',
-                )}
-              </strong>
-              <p>
-                {t(
-                  'Hỏi giáo viên ngay tại thời điểm bạn chưa hiểu.',
-                  '이해가 안 되는 바로 그 시점에 선생님께 질문하세요.',
-                )}
-              </p>
-            </div>
           </div>
         </aside>
       </div>
     </>
   );
 }
+
 function Lessons(props: Props) {
   const { lang, entries, go } = props;
   const t = (v: string, k: string) => (lang === 'vi' ? v : k);
@@ -562,29 +639,16 @@ export default function Home() {
       <Sidebar className="campus-sidebar">
         <SidebarHeader>
           <a className="brand" href="#home">
-            <span className="brand-icon">K</span>KROSS
+            <span className="brand-icon">K</span>kross
             <span className="brand-dot">.</span>
           </a>
-          <p className="brand-sub">CAMPUS · ĐÀ NẴNG</p>
+          <p className="brand-sub">CAMPUS</p>
         </SidebarHeader>
         <SidebarContent>
           <p className="nav-label">
             {t('KHÔNG GIAN HỌC TẬP', '나의 학습 공간')}
           </p>
           <SidebarNav lang={lang} view={view} go={go} />
-          <div className="sidebar-note">
-            <GraduationCap />
-            <strong>
-              {t('Từng bước đến Hàn Quốc', '한국을 향해 한 걸음씩')}
-            </strong>
-            <p>
-              {t(
-                'Bắt đầu từ một bài học nhỏ hôm nay.',
-                '오늘의 작은 배움에서 시작해요.',
-              )}
-            </p>
-            <span>KROSS 한국어 · 유학</span>
-          </div>
           <RoleSwitch view={view} go={go} lang={lang} />
         </SidebarContent>
         <SidebarFooter>

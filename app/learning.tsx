@@ -161,8 +161,8 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
           <h1>{t('Gọi món ở quán cà phê', '카페에서 주문하기')}</h1>
           <p>
             {t(
-              'Xem, dừng lại, thử một câu. Giáo viên luôn đồng hành cùng bạn.',
-              '보고, 멈추고, 직접 한 문장. 선생님과 함께 완성해요.',
+              'Luyện tập tại từng điểm dừng và đặt câu hỏi ngay trong video.',
+              '영상 속 미션을 풀고, 이해가 안 되는 부분은 바로 질문하세요.',
             )}
           </p>
         </div>
@@ -679,12 +679,7 @@ export function Vocab({ lang, entries, mutate, busy }: Props) {
       <div className="view-title">
         <div>
           <div className="eyebrow green">KROSS VOCAB · BÀI 04</div>
-          <h1>
-            {t(
-              'Từ mới hôm nay. Vốn từ ngày mai.',
-              '오늘의 새 단어, 내일의 자신감.',
-            )}
-          </h1>
+          <h1>{t('Sổ từ vựng của tôi', '나의 단어장')}</h1>
           <p>
             {t(
               'Ôn lại 8 từ vừa gặp trong bài học về quán cà phê.',
@@ -1034,12 +1029,7 @@ export function Feedback({ lang, entries, mutate, busy, go }: Props) {
           <div className="eyebrow green">
             {t('THỰC HÀNH & PHẢN HỒI', '연습과 피드백')}
           </div>
-          <h1>
-            {t(
-              'Một câu của bạn. Một bước tiến mới.',
-              '내가 만든 한 문장, 새로운 한 걸음.',
-            )}
-          </h1>
+          <h1>{t('Bài tập & nhận xét', '과제와 피드백')}</h1>
           <p>
             {t(
               'Viết thử, nhận góp ý và làm tốt hơn ở lần tiếp theo.',
@@ -1225,12 +1215,7 @@ export function Teacher({ lang, entries, mutate, busy, go }: Props) {
       <div className="view-title">
         <div>
           <div className="eyebrow green">KROSS TEACHING STUDIO</div>
-          <h1>
-            {t(
-              'Biến mỗi video thành một cuộc đối thoại.',
-              '모든 영상을 대화하는 수업으로.',
-            )}
-          </h1>
+          <h1>{t('Quản lý bài học', '수업 관리')}</h1>
           <p>
             {t(
               'Thêm nhiệm vụ đúng thời điểm. Theo sát điều học viên đã hiểu.',
