@@ -1,3 +1,4 @@
+import { validateActivity, matchesAnswer } from '@/lib/activities';
 import { database } from '@/db';
 import { checkpoints, words } from '@/lib/course';
 const cookieName = 'kross_demo';
@@ -86,7 +87,131 @@ export async function POST(req: Request) {
       ...checkpoints.filter((p) => !custom.some((c) => c.id === p.id)),
       ...custom,
     ];
-    if (b.action === 'progress') {
+    if (b.action === 'saveActivity') {
+      const old = entries.find(
+        (x) => x.id === b.id && x.kind === 'lessonActivity',
+      );
+      const lessonActivities = entries
+        .filter((x) => x.kind === 'lessonActivity' && !x.payload.archived)
+        .map((x) => x.payload);
+      const validation = validateActivity(b, config.duration, lessonActivities);
+      if (
+        validation ||
+        (!old && lessonActivities.length >= 40) ||
+        all.some((p) => p.time === b.time)
+      )
+        return response(
+          req,
+          sid,
+          {
+            error: 'INVALID_ACTIVITY',
+            detail: validation || 'LIMIT_OR_DUPLICATE',
+          },
+          400,
+        );
+      const id = old?.id || 'lessonActivity:' + crypto.randomUUID();
+      await save(sid, id, 'lessonActivity', {
+        id,
+        type: b.type,
+        time: b.time,
+        title: clean(b.title, 120),
+        prompt: clean(b.prompt),
+        answer: clean(b.answer),
+        reference: clean(b.reference),
+        sourceStart: Number(b.sourceStart) || 0,
+        sourceEnd: Number(b.sourceEnd) || 0,
+        padletUrl: clean(b.padletUrl),
+        direction: b.direction === 'ko-vi' ? 'ko-vi' : 'vi-ko',
+        revision: (old?.payload.revision || 0) + 1,
+      });
+    } else if (b.action === 'archiveActivity') {
+      const old = entries.find(
+        (x) => x.id === b.id && x.kind === 'lessonActivity',
+      );
+      if (!old || typeof b.archived !== 'boolean')
+        return response(req, sid, { error: 'INVALID_ACTIVITY' }, 400);
+      if (!b.archived) {
+        const others = entries
+          .filter((x) => x.kind === 'lessonActivity' && !x.payload.archived)
+          .map((x) => x.payload);
+        if (
+          validateActivity(old.payload, config.duration, others) ||
+          all.some((x) => x.time === old.payload.time)
+        )
+          return response(req, sid, { error: 'INVALID_RESTORE' }, 400);
+      }
+      await save(sid, old.id, 'lessonActivity', {
+        ...old.payload,
+        archived: b.archived,
+      });
+    } else if (b.action === 'respondActivity') {
+      const a = entries.find(
+        (x) =>
+          x.id === b.id && x.kind === 'lessonActivity' && !x.payload.archived,
+      )?.payload;
+      const body = clean(b.body);
+      if (!a || a.revision !== b.revision)
+        return response(req, sid, { error: 'STALE_ACTIVITY' }, 400);
+      if (
+        a.type === 'shadow' &&
+        (!b.recorded ||
+          !b.compared ||
+          !Number.isFinite(b.seconds) ||
+          b.seconds < 1 ||
+          b.seconds > 95)
+      )
+        return response(req, sid, { error: 'RECORDING_REQUIRED' }, 400);
+      if (a.type !== 'shadow' && !body)
+        return response(req, sid, { error: 'ANSWER_REQUIRED' }, 400);
+      const correct =
+        ['fill', 'translate'].includes(a.type) && matchesAnswer(body, a.answer);
+      const status =
+        a.type === 'fill'
+          ? correct
+            ? 'correct'
+            : 'wrong'
+          : a.type === 'translate'
+            ? correct
+              ? 'correct'
+              : 'pending'
+            : a.type === 'shadow'
+              ? 'completed'
+              : 'pending';
+      const old = entries.find((x) => x.id === 'response:' + a.id)?.payload;
+      await save(sid, 'response:' + a.id, 'activityResponse', {
+        activityId: a.id,
+        revision: a.revision,
+        body,
+        type: a.type,
+        status,
+        attempts: (old?.attempts || 0) + 1,
+        feedback: '',
+        seconds: a.type === 'shadow' ? b.seconds : null,
+        recordingLocal: a.type === 'shadow',
+      });
+      await activity(sid);
+      return response(req, sid, {
+        entries: await read(sid),
+        status,
+        reference: a.reference,
+        answer: status === 'wrong' ? undefined : a.answer,
+      });
+    } else if (b.action === 'reviewActivity') {
+      const old = entries.find(
+        (x) => x.id === b.id && x.kind === 'activityResponse',
+      );
+      if (
+        !old ||
+        !['approved', 'revise'].includes(b.status) ||
+        !clean(b.feedback)
+      )
+        return response(req, sid, { error: 'INVALID_REVIEW' }, 400);
+      await save(sid, old.id, 'activityResponse', {
+        ...old.payload,
+        status: b.status,
+        feedback: clean(b.feedback),
+      });
+    } else if (b.action === 'progress') {
       const pos = Number(b.position);
       if (!Number.isFinite(pos) || pos < 0 || pos > config.duration + 1)
         return response(req, sid, { error: 'INVALID_PROGRESS' }, 400);
@@ -198,7 +323,13 @@ export async function POST(req: Request) {
         !Number.isFinite(time) ||
         time <= 0 ||
         time >= config.duration ||
-        all.some((p) => p.id !== cp.id && Math.abs(p.time - time) < 1)
+        all.some((p) => p.id !== cp.id && Math.abs(p.time - time) < 1) ||
+        entries.some(
+          (e) =>
+            e.kind === 'lessonActivity' &&
+            !e.payload.archived &&
+            Math.abs(e.payload.time - time) < 1,
+        )
       )
         return response(req, sid, { error: 'INVALID_CHECKPOINT' }, 400);
       await database().batch([
@@ -229,6 +360,12 @@ export async function POST(req: Request) {
         time <= 0 ||
         time >= config.duration ||
         all.some((x) => Math.abs(x.time - time) < 1) ||
+        entries.some(
+          (e) =>
+            e.kind === 'lessonActivity' &&
+            !e.payload.archived &&
+            Math.abs(e.payload.time - time) < 1,
+        ) ||
         all.length >= 20 ||
         !prompt ||
         !explanation ||
@@ -268,13 +405,20 @@ export async function POST(req: Request) {
         !Number.isFinite(duration) ||
         duration < 50 ||
         duration > 14400 ||
-        all.some((x) => x.time >= duration)
+        all.some((x) => x.time >= duration) ||
+        entries.some(
+          (x) =>
+            x.kind === 'lessonActivity' &&
+            !x.payload.archived &&
+            (x.payload.time >= duration ||
+              (x.payload.type === 'shadow' && x.payload.sourceEnd > duration)),
+        )
       )
         return response(req, sid, { error: 'INVALID_VIDEO' }, 400);
       await database().batch([
         database()
           .prepare(
-            "DELETE FROM records WHERE session=? AND kind IN ('progress','attempt')",
+            "DELETE FROM records WHERE session=? AND kind IN ('progress','attempt','activityResponse')",
           )
           .bind(sid),
         database()

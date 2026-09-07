@@ -1,4 +1,11 @@
 'use client';
+import { ActivityTask, ActivityStudio } from './activities';
+import {
+  getActivities,
+  activityCompleted,
+  activityLabels,
+  type LessonActivity,
+} from '@/lib/activities';
 import { useEffect, useRef, useState } from 'react';
 import {
   Play,
@@ -18,6 +25,8 @@ import {
   CheckCircle2,
   CircleHelp,
   Layers,
+  Maximize,
+  Minimize,
 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
@@ -51,6 +60,44 @@ export const getPoints = (entries: Entry[]) => {
 export function Lesson({ lang, entries, mutate, busy, go }: Props) {
   const t = (vi: string, ko: string) => tr(lang, vi, ko);
   const video = useRef<HTMLVideoElement>(null);
+  const classroom = useRef<HTMLDivElement>(null);
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => {
+    const sync = () =>
+      setExpanded(document.fullscreenElement === classroom.current);
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !document.fullscreenElement)
+        setExpanded(false);
+    };
+    document.addEventListener('fullscreenchange', sync);
+    document.addEventListener('keydown', escape);
+    return () => {
+      document.removeEventListener('fullscreenchange', sync);
+      document.removeEventListener('keydown', escape);
+    };
+  }, []);
+  useEffect(() => {
+    if (!expanded) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [expanded]);
+  async function toggleClassroom() {
+    if (expanded) {
+      if (document.fullscreenElement === classroom.current)
+        await document.exitFullscreen();
+      setExpanded(false);
+    } else {
+      setExpanded(true);
+      try {
+        await classroom.current?.requestFullscreen();
+      } catch {
+        /* Keep the in-window classroom on unsupported browsers. */
+      }
+    }
+  }
   const lastSave = useRef(-1);
   const gate = useRef(false);
   const [time, setTime] = useState(0),
@@ -60,6 +107,10 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
     [error, setError] = useState(false),
     [question, setQuestion] = useState(''),
     [activeTab, setActiveTab] = useState('overview');
+  const activities = getActivities(entries);
+  const [activeActivity, setActiveActivity] = useState<LessonActivity | null>(
+    null,
+  );
   const points = getPoints(entries);
   const config = entries.find((e) => e.id === 'config')?.payload || {
     videoUrl: '/lesson-cafe.mp4',
@@ -78,9 +129,34 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
   function openPoint(cp: Checkpoint) {
     video.current?.pause();
     gate.current = true;
+    setActiveActivity(null);
     setPoint(cp);
     setSelected(null);
     setResult(null);
+  }
+  function openActivity(a: LessonActivity) {
+    video.current?.pause();
+    gate.current = true;
+    setPoint(null);
+    setActiveActivity(a);
+  }
+  useEffect(() => {
+    if (activeActivity) {
+      const el = document.getElementById('active-activity');
+      el?.focus({ preventScroll: true });
+      el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [activeActivity?.id]);
+  function nextEvent(n: number) {
+    const cp = points.find((p) => p.time <= n && !answered(p.id));
+    const a = activities.find(
+      (p) => p.time <= n && !activityCompleted(p, entries),
+    );
+    return a && (!cp || a.time < cp.time)
+      ? { time: a.time, activity: a, point: null }
+      : cp
+        ? { time: cp.time, point: cp, activity: null }
+        : null;
   }
   function savePosition(n: number) {
     if (Math.abs(n - lastSave.current) > 4) {
@@ -98,10 +174,11 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
     if (!v) return;
     const n = v.currentTime;
     setTime(n);
-    const cp = points.find((p) => p.time <= n && !answered(p.id));
-    if (cp && !gate.current) {
-      v.currentTime = cp.time;
-      openPoint(cp);
+    const event = nextEvent(n);
+    if (event && !gate.current) {
+      v.currentTime = event.time;
+      if (event.activity) openActivity(event.activity);
+      else if (event.point) openPoint(event.point);
     }
     savePosition(n);
   }
@@ -110,9 +187,11 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
     gate.current = false;
     setPoint(null);
     setResult(null);
-    const first = points.find((p) => p.time <= n && !answered(p.id));
+    setActiveActivity(null);
+    const first = nextEvent(n);
     video.current.currentTime = first ? first.time : n;
-    if (first) openPoint(first);
+    if (first?.activity) openActivity(first.activity);
+    else if (first?.point) openPoint(first.point);
     setTime(video.current.currentTime);
   }
   async function check() {
@@ -127,6 +206,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
     } catch {}
   }
   function resume() {
+    setActiveActivity(null);
     gate.current = false;
     setPoint(null);
     setResult(null);
@@ -145,7 +225,10 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
     } catch {}
   }
   return (
-    <>
+    <div
+      ref={classroom}
+      className={`lesson-with-activities classroom ${expanded ? 'classroom-expanded' : ''}`}
+    >
       <div className="breadcrumb">
         <button className="text-button" onClick={() => go('lessons')}>
           <ArrowLeft size={16} />
@@ -170,6 +253,27 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
           {done}/{points.length} {t('nhiệm vụ', '미션')}
         </span>
       </div>
+      <div className="classroom-toolbar">
+        <div>
+          <strong>{t('Không gian học tập', '수업 워크스페이스')}</strong>
+          <span>
+            {t(
+              'Video bên trái · Bài tập bên phải',
+              '왼쪽은 영상 · 오른쪽은 내 활동',
+            )}
+          </span>
+        </div>
+        <button
+          className="secondary"
+          onClick={toggleClassroom}
+          aria-pressed={expanded}
+        >
+          {expanded ? <Minimize size={17} /> : <Maximize size={17} />}
+          {expanded
+            ? t('Thoát toàn màn hình', '전체화면 나가기')
+            : t('Toàn màn hình lớp học', '수업 전체화면')}
+        </button>
+      </div>
       <div className="learning-grid">
         <section>
           <div className="video-wrap">
@@ -183,6 +287,8 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
                   : undefined
               }
               controls
+              controlsList="nofullscreen"
+              disablePictureInPicture
               playsInline
               preload="metadata"
               aria-label={t('Video bài học', '수업 영상')}
@@ -252,119 +358,201 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
               {t('Hỏi tại', '이 시점에 질문')} {formatTime(time)}
             </button>
           </div>
-          {point && (
+          {activities.length > 0 && (
             <div
-              id="active-mission"
-              tabIndex={-1}
-              className="mission-card"
-              role="region"
-              aria-label={t('Nhiệm vụ trong video', '영상 속 미션')}
+              className="activity-timeline"
+              aria-label={t('Hoạt động theo thời gian', '시간대별 수업 활동')}
             >
-              <div className="row spread">
-                <span className="eyebrow green">
-                  {t('ĐẾN LƯỢT BẠN', '이제 내 차례')} · {formatTime(point.time)}
-                </span>
-                <span className="status-chip">
-                  {points.findIndex((p) => p.id === point.id) + 1}/
-                  {points.length}
-                </span>
-              </div>
-              <h2>{lang === 'vi' ? point.prompt : point.promptKo}</h2>
-              <RadioGroup
-                value={selected === null ? '' : String(selected)}
-                onValueChange={(value) => {
-                  setSelected(Number(value));
-                  setResult(null);
-                }}
-                aria-label={t('Chọn đáp án', '정답 선택')}
-                className="answer-options"
-              >
-                {point.options.map((o, i) => (
-                  <label
-                    className={
-                      'answer-option ' + (selected === i ? 'chosen' : '')
-                    }
-                    key={o}
-                  >
-                    <RadioGroupItem
-                      value={String(i)}
-                      disabled={result === 'correct' || busy}
-                    />
-                    <span className="option-letter">
-                      {String.fromCharCode(65 + i)}
-                    </span>
-                    <span lang="ko">{o}</span>
-                  </label>
-                ))}
-              </RadioGroup>
-              {result && (
-                <div className={'answer-feedback ' + result} role="status">
-                  <strong>
-                    {result === 'correct'
-                      ? t('Đúng rồi! Bạn đã hiểu.', '맞았어요! 잘 이해했네요.')
-                      : t(
-                          'Thử lại nhé. Đọc gợi ý bên dưới.',
-                          '다시 도전해 봐요. 아래 설명을 읽어 보세요.',
-                        )}
-                  </strong>
+              {activities.map((a) => (
+                <button
+                  key={a.id}
+                  className={activityCompleted(a, entries) ? 'done' : ''}
+                  onClick={() => seek(a.time)}
+                >
+                  <span>{formatTime(a.time)}</span>
+                  <strong>{a.title}</strong>
+                  <small>
+                    {activityLabels[a.type][lang === 'ko' ? 1 : 0]}{' '}
+                    {activityCompleted(a, entries) ? '✓' : ''}
+                  </small>
+                </button>
+              ))}
+            </div>
+          )}
+          <aside
+            className="classroom-practice"
+            aria-label={t('Bài tập cùng video', '영상과 함께 푸는 활동')}
+          >
+            {!activeActivity &&
+              !point &&
+              !(
+                done === points.length &&
+                activities.every((a) => activityCompleted(a, entries))
+              ) && (
+                <div className="practice-waiting">
+                  <span className="eyebrow green">
+                    {t('ĐẾN LƯỢT BẠN', 'YOUR PRACTICE')}
+                  </span>
+                  <h2>
+                    {t(
+                      'Xem, rồi tự mình thực hành.',
+                      '보고, 내 것으로 만드는 시간.',
+                    )}
+                  </h2>
                   <p>
-                    {lang === 'vi' ? point.explanation : point.explanationKo}
+                    {t(
+                      'Video tự dừng tại thời điểm giáo viên đã chọn. Bài tập sẽ xuất hiện ngay ở đây.',
+                      '선생님이 정한 시점에 영상이 멈추면, 이곳에서 활동을 시작해요.',
+                    )}
                   </p>
+                  <div className="practice-next">
+                    {t('Tiếp theo', '다음 활동')} ·{' '}
+                    {(() => {
+                      const next = [
+                        ...points.filter((p) => !answered(p.id)),
+                        ...activities.filter(
+                          (a) => !activityCompleted(a, entries),
+                        ),
+                      ].sort((a, b) => a.time - b.time)[0];
+                      return next ? formatTime(next.time) : '—';
+                    })()}
+                  </div>
                 </div>
               )}
-              <div className="row mission-actions">
-                <button
-                  className="text-button"
-                  onClick={() => {
-                    gate.current = false;
-                    setPoint(null);
-                    video.current!.currentTime = Math.max(0, point.time - 10);
-                    video.current?.play().catch(() => {});
+            {activeActivity && (
+              <ActivityTask
+                key={activeActivity.id + activeActivity.revision}
+                lang={lang}
+                entries={entries}
+                mutate={mutate}
+                busy={busy}
+                go={go}
+                activity={activeActivity}
+                videoUrl={config.videoUrl}
+                onContinue={resume}
+              />
+            )}
+            {point && (
+              <div
+                id="active-mission"
+                tabIndex={-1}
+                className="mission-card"
+                role="region"
+                aria-label={t('Nhiệm vụ trong video', '영상 속 미션')}
+              >
+                <div className="row spread">
+                  <span className="eyebrow green">
+                    {t('ĐẾN LƯỢT BẠN', '이제 내 차례')} ·{' '}
+                    {formatTime(point.time)}
+                  </span>
+                  <span className="status-chip">
+                    {points.findIndex((p) => p.id === point.id) + 1}/
+                    {points.length}
+                  </span>
+                </div>
+                <h2>{lang === 'vi' ? point.prompt : point.promptKo}</h2>
+                <RadioGroup
+                  value={selected === null ? '' : String(selected)}
+                  onValueChange={(value) => {
+                    setSelected(Number(value));
+                    setResult(null);
                   }}
+                  aria-label={t('Chọn đáp án', '정답 선택')}
+                  className="answer-options"
                 >
-                  <RotateCcw size={16} />
-                  {t('Xem lại 10 giây', '10초 전 다시 보기')}
-                </button>
-                {result === 'correct' ? (
-                  <button className="primary" onClick={resume}>
-                    {t('Tiếp tục bài học', '수업 계속하기')}
-                    <Play size={16} />
-                  </button>
-                ) : (
-                  <button
-                    className="primary"
-                    disabled={selected === null || busy}
-                    onClick={check}
-                  >
-                    {t('Kiểm tra đáp án', '정답 확인')}
-                    <ChevronRight size={16} />
-                  </button>
+                  {point.options.map((o, i) => (
+                    <label
+                      className={
+                        'answer-option ' + (selected === i ? 'chosen' : '')
+                      }
+                      key={o}
+                    >
+                      <RadioGroupItem
+                        value={String(i)}
+                        disabled={result === 'correct' || busy}
+                      />
+                      <span className="option-letter">
+                        {String.fromCharCode(65 + i)}
+                      </span>
+                      <span lang="ko">{o}</span>
+                    </label>
+                  ))}
+                </RadioGroup>
+                {result && (
+                  <div className={'answer-feedback ' + result} role="status">
+                    <strong>
+                      {result === 'correct'
+                        ? t(
+                            'Đúng rồi! Bạn đã hiểu.',
+                            '맞았어요! 잘 이해했네요.',
+                          )
+                        : t(
+                            'Thử lại nhé. Đọc gợi ý bên dưới.',
+                            '다시 도전해 봐요. 아래 설명을 읽어 보세요.',
+                          )}
+                    </strong>
+                    <p>
+                      {lang === 'vi' ? point.explanation : point.explanationKo}
+                    </p>
+                  </div>
                 )}
-              </div>
-            </div>
-          )}
-          {!point && done === points.length && (
-            <div className="success-panel">
-              <CheckCircle2 />
-              <div>
-                <strong>
-                  {t(
-                    'Đã hoàn thành tất cả nhiệm vụ!',
-                    '모든 미션을 완료했어요!',
+                <div className="row mission-actions">
+                  <button
+                    className="text-button"
+                    onClick={() => {
+                      gate.current = false;
+                      setPoint(null);
+                      video.current!.currentTime = Math.max(0, point.time - 10);
+                      video.current?.play().catch(() => {});
+                    }}
+                  >
+                    <RotateCcw size={16} />
+                    {t('Xem lại 10 giây', '10초 전 다시 보기')}
+                  </button>
+                  {result === 'correct' ? (
+                    <button className="primary" onClick={resume}>
+                      {t('Tiếp tục bài học', '수업 계속하기')}
+                      <Play size={16} />
+                    </button>
+                  ) : (
+                    <button
+                      className="primary"
+                      disabled={selected === null || busy}
+                      onClick={check}
+                    >
+                      {t('Kiểm tra đáp án', '정답 확인')}
+                      <ChevronRight size={16} />
+                    </button>
                   )}
-                </strong>
-                <p>
-                  {t(
-                    'Bây giờ, viết một đoạn hội thoại và gửi giáo viên.',
-                    '이제 짧은 대화를 작성해 선생님께 제출해 보세요.',
-                  )}
-                </p>
+                </div>
               </div>
-              <button className="primary" onClick={() => go('feedback')}>
-                {t('Làm bài cuối', '마무리 과제')}
-              </button>
-            </div>
-          )}
+            )}
+            {!point &&
+              !activeActivity &&
+              done === points.length &&
+              activities.every((a) => activityCompleted(a, entries)) && (
+                <div className="success-panel">
+                  <CheckCircle2 />
+                  <div>
+                    <strong>
+                      {t(
+                        'Đã hoàn thành tất cả nhiệm vụ!',
+                        '모든 미션을 완료했어요!',
+                      )}
+                    </strong>
+                    <p>
+                      {t(
+                        'Bây giờ, viết một đoạn hội thoại và gửi giáo viên.',
+                        '이제 짧은 대화를 작성해 선생님께 제출해 보세요.',
+                      )}
+                    </p>
+                  </div>
+                  <button className="primary" onClick={() => go('feedback')}>
+                    {t('Làm bài cuối', '마무리 과제')}
+                  </button>
+                </div>
+              )}
+          </aside>
           <Tabs
             value={activeTab}
             onValueChange={(v) => {
@@ -573,7 +761,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
           </div>
         </aside>
       </div>
-    </>
+    </div>
   );
 }
 function speak(text: string, lang: Lang, setNotice: (s: string) => void) {
@@ -1262,10 +1450,22 @@ export function Teacher({ lang, entries, mutate, busy, go }: Props) {
           <TabsTrigger value="inbox">
             {t('Bài nộp & câu hỏi', '제출물과 질문')} ({pending})
           </TabsTrigger>
+          <TabsTrigger value="activities">
+            {t('Hoạt động tương tác', '쌍방향 활동')}
+          </TabsTrigger>
           <TabsTrigger value="editor">
             {t('Thiết kế bài học', '수업 만들기')}
           </TabsTrigger>
         </TabsList>
+        <TabsContent value="activities">
+          <ActivityStudio
+            lang={lang}
+            entries={entries}
+            mutate={mutate}
+            busy={busy}
+            go={go}
+          />
+        </TabsContent>
         <TabsContent value="inbox">
           <div className="feedback-grid">
             <section className="panel">
