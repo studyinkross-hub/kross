@@ -1,0 +1,55 @@
+/* Selected concept 01: a bright editorial classroom with a horizontal syllabus. */
+.atelier-app { --background:#f7f8f3; background:#f7f8f3; }
+.atelier-app.view-lesson .content { padding:28px 32px 48px; max-width:1600px; }
+.atelier-app.view-lesson .studio-global-nav { padding:22px 32px; }
+.atelier-app.view-lesson .studio-global-nav>.brand { display:flex; }
+.atelier-classroom { border:1px solid #a7b7a8; background:#fafbf7; }
+.atelier-classroom .atelier-rail { display:none; }
+.atelier-classroom .classroom-toolbar { margin:0; padding:14px 24px; background:#173f31; color:#fff; border:0; min-height:65px; }
+.atelier-classroom .classroom-toolbar .master-wordmark { color:#fff; }
+.atelier-classroom .classroom-toolbar .master-wordmark b { font-size:21px; }
+.atelier-classroom .classroom-toolbar .master-wordmark em { font-size:27px; }
+.atelier-classroom .classroom-toolbar span { font-size:14px; color:#f1f5eb; }
+.atelier-classroom .classroom-toolbar .secondary { background:transparent; color:#fff; border-color:#648271; font-size:14px; }
+.atelier-classroom .learning-grid,.atelier-classroom.outline-collapsed .learning-grid { display:block; background:#fafbf7; }
+.atelier-app .atelier-classroom .learning-grid>section { grid-template-columns:minmax(0,1fr) minmax(340px,34%) !important; gap:0; min-width:0; align-items:start; background:#fafbf7; }
+.atelier-classroom .video-wrap { margin:0; border-radius:0; background:#10271d; grid-row:1; }
+.atelier-classroom .video-wrap video { width:100%; aspect-ratio:16/9; object-fit:contain; background:#10271d; }
+.atelier-classroom .video-caption { grid-row:2; margin:0; padding:12px 22px; background:#fafbf7; color:#526452; border-bottom:1px solid #d5dbd0; flex-wrap:wrap; gap:10px; font-size:13px; }
+.atelier-classroom .video-caption button { color:#236646; }
+.atelier-classroom .activity-timeline { grid-row:3; display:flex; gap:0; overflow:auto; padding:18px 20px; margin:0; background:#f5f7f0; border-bottom:1px solid #d5dbd0; }
+.atelier-classroom .activity-timeline button { flex:0 0 145px; text-align:left; padding:10px 16px; border:0; border-right:1px solid #d5dbd0; border-radius:0; background:transparent; }
+.atelier-classroom .activity-timeline button:hover,.atelier-classroom .activity-timeline button.done { background:#e6eddf; }
+.atelier-classroom .activity-timeline strong { font-size:14px; }
+.atelier-classroom .activity-timeline span,.atelier-classroom .activity-timeline small { font-size:12px; }
+.atelier-classroom .classroom-practice { grid-column:2; grid-row:1/5; border:0; border-left:1px solid #b6c3b5; border-radius:0; padding:30px 26px; background:#fafbf7; height:100%; max-height:calc(100dvh - 190px); min-height:500px; }
+.atelier-classroom .lesson-tabs { grid-column:1; grid-row:4; padding:18px 22px 26px; margin:0; color:#173f31; }
+.atelier-classroom .lesson-tabs .panel { background:transparent; color:#173f31; padding:18px 0 0; border:0; }
+.atelier-classroom .lesson-tabs [role=tab] { color:#526452; font-size:14px; }
+.atelier-classroom .lesson-tabs [role=tab][data-state=active],.atelier-classroom .lesson-tabs [role=tab][aria-selected=true] { color:#173f31; border-color:#a15132; }
+.atelier-classroom .lesson-tabs .muted { color:#526452; }
+.atelier-classroom .grammar-callout { background:#eef2e8; color:#173f31; border-left:2px solid #a15132; border-radius:0; }
+.atelier-classroom .grammar-callout strong { font-size:clamp(20px,2vw,30px); }
+.atelier-classroom.classroom-expanded { padding:0; background:#fafbf7; border:0; }
+.atelier-classroom.classroom-expanded .learning-grid { min-height:calc(100dvh - 65px); }
+.atelier-classroom.classroom-expanded .classroom-practice { max-height:calc(100dvh - 65px); position:sticky; top:0; }
+.atelier-classroom.classroom-expanded .lesson-tabs { display:block; }
+.atelier-classroom.classroom-expanded .video-wrap video { max-height:65dvh; }
+.atelier-app.view-teacher .studio-intro { background:#f0f3e9; border:1px solid #d5dbd0; border-radius:0; box-shadow:none; }
+.atelier-app.view-teacher .studio-activity { border-radius:3px; border-color:#d5dbd0; box-shadow:none; }
+@media(max-width:1000px) {
+ .atelier-app.view-lesson .content { padding:18px; }
+ .atelier-app .atelier-classroom .learning-grid>section { grid-template-columns:minmax(0,1fr) minmax(300px,38%) !important; }
+ .atelier-classroom .classroom-practice { padding:22px; }
+}
+@media(max-width:650px) {
+ .atelier-app.view-lesson .content { padding:0; }
+ .atelier-app .atelier-classroom .learning-grid>section { grid-template-columns:1fr !important; }
+ .atelier-classroom .classroom-practice { grid-column:1; grid-row:4; max-height:none; min-height:0; margin:0; padding:24px; border-left:0; }
+ .atelier-classroom .lesson-tabs { grid-row:5; }
+ .atelier-classroom.classroom-expanded .classroom-practice { position:static; max-height:none; }
+ .atelier-classroom.classroom-expanded .video-wrap { position:sticky; top:0; margin:0; }
+ .atelier-classroom .classroom-toolbar { padding:12px; }
+ .atelier-classroom .classroom-toolbar .secondary { font-size:12px; padding:8px; }
+ .atelier-app.view-lesson .studio-global-nav { padding:16px; }
+}

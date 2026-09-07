@@ -2,6 +2,7 @@
 import { StudioHome } from './studio-home';
 import './interactive.css';
 import './atelier.css';
+import './editorial.css';
 import { useEffect, useRef, useState } from 'react';
 import {
   BookOpen,
