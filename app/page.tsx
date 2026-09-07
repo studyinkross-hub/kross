@@ -1,7 +1,7 @@
 'use client';
-import { DesignPicker, LearningHome } from './designs';
 import { StudioHome } from './studio-home';
 import './interactive.css';
+import './atelier.css';
 import { useEffect, useRef, useState } from 'react';
 import {
   BookOpen,
@@ -541,15 +541,6 @@ export default function Home() {
     [loading, setLoading] = useState(true),
     [error, setError] = useState(''),
     [pending, setPending] = useState(0);
-  const [design, setDesign] = useState(2);
-  useEffect(() => {
-    const n = Number(localStorage.getItem('kross-design-v2') ?? 2);
-    if (n >= 0 && n <= 2) setDesign(n);
-  }, []);
-  function chooseDesign(n: number) {
-    setDesign(n);
-    localStorage.setItem('kross-design-v2', String(n));
-  }
   const queue = useRef<Promise<unknown>>(Promise.resolve());
   const t = (v: string, k: string) => (lang === 'vi' ? v : k);
   useEffect(() => {
@@ -637,7 +628,7 @@ export default function Home() {
                 '변경 내용을 저장하지 못했어요. 입력한 내용을 확인하고 다시 시도해 주세요.',
               );
   return (
-    <SidebarProvider className={'kross-theme theme-' + design}>
+    <SidebarProvider className={'kross-theme theme-2 atelier-app view-' + view}>
       <a
         href="#main-content"
         onClick={(e) => {
@@ -722,15 +713,13 @@ export default function Home() {
             </button>
           </div>
         </header>
-        {design === 2 && (
+        {(
           <nav
             className="studio-global-nav"
             aria-label={t('Điều hướng lớp học', '수업 메뉴')}
           >
             <a href="#home" className="brand">
-              <span className="logo-window">
-                <img src="/kross-logo.png" alt="KROSS" />
-              </span>
+              <span className="master-wordmark"><b>KROSS</b><small>THE</small><em>Master</em></span>
             </a>
             <div>
               {['home', 'lessons', 'vocab', 'feedback', 'teacher'].map((v) => (
@@ -746,7 +735,6 @@ export default function Home() {
           </nav>
         )}
         <main id="main-content" className="content" tabIndex={-1}>
-          <DesignPicker value={design} onChange={chooseDesign} lang={lang} />
           {error && (
             <div role="alert" className="error-banner">
               <AlertCircle size={19} />
@@ -768,11 +756,7 @@ export default function Home() {
               {t('Đang chuẩn bị góc học tập…', '학습 공간을 준비하고 있어요…')}
             </div>
           ) : error === 'load' ? null : view === 'home' ? (
-            design === 2 ? (
-              <StudioHome {...props} />
-            ) : (
-              <LearningHome {...props} design={design} />
-            )
+            <StudioHome {...props} />
           ) : view === 'lessons' ? (
             <Lessons {...props} />
           ) : view === 'lesson' ? (

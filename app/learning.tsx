@@ -62,6 +62,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
   const video = useRef<HTMLVideoElement>(null);
   const classroom = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(false);
+  const [outlineOpen, setOutlineOpen] = useState(true);
   useEffect(() => {
     const sync = () =>
       setExpanded(document.fullscreenElement === classroom.current);
@@ -227,7 +228,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
   return (
     <div
       ref={classroom}
-      className={`lesson-with-activities classroom ${expanded ? 'classroom-expanded' : ''}`}
+      className={`lesson-with-activities classroom atelier-classroom ${outlineOpen ? '' : 'outline-collapsed'} ${expanded ? 'classroom-expanded' : ''}`}
     >
       <div className="breadcrumb">
         <button className="text-button" onClick={() => go('lessons')}>
@@ -255,13 +256,8 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
       </div>
       <div className="classroom-toolbar">
         <div>
-          <strong>{t('Không gian học tập', '수업 워크스페이스')}</strong>
-          <span>
-            {t(
-              'Video bên trái · Bài tập bên phải',
-              '왼쪽은 영상 · 오른쪽은 내 활동',
-            )}
-          </span>
+          <a className="master-wordmark" href="#home" aria-label="KROSS THE Master"><b>KROSS</b><small>THE</small><em>Master</em></a>
+          <span>{t('Sơ cấp 1 / Gọi món ở quán cà phê', '초급 1 / 카페에서 주문하기')}</span>
         </div>
         <button
           className="secondary"
@@ -275,6 +271,15 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
         </button>
       </div>
       <div className="learning-grid">
+        <nav className="atelier-rail" aria-label={t('Mục lục bài học', '수업 목차')}>
+          <button className="rail-toggle" onClick={() => setOutlineOpen(!outlineOpen)} aria-expanded={outlineOpen} aria-label={t('Ẩn / hiện mục lục', '수업 목차 접기 / 펼치기')}><Layers size={20}/><span>{t('Mục lục', '수업 목차')}</span></button>
+          <div className="rail-content">
+            <p className="rail-heading">TODAY’S CLASS <span>{formatTime(config.duration)}</span></p>
+            <button className="rail-start" onClick={() => seek(0)}><Play size={14}/>{t('Từ đầu', '처음부터')}</button>
+            {[...activities.map(a => ({id:a.id,time:a.time,label:a.title,complete:activityCompleted(a,entries),active:activeActivity?.id===a.id})), ...points.map(p => ({id:p.id,time:p.time,label:lang==='ko'?p.promptKo:p.prompt,complete:answered(p.id),active:point?.id===p.id}))].sort((a,b)=>a.time-b.time).map((item,i)=><button key={item.id} className={'rail-chapter '+(item.active?'active':'')} onClick={()=>seek(item.time)} aria-current={item.active?'step':undefined}><span className="rail-number">{item.complete?<Check size={24}/>:String(i+1).padStart(2,'0')}</span><strong>{item.label}</strong><small>{formatTime(item.time)}</small></button>)}
+            <div className="rail-progress"><strong>{done+activities.filter(a=>activityCompleted(a,entries)).length} / {points.length+activities.length}</strong><span>{t('hoàn thành', '활동 완료')}</span></div>
+          </div>
+        </nav>
         <section>
           <div className="video-wrap">
             <video

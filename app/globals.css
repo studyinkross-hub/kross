@@ -35,14 +35,14 @@
   --color-sidebar-ring: #74c682;
 }
 :root {
-  --background: #f7fcf8;
-  --foreground: #203924;
+  --background: #fafaf5;
+  --foreground: #143e32;
   --card: #fff;
-  --primary: #74c682;
+  --primary: #236646;
   --muted: #edf6ee;
   --border: #e7f1e9;
   --sidebar: #fff;
-  --radius: 1rem;
+  --radius: 0.35rem;
 }
 * {
   box-sizing: border-box;
