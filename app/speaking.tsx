@@ -13,6 +13,7 @@ import {
 import { readClip, storeClip } from '@/lib/media';
 import type { LessonActivity } from '@/lib/activities';
 import { formatTime } from '@/lib/course';
+import { AudioStrip } from './audio-strip';
 export function SpeakingRecorder({
   activity,
   videoUrl,
@@ -192,6 +193,7 @@ export function SpeakingRecorder({
     }
   }
   function playOriginal() {
+    setError('');
     own.current?.pause();
     if (!original.current) return;
     original.current.currentTime = activity.sourceStart;
@@ -208,16 +210,18 @@ export function SpeakingRecorder({
   }
   return (
     <div className="speaking-lab">
+      <div className="speaking-phrase" lang="ko">{activity.reference || activity.prompt}</div>
       <div className="comparison-grid">
         <section>
           <div className="row spread">
-            <h3>{t('01 · Nghe bản gốc', '01 · 원본 듣기')}</h3>
+            <h3>{t('Giọng giáo viên', '선생님 원본')}</h3>
             <span>
               {formatTime(activity.sourceStart)}–
               {formatTime(activity.sourceEnd)}
             </span>
           </div>
           <video
+            className="source-media"
             ref={original}
             src={videoUrl}
             playsInline
@@ -244,6 +248,7 @@ export function SpeakingRecorder({
               )
             }
           />
+          <AudioStrip target={original} src={videoUrl} start={activity.sourceStart} duration={activity.sourceEnd-activity.sourceStart} disabled={recording} label={t('Nghe giọng giáo viên','선생님 원본 재생')} onPlay={playOriginal}/>
           <button
             className="secondary"
             onClick={playOriginal}
@@ -253,19 +258,20 @@ export function SpeakingRecorder({
             {t('Nghe đúng đoạn', '지정 구간 듣기')}
           </button>
           {videoUrl === '/lesson-cafe.mp4' && (
-            <p className="fineprint">
+            <p className="fineprint demo-audio-note">
               {t(
                 'Video mẫu không có tiếng. Dùng video lớp học có âm thanh để so sánh phát âm.',
-                '예제 영상에는 음성이 없습니다. 발음 비교에는 소리가 있는 수업 영상을 연결하세요.',
+                '예제는 무음입니다. 실제 수업 영상에서 원음을 들을 수 있어요.',
               )}
             </p>
           )}
         </section>
         <section>
           <div className="row spread">
-            <h3>{t('02 · Giọng của tôi', '02 · 내 목소리')}</h3>
+            <h3>{t('Bản thu của tôi', '내 녹음')}</h3>
             <span>{formatTime(seconds)} / 01:30</span>
           </div>
+          <AudioStrip target={own} src={url} duration={seconds} disabled={!url || recording} label={t('Nghe bản thu','내 녹음 재생')}/>
           <div className={'record-area ' + (recording ? 'recording' : '')}>
             <Mic size={29} />
             <strong>
@@ -292,6 +298,7 @@ export function SpeakingRecorder({
           {url && (
             <>
               <audio
+                className="recorded-media"
                 ref={own}
                 src={url}
                 controls
@@ -347,7 +354,7 @@ export function SpeakingRecorder({
               </a>
             </>
           )}
-          <label className="audio-import">
+          <details className="recording-options"><summary>{t('Tệp âm thanh','음성 파일 가져오기')}</summary><label className="audio-import">
             <Upload size={15} />
             {t('Hoặc chọn tệp âm thanh', '또는 음성 파일 선택')}
             <input
@@ -371,7 +378,7 @@ export function SpeakingRecorder({
                 void accept(f);
               }}
             />
-          </label>
+          </label></details>
         </section>
       </div>
       <div className="compare-check">
@@ -384,7 +391,7 @@ export function SpeakingRecorder({
           <Check size={17} />
           {t(
             'Tôi đã nghe hai bản và tự so sánh',
-            '두 녹음을 듣고 직접 비교했어요',
+            '원본과 내 발음을 비교했어요',
           )}
         </button>
         <p>
@@ -394,13 +401,13 @@ export function SpeakingRecorder({
           )}
         </p>
       </div>
-      <p className="fineprint">
+      <details className="recording-options"><summary>{t('Lưu bản thu','녹음 저장 안내')}{saved?' · ✓':''}</summary><p className="fineprint">
         {t(
           'Bản thu chỉ lưu trên trình duyệt này, không gửi cho giáo viên. Không chấm điểm phát âm tự động.',
           '녹음은 이 브라우저에만 저장되며 선생님께 전송되지 않습니다. 자동 발음 점수는 제공하지 않습니다.',
         )}{' '}
         {saved ? t('Đã lưu trên thiết bị.', '기기에 저장됨.') : ''}
-      </p>
+      </p></details>
       {error && (
         <p role="alert" className="activity-error">
           {error}

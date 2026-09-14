@@ -50,10 +50,10 @@ export function ActivityTask({
     [seconds, setSeconds] = useState(0),
     [error, setError] = useState('');
   const Icon = icons[activity.type];
-  async function submit() {
+  async function submit(continueAfter = false) {
     setError('');
     try {
-      await mutate({
+      const response = await mutate({
         action: 'respondActivity',
         id: activity.id,
         revision: activity.revision,
@@ -62,6 +62,7 @@ export function ActivityTask({
         compared: ready,
         seconds,
       });
+      if (continueAfter && activityCompleted(activity,response.entries || [])) onContinue();
     } catch {
       setError(
         t(
@@ -86,8 +87,8 @@ export function ActivityTask({
         </span>
         <time>{formatTime(activity.time)}</time>
       </div>
-      <h2>{activity.title}</h2>
-      <p className="activity-prompt">{activity.prompt}</p>
+      <h2>{activity.type === 'shadow' ? t('Nghe, rồi nói bằng giọng của mình.','듣고, 내 목소리로.') : activity.title}</h2>
+      <p className="activity-prompt">{activity.type==='shadow'?t('Nghe bản gốc rồi nói theo.','원본을 듣고 따라 말해 보세요.'):activity.prompt}</p>
       {activity.type === 'shadow' ? (
         <SpeakingRecorder
           key={activity.id + activity.revision}
@@ -197,7 +198,8 @@ export function ActivityTask({
           disabled={
             busy || (activity.type === 'shadow' ? !ready : !body.trim())
           }
-          onClick={submit}
+          onClick={()=>submit()}
+          hidden={activity.type==='shadow'}
         >
           <Save size={17} />
           {status
@@ -208,10 +210,10 @@ export function ActivityTask({
         </button>
         <button
           className="primary"
-          disabled={!activityCompleted(activity, entries) || busy}
-          onClick={onContinue}
+          disabled={busy || (!activityCompleted(activity, entries) && !(activity.type==='shadow' && ready))}
+          onClick={()=>activityCompleted(activity,entries)?onContinue():submit(true)}
         >
-          {t('Tiếp tục video', '영상 이어보기')}
+          {t('Hoàn thành và tiếp tục', '완료하고 수업 계속')}
           <Play size={17} />
         </button>
       </div>

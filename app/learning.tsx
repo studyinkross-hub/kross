@@ -1,5 +1,7 @@
 'use client';
 import { ActivityTask, ActivityStudio } from './activities';
+import { SpeakingRecorder } from './speaking';
+import {CourseBar} from './course-bar';
 import {
   getActivities,
   activityCompleted,
@@ -53,7 +55,7 @@ export const getPoints = (entries: Entry[]) => {
     .filter((e) => e.kind === 'checkpoint')
     .map((e) => e.payload as Checkpoint);
   return [
-    ...checkpoints.filter((p) => !custom.some((c) => c.id === p.id)),
+    ...(entries.find(e=>e.id==='config')?.payload.isCatalog ? [] : checkpoints.filter((p) => !custom.some((c) => c.id === p.id))),
     ...custom,
   ].sort((a, b) => a.time - b.time);
 };
@@ -62,7 +64,8 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
   const video = useRef<HTMLVideoElement>(null);
   const classroom = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(false);
-  const [outlineOpen, setOutlineOpen] = useState(true);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [showCover, setShowCover] = useState(true);
   useEffect(() => {
     const sync = () =>
       setExpanded(document.fullscreenElement === classroom.current);
@@ -120,6 +123,8 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
   const answered = (id: string) =>
     entries.some((e) => e.id === 'attempt:' + id && e.payload.correct);
   const done = points.filter((p) => answered(p.id)).length;
+  const events = [...activities.map(a => ({id:a.id,time:a.time,label:activityLabels[a.type][lang === 'ko' ? 1 : 0],done:activityCompleted(a,entries)})), ...points.map((p,i) => ({id:p.id,time:p.time,label:t('Bài tập','확인 문제')+' '+(i+1),done:answered(p.id)}))].sort((a,b)=>a.time-b.time);
+  const practicePreview: LessonActivity = {id:'local-speaking-preview',revision:1,type:'shadow',time:0,title:'',prompt:'커피 한 잔 주세요.',reference:'커피 한 잔 주세요.',sourceStart:0,sourceEnd:6,answer:'',padletUrl:'',direction:'vi-ko'};
   useEffect(() => {
     if (point) {
       const target = document.getElementById('active-mission');
@@ -183,7 +188,8 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
     }
     savePosition(n);
   }
-  function seek(n: number) {
+  function seek(n: number, reveal = true) {
+    if (reveal) setShowCover(false);
     if (!video.current) return;
     gate.current = false;
     setPoint(null);
@@ -228,14 +234,14 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
   return (
     <div
       ref={classroom}
-      className={`lesson-with-activities classroom atelier-classroom ${outlineOpen ? '' : 'outline-collapsed'} ${expanded ? 'classroom-expanded' : ''}`}
+      className={`lesson-with-activities classroom reference-classroom ${expanded ? 'classroom-expanded' : ''}`}
     >
       <div className="breadcrumb">
         <button className="text-button" onClick={() => go('lessons')}>
           <ArrowLeft size={16} />
           {t('Lớp học của tôi', '내 수업')}
         </button>
-        <span>/ Bài 04</span>
+        <span>/ {t('Sơ cấp 1 · Gọi món ở quán cà phê', '초급 1 · 카페에서 주문하기')}</span>
       </div>
       <div className="view-title">
         <div>
@@ -256,8 +262,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
       </div>
       <div className="classroom-toolbar">
         <div>
-          <a className="master-wordmark" href="#home" aria-label="KROSS THE Master"><b>KROSS</b><small>THE</small><em>Master</em></a>
-          <span>{t('Sơ cấp 1 / Gọi món ở quán cà phê', '초급 1 / 카페에서 주문하기')}</span>
+          <h1>{config.title || t('04. Gọi món ở quán cà phê', '04. 카페에서 주문하기')}</h1>
         </div>
         <button
           className="secondary"
@@ -271,15 +276,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
         </button>
       </div>
       <div className="learning-grid">
-        <nav className="atelier-rail" aria-label={t('Mục lục bài học', '수업 목차')}>
-          <button className="rail-toggle" onClick={() => setOutlineOpen(!outlineOpen)} aria-expanded={outlineOpen} aria-label={t('Ẩn / hiện mục lục', '수업 목차 접기 / 펼치기')}><Layers size={20}/><span>{t('Mục lục', '수업 목차')}</span></button>
-          <div className="rail-content">
-            <p className="rail-heading">TODAY’S CLASS <span>{formatTime(config.duration)}</span></p>
-            <button className="rail-start" onClick={() => seek(0)}><Play size={14}/>{t('Từ đầu', '처음부터')}</button>
-            {[...activities.map(a => ({id:a.id,time:a.time,label:a.title,complete:activityCompleted(a,entries),active:activeActivity?.id===a.id})), ...points.map(p => ({id:p.id,time:p.time,label:lang==='ko'?p.promptKo:p.prompt,complete:answered(p.id),active:point?.id===p.id}))].sort((a,b)=>a.time-b.time).map((item,i)=><button key={item.id} className={'rail-chapter '+(item.active?'active':'')} onClick={()=>seek(item.time)} aria-current={item.active?'step':undefined}><span className="rail-number">{item.complete?<Check size={24}/>:String(i+1).padStart(2,'0')}</span><strong>{item.label}</strong><small>{formatTime(item.time)}</small></button>)}
-            <div className="rail-progress"><strong>{done+activities.filter(a=>activityCompleted(a,entries)).length} / {points.length+activities.length}</strong><span>{t('hoàn thành', '활동 완료')}</span></div>
-          </div>
-        </nav>
+        <CourseBar lang={lang} initialVideo={config}/>
         <section>
           <div className="video-wrap">
             <video
@@ -288,7 +285,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
               src={config.videoUrl}
               poster={
                 config.videoUrl === '/lesson-cafe.mp4'
-                  ? '/lesson-poster.jpg'
+                  ? '/lesson-teacher.png'
                   : undefined
               }
               controls
@@ -300,6 +297,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
               onTimeUpdate={update}
               onSeeking={update}
               onPlay={() => {
+                setShowCover(false);
                 if (gate.current) video.current?.pause();
               }}
               onPause={() => {
@@ -310,11 +308,12 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
                 const pos =
                   entries.find((e) => e.id === 'progress')?.payload.position ||
                   0;
-                seek(Math.min(pos, config.duration));
+                seek(Math.min(pos, config.duration), false);
               }}
               onError={() => setError(true)}
               onEnded={() => savePosition(config.duration)}
             />
+            {showCover && config.videoUrl==='/lesson-cafe.mp4' && <div className="lesson-cover"><img src="/lesson-teacher.png" alt={t('Ảnh minh họa lớp học','예제 수업 표지 이미지')}/><button onClick={()=>{setShowCover(false);video.current?.play().catch(()=>setError(true));}}><Play size={20} fill="currentColor"/>{t('Tiếp tục bài học','수업 시작하기')}</button></div>}
             {error && (
               <div className="video-error" role="alert">
                 <strong>
@@ -338,6 +337,15 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
               </div>
             )}
           </div>
+          <div className="reference-chapters" aria-label={t('Các phần của bài học','수업 순서')}>
+            <button onClick={()=>seek(0)} className={time === 0 ? 'current' : ''}><span>01</span><strong>{t('Bắt đầu','수업 시작')}</strong><small>00:00</small></button>
+            {events.map((e,i)=><button key={e.id} className={(activeActivity?.id===e.id || point?.id===e.id)?'current':e.done?'done':''} onClick={()=>seek(e.time)}><span>{e.done?<Check size={14}/>:String(i+2).padStart(2,'0')}</span><strong>{e.label}</strong><small>{formatTime(e.time)}</small></button>)}
+          </div>
+          <div className="reference-phrase">
+            <div><small>한국어</small><strong>{activeActivity?.type==='shadow' ? activeActivity.reference || activeActivity.prompt : '커피 한 잔 주세요.'}</strong></div>
+            <div><small>Tiếng Việt</small><p>{activeActivity?.type==='shadow' ? t('Câu luyện nói do giáo viên chọn','선생님이 정한 말하기 문장') : 'Cho tôi một ly cà phê.'}</p></div>
+            <button className="secondary" aria-expanded={notesOpen} onClick={()=>setNotesOpen(!notesOpen)}><BookOpen size={16}/>{t('Ghi chú','수업 노트')}<ChevronRight size={15}/></button>
+          </div>
           <div className="video-caption">
             <span>
               <span className="live-dot" />{' '}
@@ -356,6 +364,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
               onClick={() => {
                 video.current?.pause();
                 setActiveTab('questions');
+                setNotesOpen(true);
                 document.getElementById('question-box')?.focus();
               }}
             >
@@ -363,7 +372,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
               {t('Hỏi tại', '이 시점에 질문')} {formatTime(time)}
             </button>
           </div>
-          {activities.length > 0 && (
+          {false && activities.length > 0 && (
             <div
               className="activity-timeline"
               aria-label={t('Hoạt động theo thời gian', '시간대별 수업 활동')}
@@ -400,16 +409,18 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
                   </span>
                   <h2>
                     {t(
-                      'Xem, rồi tự mình thực hành.',
-                      '보고, 내 것으로 만드는 시간.',
+                      'Nghe, rồi nói bằng giọng của mình.',
+                      '듣고, 내 목소리로.',
                     )}
                   </h2>
                   <p>
                     {t(
                       'Video tự dừng tại thời điểm giáo viên đã chọn. Bài tập sẽ xuất hiện ngay ở đây.',
-                      '선생님이 정한 시점에 영상이 멈추면, 이곳에서 활동을 시작해요.',
+                      '원본을 듣고 따라 말해 보세요.',
                     )}
                   </p>
+                  {config.videoUrl === '/lesson-cafe.mp4' && <SpeakingRecorder activity={practicePreview} videoUrl={config.videoUrl} lang={lang} onReady={()=>{}} />}
+                  <button className="primary preview-continue" onClick={()=>{setShowCover(false);video.current?.play().catch(()=>setError(true));}}>{t('Tiếp tục bài học','수업 계속하기')}<ChevronRight size={17}/></button>
                   <div className="practice-next">
                     {t('Tiếp theo', '다음 활동')} ·{' '}
                     {(() => {
@@ -570,7 +581,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
                 );
               }
             }}
-            className="lesson-tabs"
+            className={'lesson-tabs reference-notes ' + (notesOpen ? 'is-open' : '')}
           >
             <TabsList variant="line">
               <TabsTrigger value="overview">
@@ -1422,6 +1433,7 @@ export function Teacher({ lang, entries, mutate, busy, go }: Props) {
         </button>
       </div>
       <div className="demo-explanation">
+        <CourseBar lang={lang} teacher initialVideo={config}/>
         {t(
           'Đang thử vai trò giáo viên trong cùng một lớp mẫu. Dữ liệu được lưu cho phiên trình duyệt này; chưa phải tài khoản giáo viên thực.',
           '같은 예제 반의 선생님 역할을 체험하고 있어요. 데이터는 이 브라우저 세션별로 저장되며 실제 교사 계정은 아닙니다.',

@@ -3,6 +3,8 @@ import { StudioHome } from './studio-home';
 import './interactive.css';
 import './atelier.css';
 import './editorial.css';
+import './reference.css';
+import {TeacherGate} from './teacher-gate';
 import { useEffect, useRef, useState } from 'react';
 import {
   BookOpen,
@@ -562,7 +564,7 @@ export default function Home() {
   function load() {
     setLoading(true);
     setError('');
-    fetch('/api/state')
+    fetch('/api/state'+window.location.search)
       .then(async (r) => {
         if (!r.ok) throw new Error();
         const data = (await r.json()) as { entries: Entry[]; error?: string };
@@ -583,13 +585,13 @@ export default function Home() {
     const task = queue.current
       .catch(() => {})
       .then(async () => {
-        const r = await fetch('/api/state', {
+        const r = await fetch('/api/state'+window.location.search, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
         });
         const data = (await r.json()) as { entries: Entry[]; error?: string };
-        if (!r.ok) throw new Error(data.error || 'SAVE_FAILED');
+        if (!r.ok) {if(data.error==='TEACHER_REQUIRED')window.dispatchEvent(new Event('kross-teacher-locked'));throw new Error(data.error || 'SAVE_FAILED');}
         setEntries(data.entries);
         setError('');
         return data;
@@ -726,13 +728,14 @@ export default function Home() {
               {['home', 'lessons', 'vocab', 'feedback', 'teacher'].map((v) => (
                 <button
                   key={v}
-                  aria-current={view === v ? 'page' : undefined}
+                  aria-current={view === v || (v === 'lessons' && view === 'lesson') ? 'page' : undefined}
                   onClick={() => go(v)}
                 >
                   {viewNames[v][lang === 'ko' ? 1 : 0]}
                 </button>
               ))}
             </div>
+            <button className="reference-language" onClick={()=>setLang(lang === 'ko'?'vi':'ko')} aria-label={lang==='ko'?'Chuyển sang tiếng Việt':'한국어로 전환'}>{lang==='ko'?'KO / VI':'VI / KO'}</button>
           </nav>
         )}
         <main id="main-content" className="content" tabIndex={-1}>
@@ -767,7 +770,7 @@ export default function Home() {
           ) : view === 'feedback' ? (
             <Feedback {...props} />
           ) : (
-            <Teacher {...props} />
+            <TeacherGate lang={lang}><Teacher {...props} /></TeacherGate>
           )}
           <footer className="page-footer">
             KROSS CAMPUS{' '}

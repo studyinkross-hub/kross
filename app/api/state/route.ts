@@ -1,5 +1,6 @@
 import { validateActivity, matchesAnswer } from '@/lib/activities';
 import { database } from '@/db';
+import { isTeacher } from '@/lib/teacher-auth';
 import { checkpoints, words } from '@/lib/course';
 const cookieName = 'kross_demo';
 function identity(req: Request) {
@@ -9,9 +10,11 @@ function identity(req: Request) {
     .map((x) => x.trim())
     .find((x) => x.startsWith(cookieName + '='))
     ?.slice(cookieName.length + 1);
-  return existing && /^[a-f0-9-]{36}$/.test(existing)
+  const base = existing && /^[a-f0-9-]{36}$/.test(existing)
     ? existing
     : crypto.randomUUID();
+  const lesson=new URL(req.url).searchParams.get('lesson');
+  return base+(lesson && /^[a-f0-9-]{36}$/.test(lesson)?':'+lesson:'');
 }
 function response(req: Request, sid: string, body: unknown, status = 200) {
   return Response.json(body, {
@@ -21,7 +24,7 @@ function response(req: Request, sid: string, body: unknown, status = 200) {
       'Set-Cookie':
         cookieName +
         '=' +
-        sid +
+        sid.split(':')[0] +
         '; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000' +
         (new URL(req.url).protocol === 'https:' ? '; Secure' : ''),
     },
@@ -34,7 +37,10 @@ async function read(sid: string) {
     )
     .bind(sid)
     .all<any>();
-  return r.results.map((x) => ({ ...x, payload: JSON.parse(x.payload) }));
+  const rows=r.results.map((x) => ({ ...x, payload: JSON.parse(x.payload) }));
+  const lesson=sid.split(':')[1];
+  if(lesson){const v=await database().prepare('SELECT payload FROM records WHERE session=? AND id=?').bind('__course_catalog__',lesson).first<{payload:string}>();if(!v)throw Error('UNKNOWN_LESSON');const existing=rows.find(x=>x.id==='config');if(existing)existing.payload={...JSON.parse(v.payload),...existing.payload,isCatalog:true};else rows.push({id:'config',kind:'config',payload:{...JSON.parse(v.payload),isCatalog:true},updatedAt:''});}
+  return rows;
 }
 async function save(sid: string, id: string, kind: string, payload: unknown) {
   await database()
@@ -75,6 +81,7 @@ export async function POST(req: Request) {
     if (raw.length > 32000)
       return response(req, sid, { error: 'TOO_LARGE' }, 413);
     const b = JSON.parse(raw);
+    if (['saveActivity','archiveActivity','reviewActivity','feedback','reply','moveCheckpoint','checkpoint','config'].includes(b.action) && !await isTeacher(req)) return response(req,sid,{error:'TEACHER_REQUIRED'},403);
     const entries = await read(sid);
     const config = entries.find((x) => x.id === 'config')?.payload || {
       videoUrl: '/lesson-cafe.mp4',
@@ -84,7 +91,7 @@ export async function POST(req: Request) {
       .filter((x) => x.kind === 'checkpoint')
       .map((x) => x.payload);
     const all = [
-      ...checkpoints.filter((p) => !custom.some((c) => c.id === p.id)),
+      ...(config.isCatalog ? [] : checkpoints.filter((p) => !custom.some((c) => c.id === p.id))),
       ...custom,
     ];
     if (b.action === 'saveActivity') {
