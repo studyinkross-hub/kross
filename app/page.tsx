@@ -651,7 +651,7 @@ export default function Home() {
               <img src="/kross-logo.png" alt="KROSS · From dream to goal" />
             </span>
           </a>
-          <p className="brand-sub">CAMPUS</p>
+          <p className="brand-sub">THE MASTER</p>
         </SidebarHeader>
         <SidebarContent>
           <p className="nav-label">
@@ -775,7 +775,7 @@ export default function Home() {
             <TeacherGate lang={lang}><InviteStudents lang={lang}/><TeacherLibrary lang={lang}/><Teacher {...props} /></TeacherGate>
           )}
           <footer className="page-footer">
-            KROSS CAMPUS{' '}
+            KROSS THE MASTER{' '}
             <span>
               {t(
                 'Học cùng nhau, tiến xa hơn.',
