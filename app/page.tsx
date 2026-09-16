@@ -5,6 +5,8 @@ import './atelier.css';
 import './editorial.css';
 import './reference.css';
 import {TeacherGate} from './teacher-gate';
+import {StudentAccess,InviteStudents} from './student-access';
+import {TeacherLibrary,LearningLibrary} from './learning-library';
 import { useEffect, useRef, useState } from 'react';
 import {
   BookOpen,
@@ -631,7 +633,7 @@ export default function Home() {
                 '변경 내용을 저장하지 못했어요. 입력한 내용을 확인하고 다시 시도해 주세요.',
               );
   return (
-    <SidebarProvider className={'kross-theme theme-2 atelier-app view-' + view}>
+    <StudentAccess lang={lang}><SidebarProvider className={'kross-theme theme-2 atelier-app view-' + view}>
       <a
         href="#main-content"
         onClick={(e) => {
@@ -766,11 +768,11 @@ export default function Home() {
           ) : view === 'lesson' ? (
             <Lesson {...props} />
           ) : view === 'vocab' ? (
-            <Vocab {...props} />
+            <><LearningLibrary lang={lang}/><Vocab {...props} /></>
           ) : view === 'feedback' ? (
             <Feedback {...props} />
           ) : (
-            <TeacherGate lang={lang}><Teacher {...props} /></TeacherGate>
+            <TeacherGate lang={lang}><InviteStudents lang={lang}/><TeacherLibrary lang={lang}/><Teacher {...props} /></TeacherGate>
           )}
           <footer className="page-footer">
             KROSS CAMPUS{' '}
@@ -783,6 +785,6 @@ export default function Home() {
           </footer>
         </main>
       </div>
-    </SidebarProvider>
+    </SidebarProvider></StudentAccess>
   );
 }

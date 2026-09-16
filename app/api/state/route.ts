@@ -1,9 +1,9 @@
 import { validateActivity, matchesAnswer } from '@/lib/activities';
 import { database } from '@/db';
-import { isTeacher } from '@/lib/teacher-auth';
+import { isTeacher, digest } from '@/lib/teacher-auth';
 import { checkpoints, words } from '@/lib/course';
 const cookieName = 'kross_demo';
-function identity(req: Request) {
+async function identity(req: Request) {
   const existing = req.headers
     .get('cookie')
     ?.split(';')
@@ -14,7 +14,13 @@ function identity(req: Request) {
     ? existing
     : crypto.randomUUID();
   const lesson=new URL(req.url).searchParams.get('lesson');
-  return base+(lesson && /^[a-f0-9-]{36}$/.test(lesson)?':'+lesson:'');
+  const valid=lesson && /^[a-f0-9-]{36}$/.test(lesson)?lesson:'';
+  if(await isTeacher(req))return valid?'__lesson__:'+valid:base;
+  const user=req.headers.get('oai-authenticated-user-id');
+  if(!user)return '';
+  const key='student:'+await digest(user);
+  const profile=await database().prepare('SELECT id FROM records WHERE session=? AND id=?').bind('__enrollment__',key).first();
+  return profile?key+(valid?':'+valid:''):'';
 }
 function response(req: Request, sid: string, body: unknown, status = 200) {
   return Response.json(body, {
@@ -38,7 +44,12 @@ async function read(sid: string) {
     .bind(sid)
     .all<any>();
   const rows=r.results.map((x) => ({ ...x, payload: JSON.parse(x.payload) }));
-  const lesson=sid.split(':')[1];
+  const final=sid.split(':').at(-1)||'';
+  const lesson=/^[a-f0-9-]{36}$/.test(final)?final:'';
+  if(lesson && sid.startsWith('student:')){
+    const shared=await database().prepare('SELECT id,kind,payload,updated_at AS updatedAt FROM records WHERE session=? AND kind IN (\'checkpoint\',\'lessonActivity\',\'config\')').bind('__lesson__:'+lesson).all<any>();
+    for(const x of shared.results)if(!rows.some(r=>r.id===x.id))rows.push({...x,payload:JSON.parse(x.payload)});
+  }
   if(lesson){const v=await database().prepare('SELECT payload FROM records WHERE session=? AND id=?').bind('__course_catalog__',lesson).first<{payload:string}>();if(!v)throw Error('UNKNOWN_LESSON');const existing=rows.find(x=>x.id==='config');if(existing)existing.payload={...JSON.parse(v.payload),...existing.payload,isCatalog:true};else rows.push({id:'config',kind:'config',payload:{...JSON.parse(v.payload),isCatalog:true},updatedAt:''});}
   return rows;
 }
@@ -62,15 +73,18 @@ async function activity(sid: string) {
 const clean = (v: unknown, max = 2000) =>
   typeof v === 'string' ? v.trim().slice(0, max) : '';
 export async function GET(req: Request) {
-  const sid = identity(req);
   try {
+    const sid = await identity(req);
+    if(!sid)return replyDenied();
     return response(req, sid, { entries: await read(sid) });
   } catch {
-    return response(req, sid, { error: 'STORAGE_UNAVAILABLE' }, 503);
+    return Response.json({ error: 'STORAGE_UNAVAILABLE' }, { status: 503 });
   }
 }
 export async function POST(req: Request) {
-  const sid = identity(req);
+  let sid='';
+  try{sid=await identity(req);}catch{return Response.json({error:'STORAGE_UNAVAILABLE'},{status:503});}
+  if(!sid)return replyDenied();
   const origin = req.headers.get('origin');
   if (origin && origin !== new URL(req.url).origin)
     return response(req, sid, { error: 'ORIGIN' }, 403);
@@ -446,3 +460,4 @@ export async function POST(req: Request) {
     return response(req, sid, { error: 'SAVE_FAILED' }, 500);
   }
 }
+function replyDenied(){return Response.json({error:'ENROLLMENT_REQUIRED'},{status:403,headers:{'Cache-Control':'no-store'}});}
