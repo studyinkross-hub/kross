@@ -40,3 +40,4 @@ next-env.d.ts
 
 /wrangler.local.json
 *.tsbuildinfo
+/supabase/.temp/
