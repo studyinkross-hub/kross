@@ -1,6 +1,14 @@
-const url = () => process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, '') || '';
-const publishable = () => process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
-const secret = () => process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+import {env} from 'cloudflare:workers';
+
+type SupabaseBindings = {
+  NEXT_PUBLIC_SUPABASE_URL?: string;
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?: string;
+  SUPABASE_SERVICE_ROLE_KEY?: string;
+};
+const bindings = () => env as unknown as SupabaseBindings;
+const url = () => bindings().NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, '') || '';
+const publishable = () => bindings().NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
+const secret = () => bindings().SUPABASE_SERVICE_ROLE_KEY || '';
 
 export function supabaseReady() {
   return Boolean(url() && publishable() && secret());
