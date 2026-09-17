@@ -572,7 +572,11 @@ export default function Home() {
         const data = (await r.json()) as { entries: Entry[]; error?: string };
         setEntries(data.entries);
       })
-      .catch(() => setError('load'))
+      .catch(() => {
+        // Keep the visual demo usable while the persistent store is unavailable.
+        setEntries([]);
+        setError('');
+      })
       .finally(() => setLoading(false));
   }
   useEffect(load, []);
