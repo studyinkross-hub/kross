@@ -2106,3 +2106,31 @@
     top: 0;
   }
 }
+
+.access-shell {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(340px, 1.05fr) minmax(420px, .95fr);
+  background: #f5f7f1;
+  color: #123f31;
+}
+.access-brand {
+  min-height: 100dvh;
+  padding: clamp(34px, 5vw, 76px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: radial-gradient(circle at 78% 16%, rgba(211,235,128,.3), transparent 25%), linear-gradient(145deg,#063c32 0%,#0f5943 54%,#11382f 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.access-brand::after {content:'';position:absolute;width:430px;height:430px;border:1px solid rgba(255,255,255,.12);border-radius:50%;right:-220px;bottom:-140px;box-shadow:0 0 0 70px rgba(255,255,255,.035),0 0 0 140px rgba(255,255,255,.025)}
+.access-wordmark {font-weight:800;font-size:1.45rem;letter-spacing:-.04em;position:relative;z-index:1}.access-wordmark i{font-size:.58em;font-style:normal;letter-spacing:.02em}.access-wordmark em{font-family:Georgia,serif;font-weight:500;font-size:1.35em;margin-left:.18em;text-decoration:underline;text-decoration-color:#d8eb77;text-underline-offset:8px}
+.access-brand-copy {position:relative;z-index:1;max-width:640px;margin:80px 0}.access-brand-copy .eyebrow{color:#d8eb77}.access-brand-copy h1{white-space:pre-line;font-size:clamp(2.6rem,5vw,5.4rem);line-height:.97;letter-spacing:-.065em;margin:20px 0 28px;max-width:760px}.access-brand-copy p{font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.75;color:rgba(255,255,255,.72);max-width:570px}
+.access-points {display:flex;gap:28px;flex-wrap:wrap;position:relative;z-index:1}.access-points span{display:flex;gap:10px;align-items:center;font-size:.9rem;color:rgba(255,255,255,.8)}.access-points svg{color:#d8eb77}
+.access-card {align-self:center;width:min(500px,calc(100% - 48px));margin:auto;padding:24px clamp(24px,5vw,54px) 36px;background:#fff;border:1px solid #dce4da;border-radius:24px;box-shadow:0 24px 70px rgba(26,65,50,.1)}
+.access-tabs {display:grid;grid-template-columns:1fr 1fr;background:#edf2ec;border-radius:13px;padding:4px;margin-bottom:38px}.access-tabs button{border:0;background:transparent;color:#708078;border-radius:10px;min-height:44px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}.access-tabs button.active{background:#fff;color:#124b39;box-shadow:0 3px 12px rgba(19,64,49,.09)}
+.access-heading h2{font-size:clamp(1.8rem,3vw,2.35rem);letter-spacing:-.045em;margin:9px 0 10px;color:#103e31}.access-heading p{color:#75827b;line-height:1.65;margin:0 0 28px}.access-form{display:grid;gap:17px}.access-form label{font-size:.88rem;font-weight:700;color:#315448;display:grid;gap:8px}.access-form input,.teacher-entry input{width:100%;min-height:50px;border:1px solid #ced9d2;border-radius:10px;padding:0 14px;background:#fbfcfa;color:#153e33;font-size:1rem;box-sizing:border-box;outline:none}.access-form input:focus,.teacher-entry input:focus{border-color:#2d7155;box-shadow:0 0 0 3px rgba(45,113,85,.12);background:#fff}.access-form .code-input{font-family:ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase}.access-submit{min-height:52px;margin-top:4px;justify-content:center}.access-error{margin:0;background:#fff0ed;color:#a43c2c;border-radius:9px;padding:11px 13px;font-size:.88rem;line-height:1.5}.teacher-entry{border-top:1px solid #e2e8e3;margin-top:25px;padding-top:20px}.teacher-entry summary{display:flex;align-items:center;gap:8px;color:#697971;font-size:.88rem;cursor:pointer}.teacher-entry form{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:14px}.access-loading{margin:auto;padding:30px;color:#557066}
+@media(max-width:900px){.access-shell{grid-template-columns:1fr}.access-brand{min-height:auto;padding:28px 24px 34px}.access-brand-copy{margin:64px 0 42px}.access-brand-copy h1{font-size:clamp(2.5rem,12vw,4.4rem)}.access-card{margin:24px auto 40px;width:min(520px,calc(100% - 28px));box-sizing:border-box}.access-points{display:none}}
+@media(max-width:520px){.access-brand-copy p{font-size:.96rem}.access-card{border-radius:18px;padding:18px 18px 28px}.access-tabs{margin-bottom:28px}.access-tabs button{font-size:.82rem}.teacher-entry form{grid-template-columns:1fr}}

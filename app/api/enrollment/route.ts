@@ -1,5 +1,6 @@
 import {database} from '@/db';
 import {digest,isTeacher} from '@/lib/teacher-auth';
+import {adminRest,sha256,supabaseReady} from '@/lib/supabase-rest';
 const group='__enrollment__';
 const levels=['기초+초급1','초급2','초급회화','중급1','중급2','중급회화','TOPIK1','TOPIK2 3·4급','TOPIK2 5·6급'];
 const clean=(s:unknown,n:number)=>typeof s==='string'?s.trim().slice(0,n):'';
@@ -11,6 +12,15 @@ export async function POST(req:Request){if(req.headers.get('origin')&&req.header
   const email=clean(b.email,254).toLowerCase(),level=clean(b.level,12);
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||!levels.includes(level))return reply({error:'INVALID'},400);
   const bytes=crypto.getRandomValues(new Uint8Array(9));const code=Array.from(bytes).map(x=>x.toString(16).padStart(2,'0')).join('').toUpperCase();
+  if(supabaseReady()){
+    const courseRes=await adminRest(`/rest/v1/courses?level=eq.${encodeURIComponent(level)}&select=id`);
+    const courses=courseRes.ok?await courseRes.json() as Array<{id:string}>:[];
+    if(!courses[0])return reply({error:'COURSE_NOT_FOUND'},400);
+    const expiresAt=new Date(Date.now()+7*86400000).toISOString();
+    const inviteRes=await adminRest('/rest/v1/invitations',{method:'POST',body:JSON.stringify({email,course_id:courses[0].id,code_hash:await sha256(code),expires_at:expiresAt,created_by:null})});
+    if(!inviteRes.ok)return reply({error:'UNAVAILABLE'},503);
+    return reply({code,email,level,expires:Date.parse(expiresAt)});
+  }
   const id='invite:'+await digest(code);const expires=Date.now()+7*86400000;
   await database().prepare("INSERT INTO records(session,id,kind,payload,updated_at) VALUES (?,?,'invite',?,?)").bind(group,id,JSON.stringify({email,level,expires,used:false}),new Date().toISOString()).run();
   return reply({code,email,level,expires});
