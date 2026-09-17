@@ -1,4 +1,5 @@
 import {adminRest, authRest, sha256, supabaseReady} from '@/lib/supabase-rest';
+import {linkedAccess,crmStudent} from '@/lib/crm-bridge';
 import {isTeacher} from '@/lib/teacher-auth';
 
 const accessCookie = 'kross_access';
@@ -8,10 +9,11 @@ const json = (body: unknown, status = 200) => Response.json(body, {status, heade
 const cookieValue = (req: Request, name: string) => (req.headers.get('cookie') || '').split(';').map(x => x.trim()).find(x => x.startsWith(name + '='))?.slice(name.length + 1) || '';
 const cookie = (name: string, value: string, maxAge: number) => `${name}=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
 
-async function profileFor(token: string) {
+export async function profileFor(token: string) {
   const userRes = await authRest('/auth/v1/user', {headers: {Authorization: `Bearer ${token}`}});
   if (!userRes.ok) return null;
   const user = await userRes.json() as {id: string; email?: string};
+  if (!await linkedAccess(user.id)) return null;
   const profileRes = await adminRest(`/rest/v1/profiles?id=eq.${encodeURIComponent(user.id)}&select=display_name,role`);
   const profiles = profileRes.ok ? await profileRes.json() as Array<{display_name: string; role: string}> : [];
   const enrollmentRes = await adminRest(`/rest/v1/enrollments?student_id=eq.${encodeURIComponent(user.id)}&status=eq.active&select=courses(title,level)`);
@@ -54,24 +56,29 @@ export async function POST(req: Request) {
       const code = clean(body.code, 32).toUpperCase().replace(/\s/g, '');
       if (name.length < 2 || !/^[A-F0-9]{18}$/.test(code)) return json({error: 'INVALID'}, 400);
       const codeHash = await sha256(code);
-      const invitationRes = await adminRest(`/rest/v1/invitations?code_hash=eq.${codeHash}&email=eq.${encodeURIComponent(email)}&used_at=is.null&expires_at=gt.${encodeURIComponent(new Date().toISOString())}&select=id,course_id`);
-      const invitations = invitationRes.ok ? await invitationRes.json() as Array<{id: string; course_id: string}> : [];
+      const invitationRes = await adminRest(`/rest/v1/invitations?code_hash=eq.${codeHash}&email=eq.${encodeURIComponent(email)}&used_at=is.null&expires_at=gt.${encodeURIComponent(new Date().toISOString())}&select=id,course_id,crm_student_id`);
+      const invitations = invitationRes.ok ? await invitationRes.json() as Array<{id: string; course_id: string; crm_student_id?:string}> : [];
       if (!invitations[0]) return json({error: 'INVITE_INVALID'}, 400);
+      if (invitations[0].crm_student_id && (await crmStudent(invitations[0].crm_student_id)).status !== 'active') return json({error:'STUDENT_INACTIVE'},403);
       const createRes = await adminRest('/auth/v1/admin/users', {method: 'POST', body: JSON.stringify({email, password, email_confirm: true, user_metadata: {display_name: name}})});
       if (!createRes.ok) {
         const detail = await createRes.text();
         return json({error: detail.includes('already') ? 'EMAIL_EXISTS' : 'SIGNUP_FAILED'}, 409);
       }
       const created = await createRes.json() as {id: string};
-      const enrollRes = await adminRest('/rest/v1/enrollments', {method: 'POST', body: JSON.stringify({course_id: invitations[0].course_id, student_id: created.id, status: 'active'})});
-      if (!enrollRes.ok) return json({error: 'ENROLL_FAILED'}, 500);
-      await adminRest(`/rest/v1/invitations?id=eq.${invitations[0].id}&used_at=is.null`, {method: 'PATCH', body: JSON.stringify({used_at: new Date().toISOString()})});
+      const enrollRes = await adminRest('/rest/v1/rpc/complete_invitation', {method:'POST',body:JSON.stringify({invitation_id:invitations[0].id,user_id:created.id})});
+      if (!enrollRes.ok) {
+        // Remove only the user created by this attempt if atomic enrollment failed.
+        await adminRest('/auth/v1/admin/users/'+created.id,{method:'DELETE'});
+        return json({error:'ENROLL_FAILED'},409);
+      }
     } else if (action !== 'login') return json({error: 'INVALID'}, 400);
 
     const loginRes = await authRest('/auth/v1/token?grant_type=password', {method: 'POST', body: JSON.stringify({email, password})});
     if (!loginRes.ok) return json({error: 'LOGIN_FAILED'}, 401);
     const session = await loginRes.json() as {access_token: string; refresh_token: string; expires_in: number};
     const profile = await profileFor(session.access_token);
+    if (!profile) return json({error:'STUDENT_INACTIVE'},403);
     const response = json({authenticated: true, profile});
     response.headers.append('Set-Cookie', cookie(accessCookie, session.access_token, session.expires_in || 3600));
     response.headers.append('Set-Cookie', cookie(refreshCookie, session.refresh_token, 60 * 60 * 24 * 30));

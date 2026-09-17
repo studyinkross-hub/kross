@@ -1,3 +1,5 @@
+import {profileFor} from '@/app/api/auth/route';
+import {adminRest} from '@/lib/supabase-rest';
 import { validateActivity, matchesAnswer } from '@/lib/activities';
 import { database } from '@/db';
 import { isTeacher, digest } from '@/lib/teacher-auth';
@@ -16,11 +18,14 @@ async function identity(req: Request) {
   const lesson=new URL(req.url).searchParams.get('lesson');
   const valid=lesson && /^[a-f0-9-]{36}$/.test(lesson)?lesson:'';
   if(await isTeacher(req))return valid?'__lesson__:'+valid:base;
-  const user=req.headers.get('oai-authenticated-user-id');
-  if(!user)return '';
-  const key='student:'+await digest(user);
-  const profile=await database().prepare('SELECT id FROM records WHERE session=? AND id=?').bind('__enrollment__',key).first();
-  return profile?key+(valid?':'+valid:''):'';
+  const token=req.headers.get('cookie')?.split(';').map(x=>x.trim()).find(x=>x.startsWith('kross_access='))?.slice(13);
+  const profile=token?await profileFor(token):null;
+  if(!profile?.course)return '';
+  if(valid){
+    const item=await database().prepare('SELECT payload FROM records WHERE session=? AND id=?').bind('__course_catalog__',valid).first<{payload:string}>();
+    if(!item||JSON.parse(item.payload).level!==profile.course.level)return '';
+  }
+  return 'supabase:'+profile.id+':'+(valid||'demo');
 }
 function response(req: Request, sid: string, body: unknown, status = 200) {
   return Response.json(body, {
@@ -37,6 +42,17 @@ function response(req: Request, sid: string, body: unknown, status = 200) {
   });
 }
 async function read(sid: string) {
+  if(sid.startsWith('supabase:')) {
+    const [,student,lesson]=sid.split(':');
+    const r=await adminRest('/rest/v1/learning_records?student_id=eq.'+student+'&lesson_key=eq.'+lesson+'&select=id,kind,payload,updatedAt:updated_at');
+    if(!r.ok)throw Error('STORAGE_UNAVAILABLE');
+    const rows=await r.json() as any[];
+    if(lesson!=='demo') {
+      const shared=await read('__lesson__:'+lesson);
+      for(const item of shared)if(['checkpoint','lessonActivity','config'].includes(item.kind)&&!rows.some(x=>x.id===item.id))rows.push(item);
+    }
+    return rows;
+  }
   const r = await database()
     .prepare(
       'SELECT id, kind, payload, updated_at AS updatedAt FROM records WHERE session = ? ORDER BY updated_at ASC',
@@ -54,6 +70,12 @@ async function read(sid: string) {
   return rows;
 }
 async function save(sid: string, id: string, kind: string, payload: unknown) {
+  if(sid.startsWith('supabase:')) {
+    const [,student_id,lesson_key]=sid.split(':');
+    const r=await adminRest('/rest/v1/learning_records?on_conflict=student_id,lesson_key,id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({student_id,lesson_key,id,kind,payload,updated_at:new Date().toISOString()})});
+    if(!r.ok)throw Error('STORAGE_UNAVAILABLE');
+    return;
+  }
   await database()
     .prepare(
       'INSERT INTO records (session,id,kind,payload,updated_at) VALUES (?,?,?,?,?) ON CONFLICT(session,id) DO UPDATE SET payload=excluded.payload, updated_at=excluded.updated_at',
