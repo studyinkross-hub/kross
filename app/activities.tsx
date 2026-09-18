@@ -18,6 +18,10 @@ import {
   activityCompleted,
   type LessonActivity,
   type ActivityType,
+  type LessonStage,
+  activityStage,
+  stageForType,
+  stageLabels,
 } from '@/lib/activities';
 import { formatTime, parseTime } from '@/lib/course';
 import type { Props } from './learning';
@@ -311,6 +315,7 @@ export function ActivityStudio(props: Props) {
     padletUrl: '',
     direction: 'vi-ko',
     revision: 1,
+    stage: 'conversation',
   });
   const [form, setForm] = useState<LessonActivity>(blank),
     [time, setTime] = useState(formatTime(blank().time)),
@@ -491,7 +496,7 @@ export function ActivityStudio(props: Props) {
                   type="button"
                   key={type}
                   aria-pressed={form.type === type}
-                  onClick={() => field('type', type)}
+                  onClick={() => setForm((p) => ({ ...p, type, stage: stageForType(type) }))}
                 >
                   <Icon size={18} />
                   {activityLabels[type][lang === 'ko' ? 1 : 0]}
@@ -499,6 +504,18 @@ export function ActivityStudio(props: Props) {
               );
             })}
           </div>
+          <label htmlFor="activity-stage">{t('Phần học', '학습 단계')}</label>
+          <select
+            id="activity-stage"
+            value={activityStage(form)}
+            onChange={(e) => field('stage', e.target.value as LessonStage)}
+          >
+            {(Object.keys(stageLabels) as LessonStage[]).map((stage) => (
+              <option key={stage} value={stage}>
+                {stageLabels[stage][lang === 'ko' ? 1 : 0]}
+              </option>
+            ))}
+          </select>
           <label htmlFor="activity-time">
             {t(
               'Thời điểm dừng · mm:ss / hh:mm:ss',
@@ -681,6 +698,7 @@ export function ActivityStudio(props: Props) {
                 <span>
                   <Icon size={16} />
                   {formatTime(a.time)} ·{' '}
+                  {stageLabels[activityStage(a)][lang === 'ko' ? 1 : 0]} ·{' '}
                   {activityLabels[a.type][lang === 'ko' ? 1 : 0]}
                 </span>
                 <h4>{a.title}</h4>

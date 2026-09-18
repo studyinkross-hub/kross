@@ -165,6 +165,13 @@ export async function POST(req: Request) {
         sourceEnd: Number(b.sourceEnd) || 0,
         padletUrl: clean(b.padletUrl),
         direction: b.direction === 'ko-vi' ? 'ko-vi' : 'vi-ko',
+        stage: ['conversation', 'vocab', 'grammar'].includes(b.stage)
+          ? b.stage
+          : b.type === 'shadow'
+            ? 'conversation'
+            : b.type === 'translate'
+              ? 'grammar'
+              : 'vocab',
         revision: (old?.payload.revision || 0) + 1,
       });
     } else if (b.action === 'archiveActivity') {
@@ -430,6 +437,9 @@ export async function POST(req: Request) {
         answer: b.answer,
         explanation,
         explanationKo: explanation,
+        stage: ['conversation', 'vocab', 'grammar'].includes(b.stage)
+          ? b.stage
+          : 'vocab',
       });
     } else if (b.action === 'config') {
       const url = clean(b.videoUrl, 2000);

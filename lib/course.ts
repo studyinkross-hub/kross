@@ -8,6 +8,7 @@ export type Checkpoint = {
   answer: number;
   explanation: string;
   explanationKo: string;
+  stage?: 'conversation' | 'vocab' | 'grammar';
 };
 export const checkpoints: Checkpoint[] = [
   {
@@ -20,6 +21,7 @@ export const checkpoints: Checkpoint[] = [
     explanation:
       '잔 là đơn vị đếm đồ uống trong ly. 커피 한 잔 주세요 = Cho tôi một ly cà phê.',
     explanationKo: '음료를 셀 때는 ‘잔’을 사용해요. 커피 한 잔 주세요.',
+    stage: 'conversation',
   },
   {
     id: 'cp2',
@@ -30,6 +32,7 @@ export const checkpoints: Checkpoint[] = [
     answer: 1,
     explanation: 'Trước đơn vị đếm, 둘 đổi thành 두: 두 잔 (hai ly).',
     explanationKo: '단위 명사 앞에서 ‘둘’은 ‘두’가 돼요. 두 잔.',
+    stage: 'vocab',
   },
   {
     id: 'cp3',
@@ -42,6 +45,7 @@ export const checkpoints: Checkpoint[] = [
       '포장해 주세요 = Cho tôi mang đi. 여기서 마실게요 = Tôi sẽ uống ở đây.',
     explanationKo:
       '‘포장해 주세요’는 가지고 나가겠다는 표현이에요. 매장에서 마실 때는 ‘여기서 마실게요’라고 해요.',
+    stage: 'grammar',
   },
 ];
 export const words = [

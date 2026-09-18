@@ -1,5 +1,6 @@
 import type { Entry } from './course';
 export type ActivityType = 'shadow' | 'fill' | 'translate' | 'padlet';
+export type LessonStage = 'conversation' | 'vocab' | 'grammar';
 export type LessonActivity = {
   id: string;
   type: ActivityType;
@@ -13,8 +14,19 @@ export type LessonActivity = {
   padletUrl: string;
   direction: 'vi-ko' | 'ko-vi';
   revision: number;
+  stage?: LessonStage;
   archived?: boolean;
 };
+export const lessonStages: LessonStage[] = ['conversation', 'vocab', 'grammar'];
+export const stageLabels: Record<LessonStage, [string, string]> = {
+  conversation: ['Hội thoại', '회화'],
+  vocab: ['Từ vựng', '단어'],
+  grammar: ['Ngữ pháp', '문법'],
+};
+export const stageForType = (type: ActivityType): LessonStage =>
+  type === 'shadow' ? 'conversation' : type === 'translate' ? 'grammar' : 'vocab';
+export const activityStage = (activity: Pick<LessonActivity, 'type' | 'stage'>) =>
+  activity.stage || stageForType(activity.type);
 export const activityLabels = {
   shadow: ['Nghe & thu âm', '듣고 말하기'],
   fill: ['Điền từ', '단어 빈칸'],
@@ -113,6 +125,7 @@ export function sampleActivities(duration: number) {
     {
       ...base,
       type: 'shadow',
+      stage: 'conversation',
       time: long ? 600 : 8,
       title: '회화 · 듣고 따라 말하기',
       prompt: '커피 한 잔 주세요.',
@@ -121,6 +134,7 @@ export function sampleActivities(duration: number) {
     {
       ...base,
       type: 'fill',
+      stage: 'vocab',
       time: long ? 1200 : 22,
       title: '단어 · 빈칸 채우기',
       prompt: '커피 ___ 잔 주세요. (hai ly)',
@@ -130,6 +144,7 @@ export function sampleActivities(duration: number) {
     {
       ...base,
       type: 'translate',
+      stage: 'grammar',
       time: long ? 1800 : 38,
       title: 'ㅂ 불규칙 · 베트남어 → 한국어',
       prompt: 'Hôm nay trời lạnh.',
@@ -139,6 +154,7 @@ export function sampleActivities(duration: number) {
     {
       ...base,
       type: 'translate',
+      stage: 'grammar',
       time: long ? 2700 : 54,
       title: 'ㅂ 불규칙 · 한국어 → 베트남어',
       direction: 'ko-vi',
