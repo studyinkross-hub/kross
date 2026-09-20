@@ -5,10 +5,8 @@ import {
   Layers,
   Languages,
   ExternalLink,
-  Plus,
   Save,
   Play,
-  Check,
   Archive,
   RotateCcw,
 } from 'lucide-react';
@@ -298,8 +296,8 @@ export function ActivityStudio(props: Props) {
   const { lang, entries, mutate, busy } = props;
   const t = (v: string, k: string) => (lang === 'ko' ? k : v);
   const config = entries.find((e) => e.id === 'config')?.payload || {
-    videoUrl: '/lesson-cafe.mp4',
-    duration: 60,
+    videoUrl: '',
+    duration: 3600,
   };
   const activities = getActivities(entries);
   const blank = (): LessonActivity => ({
@@ -307,9 +305,9 @@ export function ActivityStudio(props: Props) {
     type: 'shadow',
     time: Math.min(600, Math.floor(config.duration * 0.13)),
     title: t('Luyện nói', '듣고 따라 말하기'),
-    prompt: '커피 한 잔 주세요.',
+    prompt: '',
     answer: '',
-    reference: '커피 한 잔 주세요.',
+    reference: '',
     sourceStart: 0,
     sourceEnd: Math.min(10, config.duration),
     padletUrl: '',
@@ -362,84 +360,6 @@ export function ActivityStudio(props: Props) {
       setSaving(false);
     }
   }
-  async function addSamples() {
-    setSaving(true);
-    setMessage('');
-    try {
-      const long = config.duration >= 3600;
-      const samples = [
-        {
-          ...blank(),
-          type: 'shadow',
-          time: long ? 600 : 8,
-          title: t('Gọi món · nghe và nói', '회화 · 듣고 따라 말하기'),
-          sourceStart: 0,
-          sourceEnd: long ? 20 : 6,
-        },
-        {
-          ...blank(),
-          type: 'fill',
-          time: long ? 1200 : 22,
-          title: t('Từ vựng · điền từ', '단어 · 빈칸 채우기'),
-          prompt: '커피 ___ 잔 주세요. (hai ly / 두 잔)',
-          answer: '두',
-          reference: t(
-            'Trước 잔, 둘 đổi thành 두.',
-            '단위 명사 ‘잔’ 앞에서는 둘 → 두가 됩니다.',
-          ),
-        },
-        {
-          ...blank(),
-          type: 'translate',
-          time: long ? 1800 : 38,
-          title: t(
-            'Bất quy tắc ㅂ · Việt → Hàn',
-            'ㅂ 불규칙 · 베트남어 → 한국어',
-          ),
-          prompt: 'Hôm nay trời lạnh.',
-          answer: '오늘은 추워요.|오늘 날씨가 추워요.|오늘 추워요.',
-          reference: t(
-            '춥다 → 추워요. ㅂ chuyển thành 우 trước 어요.',
-            '춥다 → 추워요. ㅂ이 우로 바뀌어 어요와 결합합니다.',
-          ),
-        },
-        {
-          ...blank(),
-          type: 'translate',
-          time: long ? 2700 : 54,
-          title: t(
-            'Bất quy tắc ㅂ · Hàn → Việt',
-            'ㅂ 불규칙 · 한국어 → 베트남어',
-          ),
-          direction: 'ko-vi',
-          prompt: '이 음식은 매워요.',
-          answer: 'Món ăn này cay.|Món này cay.',
-          reference: t('맵다 → 매워요.', '맵다 → 매워요.'),
-        },
-      ];
-      let count = 0;
-      for (const s of samples) {
-        if (activities.some((a) => a.title === s.title)) continue;
-        await mutate({ ...s, id: '', action: 'saveActivity' });
-        count++;
-      }
-      setMessage(
-        t(
-          `Đã thêm ${count} hoạt động. Thêm Padlet bằng liên kết lớp của bạn.`,
-          `${count}개 활동을 추가했습니다. Padlet은 실제 우리 반 링크를 입력해 추가하세요.`,
-        ),
-      );
-    } catch {
-      setMessage(
-        t(
-          'Một thời điểm đã được sử dụng. Hãy đổi thời điểm trong biểu mẫu.',
-          '겹치는 시점이 있습니다. 아래에서 시점을 바꿔 추가해 주세요.',
-        ),
-      );
-    } finally {
-      setSaving(false);
-    }
-  }
   return (
     <div className="activity-studio">
       <div className="studio-intro">
@@ -452,14 +372,6 @@ export function ActivityStudio(props: Props) {
             )}
           </p>
         </div>
-        <button
-          className="secondary"
-          disabled={busy || saving}
-          onClick={addSamples}
-        >
-          <Plus size={17} />
-          {t('Thêm 4 hoạt động mẫu', '활동 예제 4개 추가')}
-        </button>
       </div>
       <p className="fineprint">
         {t('Video hiện tại', '현재 영상')}: {formatTime(config.duration)} ·{' '}
@@ -685,10 +597,7 @@ export function ActivityStudio(props: Props) {
           </h3>
           {!activities.length && (
             <p>
-              {t(
-                'Thêm mẫu hoặc tự tạo hoạt động đầu tiên.',
-                '예제를 추가하거나 첫 활동을 직접 만들어 보세요.',
-              )}
+              {t('Tự tạo hoạt động đầu tiên.', '첫 활동을 직접 추가해 주세요.')}
             </p>
           )}
           {activities.map((a) => {

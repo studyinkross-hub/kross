@@ -8,6 +8,13 @@
       "when": 1788691718690,
       "tag": "0000_volatile_maverick",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1789899600000,
+      "tag": "0001_remove_demo_content",
+      "breakpoints": true
     }
   ]
 }

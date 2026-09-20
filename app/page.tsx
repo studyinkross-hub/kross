@@ -7,6 +7,7 @@ import './reference.css';
 import {TeacherGate} from './teacher-gate';
 import {StudentAccess,InviteStudents} from './student-access';
 import {TeacherLibrary,LearningLibrary} from './learning-library';
+import {CourseBar} from './course-bar';
 import { useEffect, useRef, useState } from 'react';
 import {
   BookOpen,
@@ -462,7 +463,6 @@ function Dashboard({ lang, entries, go }: Props) {
 function Lessons(props: Props) {
   const { lang, entries, go } = props;
   const t = (v: string, k: string) => (lang === 'vi' ? v : k);
-  const points = getPoints(entries);
   return (
     <>
       <div className="view-title">
@@ -480,62 +480,9 @@ function Lessons(props: Props) {
             )}
           </p>
         </div>
-        <span className="status-chip">
-          {t('Sơ cấp 1 · Lớp mẫu', '초급 1 · 예제 반')}
-        </span>
+        <span className="status-chip">KROSS THE MASTER</span>
       </div>
-      <div className="course-banner">
-        <GraduationCap size={32} />
-        <div>
-          <h2>
-            {t(
-              'Tiếng Hàn cho những ngày đầu tiên',
-              '한국어로 시작하는 첫 일상',
-            )}
-          </h2>
-          <p>
-            {t(
-              'Một bài học mẫu đã sẵn sàng để bạn trải nghiệm toàn bộ hành trình.',
-              '수업부터 피드백까지 전체 학습 흐름을 경험할 수 있는 예제 수업입니다.',
-            )}
-          </p>
-        </div>
-        <span>01</span>
-      </div>
-      <div className="course-list">
-        <div className="course-item">
-          <Art />
-          <div>
-            <span className="eyebrow green">
-              {t('BÀI 04 · GIAO TIẾP', '04강 · 실전 회화')}
-            </span>
-            <h2>{t('Gọi món ở quán cà phê', '카페에서 주문하기')}</h2>
-            <p>
-              {t(
-                '주세요 · 한 잔, 두 잔 · 포장해 주세요',
-                '주세요 · 한 잔, 두 잔 · 포장해 주세요',
-              )}
-            </p>
-            <div className="lesson-meta">
-              <span>
-                <Sparkles size={16} />
-                {points.length} {t('nhiệm vụ', '미션')}
-              </span>
-              <span>
-                <Layers size={16} />8 {t('từ vựng', '단어')}
-              </span>
-              <span>
-                <MessageCircle size={16} />
-                {t('Giáo viên nhận xét', '선생님 피드백')}
-              </span>
-            </div>
-            <button className="primary" onClick={() => go('lesson')}>
-              <Play size={16} />
-              {t('Vào bài học', '수업 입장')}
-            </button>
-          </div>
-        </div>
-      </div>
+      <CourseBar lang={lang}/>
     </>
   );
 }

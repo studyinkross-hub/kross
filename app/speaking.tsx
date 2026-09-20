@@ -3,12 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Mic,
   Square,
-  Play,
-  Download,
   Volume2,
   Check,
-  Upload,
-  RotateCcw,
 } from 'lucide-react';
 import { readClip, storeClip } from '@/lib/media';
 import type { LessonActivity } from '@/lib/activities';
@@ -29,7 +25,6 @@ export function SpeakingRecorder({
   const key = activity.id + ':' + activity.revision + ':' + videoUrl;
   const [url, setUrl] = useState(''),
     [requesting, setRequesting] = useState(false),
-    [mime, setMime] = useState('audio/webm'),
     [recording, setRecording] = useState(false),
     [seconds, setSeconds] = useState(0),
     [error, setError] = useState(''),
@@ -53,7 +48,6 @@ export function SpeakingRecorder({
           currentBlob.current = b.blob;
           setUrl(URL.createObjectURL(b.blob));
           setSeconds(b.seconds);
-          setMime(b.blob.type);
           setSaved(true);
         }
       })
@@ -93,7 +87,6 @@ export function SpeakingRecorder({
   }, [recording]);
   async function accept(blob: Blob, duration = 0) {
     currentBlob.current = blob;
-    setMime(blob.type);
     if (!blob.size) return;
     try {
       await storeClip(key, blob, duration);
@@ -257,14 +250,6 @@ export function SpeakingRecorder({
             <Volume2 size={17} />
             {t('Nghe đúng đoạn', '지정 구간 듣기')}
           </button>
-          {videoUrl === '/lesson-cafe.mp4' && (
-            <p className="fineprint demo-audio-note">
-              {t(
-                'Video mẫu không có tiếng. Dùng video lớp học có âm thanh để so sánh phát âm.',
-                '예제는 무음입니다. 실제 수업 영상에서 원음을 들을 수 있어요.',
-              )}
-            </p>
-          )}
         </section>
         <section>
           <div className="row spread">
@@ -333,52 +318,8 @@ export function SpeakingRecorder({
                   )
                 }
               />
-              <a
-                className="text-button"
-                href={url}
-                download={
-                  'KROSS-recording.' +
-                  (mime.includes('mp4')
-                    ? 'm4a'
-                    : mime.includes('wav')
-                      ? 'wav'
-                      : mime.includes('mpeg')
-                        ? 'mp3'
-                        : mime.includes('ogg')
-                          ? 'ogg'
-                          : 'webm')
-                }
-              >
-                <Download size={15} />
-                {t('Tải bản thu', '녹음 내려받기')}
-              </a>
             </>
           )}
-          <details className="recording-options"><summary>{t('Tệp âm thanh','음성 파일 가져오기')}</summary><label className="audio-import">
-            <Upload size={15} />
-            {t('Hoặc chọn tệp âm thanh', '또는 음성 파일 선택')}
-            <input
-              type="file"
-              accept="audio/*"
-              disabled={recording}
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (!f) return;
-                if (f.size > 15 * 1024 * 1024 || !f.type.startsWith('audio/')) {
-                  setError(
-                    t(
-                      'Chọn tệp âm thanh dưới 15 MB.',
-                      '15MB 이하의 음성 파일을 선택해 주세요.',
-                    ),
-                  );
-                  return;
-                }
-                setError('');
-                setSeconds(0);
-                void accept(f);
-              }}
-            />
-          </label></details>
         </section>
       </div>
       <div className="compare-check">

@@ -1,55 +1,31 @@
 'use client';
-import { useState } from 'react';
 import {
   Play,
   ArrowUpRight,
   Mic,
   Languages,
   Layers,
-  ChevronRight,
   Headphones,
   BookOpen,
   PenLine,
-  LoaderCircle,
 } from 'lucide-react';
 import type { Props } from './learning';
 import {
   getActivities,
-  sampleActivities,
   activityLabels,
   activityCompleted,
 } from '@/lib/activities';
 import { formatTime } from '@/lib/course';
-export function StudioHome({ lang, entries, mutate, busy, go }: Props) {
+export function StudioHome({ lang, entries, busy, go }: Props) {
   const t = (v: string, k: string) => (lang === 'ko' ? k : v);
-  const [starting, setStarting] = useState(false),
-    [error, setError] = useState('');
   const config = entries.find((e) => e.id === 'config')?.payload || {
-    duration: 60,
-    videoUrl: '/lesson-cafe.mp4',
+    duration: 0,
+    videoUrl: '',
   };
   const actual = getActivities(entries);
-  const schedule = actual.length ? actual : sampleActivities(config.duration);
+  const schedule = actual;
   async function start() {
-    if (actual.length) {
-      go('lesson');
-      return;
-    }
-    setStarting(true);
-    setError('');
-    try {
-      for (const a of schedule) await mutate({ ...a, action: 'saveActivity' });
-      go('lesson');
-    } catch {
-      setError(
-        t(
-          'Một thời điểm bị trùng. Đổi thời điểm trong không gian giáo viên.',
-          '기존 미션과 시점이 겹칩니다. 선생님 공간에서 시점을 조정해 주세요.',
-        ),
-      );
-    } finally {
-      setStarting(false);
-    }
+    go('lesson');
   }
   return (
     <div className="studio-home">
@@ -78,24 +54,16 @@ export function StudioHome({ lang, entries, mutate, busy, go }: Props) {
           <button
             className="studio-source"
             onClick={start}
-            disabled={starting || busy}
+            disabled={busy}
             aria-label={t('Bắt đầu bài học tương tác', '쌍방향 수업 시작')}
           >
-            <img src="/course-cafe.jpg" alt="" />
             <div>
-              <span>카페에서 주문하기</span>
-              <h2>
-                커피 한 잔<br />
-                주세요.
-              </h2>
-              <p>Một ly cà phê, làm ơn.</p>
+              <span>{config.level || 'KROSS THE MASTER'}</span>
+              <h2>{config.lessonTitle || config.title || t('Chọn bài học của bạn','내 수업을 선택하세요')}</h2>
+              <p>{t('Nội dung do giáo viên thiết lập','선생님이 등록한 수업')}</p>
             </div>
             <span className="large-play">
-              {starting ? (
-                <LoaderCircle className="spin" />
-              ) : (
-                <Play fill="currentColor" size={26} />
-              )}
+              <Play fill="currentColor" size={26} />
             </span>
           </button>
           <div className="source-desk-bottom">
@@ -105,7 +73,7 @@ export function StudioHome({ lang, entries, mutate, busy, go }: Props) {
                 {t('Xem → Thực hành → Tiếp tục', '시청 → 직접 연습 → 이어보기')}
               </span>
             </div>
-            <button onClick={start} disabled={starting || busy}>
+            <button onClick={start} disabled={busy}>
               {t('Vào bài học', '수업 시작')}
               <ArrowUpRight size={20} />
             </button>
@@ -122,12 +90,8 @@ export function StudioHome({ lang, entries, mutate, busy, go }: Props) {
               <span>↗</span>
               <span>KO</span>
             </div>
-            <span className="exercise-label">ㅂ 불규칙</span>
-            <h2>
-              Hôm nay
-              <br />
-              trời lạnh.
-            </h2>
+            <span className="exercise-label">KROSS PRACTICE</span>
+            <h2>{t('Hoạt động của giáo viên','선생님 활동')}</h2>
             <p>
               {t(
                 'Bạn sẽ nói câu này bằng tiếng Hàn như thế nào?',
@@ -138,11 +102,6 @@ export function StudioHome({ lang, entries, mutate, busy, go }: Props) {
               <span>{t('Viết câu của bạn', '내 문장으로 써 보기')}</span>
               <PenLine size={19} />
             </button>
-            <div className="grammar-note">
-              <span>춥다</span>
-              <span>→</span>
-              <strong>추워요</strong>
-            </div>
           </div>
           <button className="desk-bottom-link" onClick={() => go('teacher')}>
             {t(
@@ -158,15 +117,11 @@ export function StudioHome({ lang, entries, mutate, busy, go }: Props) {
           <span>CLASS SEQUENCE</span>
           <h2>{t('Lộ trình thực hành', '이 수업의 활동')}</h2>
           <p>
-            {actual.length
-              ? t('Theo thiết lập của giáo viên', '선생님이 설정한 순서')
-              : t(
-                  '4 hoạt động mẫu khi bắt đầu',
-                  '시작하면 예제 활동 4개가 추가됩니다.',
-                )}
+            {t('Theo thiết lập của giáo viên', '선생님이 설정한 활동만 표시됩니다.')}
           </p>
         </div>
         <div className="track-stations">
+          {!schedule.length && <p>{t('Giáo viên chưa thêm hoạt động.','아직 선생님이 추가한 활동이 없습니다.')}</p>}
           {schedule.map((a, i) => {
             const Icon =
               a.type === 'shadow'
@@ -178,7 +133,7 @@ export function StudioHome({ lang, entries, mutate, busy, go }: Props) {
               <button
                 key={a.id || i}
                 onClick={start}
-                disabled={starting || busy}
+                disabled={busy}
                 className={activityCompleted(a, entries) ? 'complete' : ''}
               >
                 <span className="station-pin">
@@ -207,7 +162,6 @@ export function StudioHome({ lang, entries, mutate, busy, go }: Props) {
             <span>VOCABULARY</span>
             <strong>{t('Từ mới trong bài', '수업에서 만난 단어')}</strong>
           </div>
-          <span className="shortcut-count">08</span>
           <ArrowUpRight />
         </button>
         <button onClick={() => go('feedback')}>
@@ -221,11 +175,6 @@ export function StudioHome({ lang, entries, mutate, busy, go }: Props) {
           <ArrowUpRight />
         </button>
       </div>
-      {error && (
-        <p role="alert" className="activity-error">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

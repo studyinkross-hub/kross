@@ -94,11 +94,26 @@ async function activity(sid: string) {
 }
 const clean = (v: unknown, max = 2000) =>
   typeof v === 'string' ? v.trim().slice(0, max) : '';
+const legacyExampleTitles = new Set([
+  '회화 · 듣고 따라 말하기',
+  'Gọi món · nghe và nói',
+  '단어 · 빈칸 채우기',
+  'Từ vựng · điền từ',
+  'ㅂ 불규칙 · 베트남어 → 한국어',
+  'Bất quy tắc ㅂ · Việt → Hàn',
+  'ㅂ 불규칙 · 한국어 → 베트남어',
+  'Bất quy tắc ㅂ · Hàn → Việt',
+]);
+const withoutLegacyExamples = <T extends { id: string; kind: string; payload: any }>(rows: T[]) =>
+  rows.filter((row) =>
+    !(['cp1', 'cp2', 'cp3'].includes(row.id) && row.kind === 'checkpoint') &&
+    !(row.kind === 'lessonActivity' && legacyExampleTitles.has(row.payload?.title)),
+  );
 export async function GET(req: Request) {
   try {
     const sid = await identity(req);
     if(!sid)return replyDenied();
-    return response(req, sid, { entries: await read(sid) });
+    return response(req, sid, { entries: withoutLegacyExamples(await read(sid)) });
   } catch {
     return Response.json({ error: 'STORAGE_UNAVAILABLE' }, { status: 503 });
   }
@@ -118,10 +133,10 @@ export async function POST(req: Request) {
       return response(req, sid, { error: 'TOO_LARGE' }, 413);
     const b = JSON.parse(raw);
     if (['saveActivity','archiveActivity','reviewActivity','feedback','reply','moveCheckpoint','checkpoint','config'].includes(b.action) && !await isTeacher(req)) return response(req,sid,{error:'TEACHER_REQUIRED'},403);
-    const entries = await read(sid);
+    const entries = withoutLegacyExamples(await read(sid));
     const config = entries.find((x) => x.id === 'config')?.payload || {
-      videoUrl: '/lesson-cafe.mp4',
-      duration: 60,
+      videoUrl: '',
+      duration: 3600,
     };
     const custom = entries
       .filter((x) => x.kind === 'checkpoint')
@@ -444,7 +459,7 @@ export async function POST(req: Request) {
     } else if (b.action === 'config') {
       const url = clean(b.videoUrl, 2000);
       const duration = Number(b.duration);
-      let valid = url === '/lesson-cafe.mp4';
+      let valid = false;
       try {
         const u = new URL(url);
         valid =
@@ -486,7 +501,7 @@ export async function POST(req: Request) {
       ]);
     } else return response(req, sid, { error: 'UNKNOWN_ACTION' }, 400);
     if (['vocab', 'submit'].includes(b.action)) await activity(sid);
-    return response(req, sid, { entries: await read(sid) });
+    return response(req, sid, { entries: withoutLegacyExamples(await read(sid)) });
   } catch (e) {
     console.error('KROSS API', e instanceof Error ? e.message : 'unknown');
     return response(req, sid, { error: 'SAVE_FAILED' }, 500);

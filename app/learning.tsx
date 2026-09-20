@@ -1,6 +1,5 @@
 'use client';
 import { ActivityTask, ActivityStudio } from './activities';
-import { SpeakingRecorder } from './speaking';
 import {CourseBar} from './course-bar';
 import {
   getActivities,
@@ -69,7 +68,6 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
   const classroom = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
-  const [showCover, setShowCover] = useState(true);
   useEffect(() => {
     const sync = () =>
       setExpanded(document.fullscreenElement === classroom.current);
@@ -121,8 +119,8 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
   );
   const points = getPoints(entries);
   const config = entries.find((e) => e.id === 'config')?.payload || {
-    videoUrl: '/lesson-cafe.mp4',
-    duration: 60,
+    videoUrl: '',
+    duration: 3600,
   };
   const answered = (id: string) =>
     entries.some((e) => e.id === 'attempt:' + id && e.payload.correct);
@@ -138,7 +136,6 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
   });
   const stageUnlocked = (stage: LessonStage) =>
     stageState.find((item) => item.stage === stage)?.unlocked !== false;
-  const practicePreview: LessonActivity = {id:'local-speaking-preview',revision:1,type:'shadow',time:0,title:'',prompt:'커피 한 잔 주세요.',reference:'커피 한 잔 주세요.',sourceStart:0,sourceEnd:6,answer:'',padletUrl:'',direction:'vi-ko'};
   useEffect(() => {
     if (point) {
       const target = document.getElementById('active-mission');
@@ -204,8 +201,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
     }
     savePosition(n);
   }
-  function seek(n: number, reveal = true) {
-    if (reveal) setShowCover(false);
+  function seek(n: number, _reveal = true) {
     if (!video.current) return;
     gate.current = false;
     setPoint(null);
@@ -257,14 +253,14 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
           <ArrowLeft size={16} />
           {t('Lớp học của tôi', '내 수업')}
         </button>
-        <span>/ {t('Sơ cấp 1 · Gọi món ở quán cà phê', '초급 1 · 카페에서 주문하기')}</span>
+        <span>/ {config.level || t('Khóa học', '과정')} · {config.lessonTitle || config.title || t('Bài học', '수업')}</span>
       </div>
       <div className="view-title">
         <div>
           <div className="eyebrow green">
-            {t('SƠ CẤP 1 · THỰC HÀNH GIAO TIẾP', '초급 1 · 실전 회화')}
+            {config.level || t('BÀI HỌC TƯƠNG TÁC', '쌍방향 수업')}
           </div>
-          <h1>{t('Gọi món ở quán cà phê', '카페에서 주문하기')}</h1>
+          <h1>{config.lessonTitle || config.title || t('Bài học', '수업')}</h1>
           <p>
             {t(
               'Luyện tập tại từng điểm dừng và đặt câu hỏi ngay trong video.',
@@ -278,7 +274,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
       </div>
       <div className="classroom-toolbar">
         <div>
-          <h1>{config.title || t('04. Gọi món ở quán cà phê', '04. 카페에서 주문하기')}</h1>
+          <h1>{config.title || config.lessonTitle || t('Bài học', '수업')}</h1>
         </div>
         <button
           className="secondary"
@@ -314,11 +310,6 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
               key={config.videoUrl}
               ref={video}
               src={config.videoUrl}
-              poster={
-                config.videoUrl === '/lesson-cafe.mp4'
-                  ? '/lesson-teacher.png'
-                  : undefined
-              }
               controls
               controlsList="nofullscreen"
               disablePictureInPicture
@@ -328,7 +319,6 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
               onTimeUpdate={update}
               onSeeking={update}
               onPlay={() => {
-                setShowCover(false);
                 if (gate.current) video.current?.pause();
               }}
               onPause={() => {
@@ -344,7 +334,6 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
               onError={() => setError(true)}
               onEnded={() => savePosition(config.duration)}
             />
-            {showCover && config.videoUrl==='/lesson-cafe.mp4' && <div className="lesson-cover"><img src="/lesson-teacher.png" alt={t('Ảnh minh họa lớp học','예제 수업 표지 이미지')}/><button onClick={()=>{setShowCover(false);video.current?.play().catch(()=>setError(true));}}><Play size={20} fill="currentColor"/>{t('Tiếp tục bài học','수업 시작하기')}</button></div>}
             {error && (
               <div className="video-error" role="alert">
                 <strong>
@@ -373,22 +362,14 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
             {events.map((e,i)=><button key={e.id} className={(activeActivity?.id===e.id || point?.id===e.id)?'current':e.done?'done':''} onClick={()=>seek(e.time)}><span>{e.done?<Check size={14}/>:String(i+2).padStart(2,'0')}</span><strong>{e.label}</strong><small>{formatTime(e.time)}</small></button>)}
           </div>
           <div className="reference-phrase">
-            <div><small>한국어</small><strong>{activeActivity?.type==='shadow' ? activeActivity.reference || activeActivity.prompt : '커피 한 잔 주세요.'}</strong></div>
-            <div><small>Tiếng Việt</small><p>{activeActivity?.type==='shadow' ? t('Câu luyện nói do giáo viên chọn','선생님이 정한 말하기 문장') : 'Cho tôi một ly cà phê.'}</p></div>
+            <div><small>한국어</small><strong>{activeActivity?.type==='shadow' ? activeActivity.reference || activeActivity.prompt : t('Nội dung do giáo viên thiết lập','선생님이 설정한 활동')}</strong></div>
+            <div><small>Tiếng Việt</small><p>{t('Chỉ hiển thị nội dung giáo viên đã thêm.','선생님이 직접 추가한 내용만 표시됩니다.')}</p></div>
             <button className="secondary" aria-expanded={notesOpen} onClick={()=>setNotesOpen(!notesOpen)}><BookOpen size={16}/>{t('Ghi chú','수업 노트')}<ChevronRight size={15}/></button>
           </div>
           <div className="video-caption">
             <span>
               <span className="live-dot" />{' '}
-              {config.videoUrl === '/lesson-cafe.mp4'
-                ? t(
-                    'Video mẫu 1 phút · Không có âm thanh',
-                    '1분 예제 영상 · 음성 없음',
-                  )
-                : t(
-                    'Video do giáo viên thiết lập',
-                    '선생님이 설정한 수업 영상',
-                  )}
+              {t('Video do giáo viên thiết lập', '선생님이 설정한 수업 영상')}
             </span>
             <button
               className="text-button"
@@ -450,8 +431,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
                       '원본을 듣고 따라 말해 보세요.',
                     )}
                   </p>
-                  {config.videoUrl === '/lesson-cafe.mp4' && <SpeakingRecorder activity={practicePreview} videoUrl={config.videoUrl} lang={lang} onReady={()=>{}} />}
-                  <button className="primary preview-continue" onClick={()=>{setShowCover(false);video.current?.play().catch(()=>setError(true));}}>{t('Tiếp tục bài học','수업 계속하기')}<ChevronRight size={17}/></button>
+                  <button className="primary preview-continue" onClick={()=>video.current?.play().catch(()=>setError(true))}>{t('Tiếp tục bài học','수업 계속하기')}<ChevronRight size={17}/></button>
                   <div className="practice-next">
                     {t('Tiếp theo', '다음 활동')} ·{' '}
                     {(() => {
@@ -917,8 +897,8 @@ export function Vocab({ lang, entries, mutate, busy }: Props) {
           <h1>{t('Sổ từ vựng của tôi', '나의 단어장')}</h1>
           <p>
             {t(
-              'Ôn lại 8 từ vừa gặp trong bài học về quán cà phê.',
-              '카페 수업에서 만난 8개 단어를 복습해요.',
+              'Ôn lại từ vựng giáo viên đã đăng.',
+              '선생님이 등록한 단어를 복습해요.',
             )}
           </p>
         </div>
@@ -934,7 +914,7 @@ export function Vocab({ lang, entries, mutate, busy }: Props) {
       </div>
       <div className="vocab-stats">
         <div>
-          <strong>08</strong>
+          <strong>{words.length.toString().padStart(2, '0')}</strong>
           <span>{t('Từ trong bài', '수업 단어')}</span>
         </div>
         <div>
@@ -958,7 +938,7 @@ export function Vocab({ lang, entries, mutate, busy }: Props) {
       <div className="row spread review-line">
         <p className="fineprint">
           {t('Lịch ôn hôm nay: ', '오늘 복습할 단어: ')}
-          {due.length} / 8
+          {due.length} / {words.length}
         </p>
         <button
           className="secondary"
@@ -1283,13 +1263,13 @@ export function Feedback({ lang, entries, mutate, busy, go }: Props) {
           </h2>
           <p>
             {t(
-              'Viết 2–3 câu bằng tiếng Hàn: gọi hai ly cà phê, hỏi giá và yêu cầu mang đi.',
-              '한국어로 2~3문장을 써 보세요. 커피 두 잔을 주문하고, 가격을 묻고, 포장을 요청해요.',
+              'Viết câu trả lời theo hướng dẫn của giáo viên.',
+              '선생님이 제시한 내용에 맞춰 답안을 작성하세요.',
             )}
           </p>
           <div className="grammar-callout">
             <span>{t('GỢI Ý', '도움 표현')}</span>
-            <strong>두 잔 · 얼마예요? · 포장</strong>
+            <strong>{t('Xem nội dung trong bài học','수업 내용을 확인하세요')}</strong>
           </div>
           <form onSubmit={submit}>
             <label htmlFor="assignment-body">
@@ -1390,8 +1370,8 @@ export function Teacher({ lang, entries, mutate, busy, go }: Props) {
   const points = getPoints(entries),
     assignment = entries.find((e) => e.id === 'assignment')?.payload,
     config = entries.find((e) => e.id === 'config')?.payload || {
-      videoUrl: '/lesson-cafe.mp4',
-      duration: 60,
+      videoUrl: '',
+      duration: 3600,
     };
   const teacherVideo = useRef<HTMLVideoElement>(null);
   const [teacherTime, setTeacherTime] = useState(0),
@@ -1962,7 +1942,7 @@ export function Teacher({ lang, entries, mutate, busy, go }: Props) {
               <span className="eyebrow green">
                 {t('CẤU TRÚC BÀI HỌC', '수업 구성')}
               </span>
-              <h2>{t('Gọi món ở quán cà phê', '카페에서 주문하기')}</h2>
+              <h2>{config.title || config.lessonTitle || t('Bài học đã chọn', '선택한 수업')}</h2>
               <p className="muted">
                 {formatTime(config.duration)} · {points.length}{' '}
                 {t('nhiệm vụ', '미션')}
