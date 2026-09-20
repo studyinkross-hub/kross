@@ -49,10 +49,15 @@ export function CourseBar({lang,teacher=false}:{lang:string;teacher?:boolean;ini
       for(const partNumber of partNumbers){
         const offset=(partNumber-1)*chunkSize,chunk=file.slice(offset,Math.min(offset+chunkSize,file.size),type);
         const partUrl=`/api/media?action=part&key=${encodeURIComponent(session.key)}&uploadId=${encodeURIComponent(session.uploadId)}&partNumber=${partNumber}`;
-        const response=await fetch(partUrl,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:chunk});
-        const data=await response.json() as UploadedPart&{error?:string};
-        if(!response.ok)throw Error(data.error||'PART_FAILED');
-        parts.push({partNumber:data.partNumber,etag:data.etag});
+        let savedPart:UploadedPart|null=null,lastError='PART_FAILED';
+        for(let attempt=1;attempt<=3&&!savedPart;attempt++){
+          const response=await fetch(partUrl,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:chunk});
+          const data=await response.json() as UploadedPart&{error?:string};
+          if(response.ok)savedPart={partNumber:data.partNumber,etag:data.etag};
+          else lastError=data.error||lastError;
+        }
+        if(!savedPart)throw Error(lastError);
+        parts.push(savedPart);
         setProgress(Math.round(Math.min(file.size,offset+chunk.size)/file.size*100));
       }
       const complete=await fetch('/api/media?action=complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:session.key,uploadId:session.uploadId,parts})});

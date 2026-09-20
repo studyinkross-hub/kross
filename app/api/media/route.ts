@@ -31,7 +31,11 @@ export async function POST(req:Request){
     if(action==='part'){
       const url=new URL(req.url),key=url.searchParams.get('key')||'',uploadId=url.searchParams.get('uploadId')||'',partNumber=Number(url.searchParams.get('partNumber'));
       if(!keyPattern.test(key)||!uploadId||!Number.isInteger(partNumber)||partNumber<1||partNumber>10000||!req.body)return Response.json({error:'INVALID_PART'},{status:400});
-      const part=await media().resumeMultipartUpload(key,uploadId).uploadPart(partNumber,req.body);
+      const declaredSize=Number(req.headers.get('content-length'));
+      if(!Number.isFinite(declaredSize)||declaredSize<1||declaredSize>16*1024*1024)return Response.json({error:'INVALID_PART_SIZE'},{status:400});
+      const bytes=await req.arrayBuffer();
+      if(bytes.byteLength!==declaredSize)return Response.json({error:'INCOMPLETE_PART'},{status:400});
+      const part=await media().resumeMultipartUpload(key,uploadId).uploadPart(partNumber,bytes);
       return Response.json({partNumber:part.partNumber,etag:part.etag});
     }
     if(action==='complete'){
@@ -46,7 +50,10 @@ export async function POST(req:Request){
     if(!file)return Response.json({error:'INVALID_FILE'},{status:400});
     await media().put(file.key,raw.stream(),{httpMetadata:{contentType:file.type},customMetadata:{name:file.name}});
     return Response.json({url:'/api/media?id='+encodeURIComponent(file.key),name:file.name,type:file.type,size:file.size});
-  }catch{return Response.json({error:'UPLOAD_FAILED'},{status:500});}
+  }catch(error){
+    console.error('media upload failed',action,error);
+    return Response.json({error:`UPLOAD_FAILED_${action.toUpperCase()}`},{status:500});
+  }
 }
 
 export async function DELETE(req:Request){
