@@ -6,12 +6,13 @@ const group='__course_catalog__';
 const levels=['기초+초급1','초급2','초급회화','중급1','중급2','중급회화','TOPIK1','TOPIK2 3·4급','TOPIK2 5·6급'];
 const sameOrigin=(req:Request)=>!req.headers.get('origin')||req.headers.get('origin')===new URL(req.url).origin;
 const media=()=> (env as unknown as {MEDIA:R2Bucket}).MEDIA;
-type Video={id:string;title:string;level:string;videoUrl:string;duration:number};
+type Video={id:string;title:string;level:string;lessonNumber:number;lessonTitle:string;videoUrl:string;duration:number};
 
 export async function GET(){
   try{
     const r=await database().prepare("SELECT payload FROM records WHERE session=? AND kind='courseVideo' ORDER BY updated_at ASC").bind(group).all<{payload:string}>();
-    return Response.json({videos:r.results.map(x=>JSON.parse(x.payload))},{headers:{'Cache-Control':'no-store'}});
+    const videos=r.results.map(x=>JSON.parse(x.payload) as Partial<Video>).map((video,index)=>({...video,lessonNumber:Number(video.lessonNumber)||1,lessonTitle:video.lessonTitle||video.title||`Lesson ${index+1}`}));
+    return Response.json({videos},{headers:{'Cache-Control':'no-store'}});
   }catch{return Response.json({error:'UNAVAILABLE'},{status:503});}
 }
 
@@ -22,8 +23,8 @@ export async function POST(req:Request){
     const raw=await req.text();
     if(raw.length>4096)return Response.json({error:'INVALID'},{status:400});
     const b=JSON.parse(raw),internal=typeof b.videoUrl==='string'&&b.videoUrl.startsWith('/api/media?id=media%2F');
-    if(typeof b.title!=='string'||!b.title.trim()||b.title.length>120||!levels.includes(b.level)||!internal||!Number.isInteger(b.duration)||b.duration<10||b.duration>14400)return Response.json({error:'INVALID'},{status:400});
-    const item:Video={id:crypto.randomUUID(),title:b.title.trim(),level:b.level,videoUrl:b.videoUrl,duration:b.duration};
+    if(typeof b.title!=='string'||!b.title.trim()||b.title.length>120||typeof b.lessonTitle!=='string'||!b.lessonTitle.trim()||b.lessonTitle.length>120||!Number.isInteger(b.lessonNumber)||b.lessonNumber<1||b.lessonNumber>999||!levels.includes(b.level)||!internal||!Number.isInteger(b.duration)||b.duration<10||b.duration>14400)return Response.json({error:'INVALID'},{status:400});
+    const item:Video={id:crypto.randomUUID(),title:b.title.trim(),level:b.level,lessonNumber:b.lessonNumber,lessonTitle:b.lessonTitle.trim(),videoUrl:b.videoUrl,duration:b.duration};
     await database().prepare("INSERT INTO records(session,id,kind,payload,updated_at) VALUES (?,?,'courseVideo',?,?)").bind(group,item.id,JSON.stringify(item),new Date().toISOString()).run();
     return Response.json({video:item});
   }catch{return Response.json({error:'INVALID'},{status:400});}
