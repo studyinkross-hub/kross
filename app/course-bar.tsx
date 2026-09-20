@@ -133,3 +133,18 @@ export function CourseBar({lang,teacher=false}:{lang:string;teacher?:boolean;ini
     </form>}
   </section>;
 }
+
+export function CourseFlowBar({lang,current}:{lang:string;current:Partial<Video>}){
+  const [videos,setVideos]=useState<Video[]>([]);
+  useEffect(()=>{fetch('/api/course').then(async response=>{if(!response.ok)throw Error();return await response.json() as {videos:Video[]};}).then(data=>setVideos(data.videos)).catch(()=>setVideos([]));},[]);
+  const steps=videos.filter(video=>video.level===current.level&&video.lessonNumber===current.lessonNumber);
+  if(!steps.length)return null;
+  const go=(id:string)=>{const url=new URL(location.href);url.searchParams.set('lesson',id);url.hash='lesson';location.assign(url.href);};
+  return <nav className="lesson-stage-bar course-flow-bar" aria-label={lang==='ko'?'수업 순서':'Trình tự bài học'}>
+    {steps.map((video,index)=><button key={video.id} type="button" className={video.id===current.id?'current':''} aria-current={video.id===current.id?'step':undefined} onClick={()=>go(video.id)}>
+      <span>{String(index+1).padStart(2,'0')}</span>
+      <strong>{segmentLabel(video.segmentType,lang)}</strong>
+      <small>{video.title}</small>
+    </button>)}
+  </nav>;
+}

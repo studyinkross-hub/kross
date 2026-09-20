@@ -1,6 +1,6 @@
 'use client';
 import { ActivityTask, ActivityStudio } from './activities';
-import {CourseBar} from './course-bar';
+import {CourseBar,CourseFlowBar} from './course-bar';
 import {segmentLabel} from '@/lib/course-flow';
 import {
   getActivities,
@@ -106,7 +106,6 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
     }
   }
   const lastSave = useRef(-1);
-  const gate = useRef(false);
   const [time, setTime] = useState(0),
     [point, setPoint] = useState<Checkpoint | null>(null),
     [selected, setSelected] = useState<number | null>(null),
@@ -127,16 +126,6 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
     entries.some((e) => e.id === 'attempt:' + id && e.payload.correct);
   const done = points.filter((p) => answered(p.id)).length;
   const events = [...activities.map(a => ({id:a.id,time:a.time,label:activityLabels[a.type][lang === 'ko' ? 1 : 0],done:activityCompleted(a,entries),stage:activityStage(a)})), ...points.map((p,i) => ({id:p.id,time:p.time,label:t('Bài tập','확인 문제')+' '+(i+1),done:answered(p.id),stage:(p.stage || 'vocab') as LessonStage}))].sort((a,b)=>a.time-b.time);
-  const stageState = lessonStages.map((stage, index) => {
-    const stageEvents = events.filter((event) => event.stage === stage);
-    const unlocked = lessonStages.slice(0, index).every((previous) => {
-      const previousEvents = events.filter((event) => event.stage === previous);
-      return previousEvents.length === 0 || previousEvents.every((event) => event.done);
-    });
-    return { stage, unlocked, complete: stageEvents.length > 0 && stageEvents.every((event) => event.done), done: stageEvents.filter((event) => event.done).length, total: stageEvents.length, firstTime: stageEvents[0]?.time || 0 };
-  });
-  const stageUnlocked = (stage: LessonStage) =>
-    stageState.find((item) => item.stage === stage)?.unlocked !== false;
   useEffect(() => {
     if (point) {
       const target = document.getElementById('active-mission');
@@ -145,21 +134,20 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
     }
   }, [point?.id]);
   function openPoint(cp: Checkpoint) {
-    if (!stageUnlocked(cp.stage || 'vocab')) return;
-    video.current?.pause();
-    gate.current = true;
     setActiveActivity(null);
     setPoint(cp);
     setSelected(null);
     setResult(null);
   }
   function openActivity(a: LessonActivity) {
-    if (!stageUnlocked(activityStage(a))) return;
-    video.current?.pause();
-    gate.current = true;
     setPoint(null);
     setActiveActivity(a);
   }
+  useEffect(()=>{
+    if(activeActivity||point)return;
+    const next=[...activities.filter(a=>!activityCompleted(a,entries)).map(activity=>({time:activity.time,activity,point:null})),...points.filter(item=>!answered(item.id)).map(item=>({time:item.time,activity:null,point:item}))].sort((a,b)=>a.time-b.time)[0];
+    if(next?.activity)setActiveActivity(next.activity);else if(next?.point)setPoint(next.point);
+  },[entries,config.id,activeActivity,point]);
   useEffect(() => {
     if (activeActivity) {
       const el = document.getElementById('active-activity');
@@ -167,17 +155,6 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
       el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
   }, [activeActivity?.id]);
-  function nextEvent(n: number) {
-    const cp = points.find((p) => p.time <= n && !answered(p.id) && stageUnlocked(p.stage || 'vocab'));
-    const a = activities.find(
-      (p) => p.time <= n && !activityCompleted(p, entries) && stageUnlocked(activityStage(p)),
-    );
-    return a && (!cp || a.time < cp.time)
-      ? { time: a.time, activity: a, point: null }
-      : cp
-        ? { time: cp.time, point: cp, activity: null }
-        : null;
-  }
   function savePosition(n: number) {
     if (Math.abs(n - lastSave.current) > 4) {
       lastSave.current = n;
@@ -194,24 +171,11 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
     if (!v) return;
     const n = v.currentTime;
     setTime(n);
-    const event = nextEvent(n);
-    if (event && !gate.current) {
-      v.currentTime = event.time;
-      if (event.activity) openActivity(event.activity);
-      else if (event.point) openPoint(event.point);
-    }
     savePosition(n);
   }
   function seek(n: number, _reveal = true) {
     if (!video.current) return;
-    gate.current = false;
-    setPoint(null);
-    setResult(null);
-    setActiveActivity(null);
-    const first = nextEvent(n);
-    video.current.currentTime = first ? first.time : n;
-    if (first?.activity) openActivity(first.activity);
-    else if (first?.point) openPoint(first.point);
+    video.current.currentTime = n;
     setTime(video.current.currentTime);
   }
   async function check() {
@@ -227,7 +191,6 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
   }
   function resume() {
     setActiveActivity(null);
-    gate.current = false;
     setPoint(null);
     setResult(null);
     if (video.current) video.current.play().catch(() => setError(true));
@@ -291,21 +254,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
       </div>
       <div className="learning-grid">
         <CourseBar lang={lang} initialVideo={config}/>
-        <nav className="lesson-stage-bar" aria-label={t('Tiến trình bài học', '수업 단계')}>
-          {stageState.map((item, index) => (
-            <button
-              key={item.stage}
-              type="button"
-              className={item.complete ? 'done' : item.unlocked ? 'current' : 'locked'}
-              aria-disabled={!item.unlocked}
-              onClick={() => seek(item.unlocked ? item.firstTime : events.find((event) => !event.done)?.time || 0)}
-            >
-              <span>{item.complete ? <Check size={14}/> : String(index + 1).padStart(2, '0')}</span>
-              <strong>{stageLabels[item.stage][lang === 'ko' ? 1 : 0]}</strong>
-              <small>{item.unlocked ? `${item.done}/${item.total}` : t('Chưa mở', '잠김')}</small>
-            </button>
-          ))}
-        </nav>
+        <CourseFlowBar lang={lang} current={config}/>
         <section>
           <div className="video-wrap">
             <video
@@ -321,7 +270,6 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
               onTimeUpdate={update}
               onSeeking={update}
               onPlay={() => {
-                if (gate.current) video.current?.pause();
               }}
               onPause={() => {
                 if (video.current) savePosition(video.current.currentTime);
@@ -429,8 +377,8 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
                   </h2>
                   <p>
                     {t(
-                      'Video tự dừng tại thời điểm giáo viên đã chọn. Bài tập sẽ xuất hiện ngay ở đây.',
-                      '원본을 듣고 따라 말해 보세요.',
+                      'Xem video và làm hoạt động ở bên cạnh theo thứ tự.',
+                      '영상을 보면서 오른쪽 활동을 순서대로 연습하세요.',
                     )}
                   </p>
                   <button className="primary preview-continue" onClick={()=>video.current?.play().catch(()=>setError(true))}>{t('Tiếp tục bài học','수업 계속하기')}<ChevronRight size={17}/></button>
@@ -529,7 +477,6 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
                   <button
                     className="text-button"
                     onClick={() => {
-                      gate.current = false;
                       setPoint(null);
                       video.current!.currentTime = Math.max(0, point.time - 10);
                       video.current?.play().catch(() => {});
@@ -558,6 +505,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
             )}
             {!point &&
               !activeActivity &&
+              points.length + activities.length > 0 &&
               done === points.length &&
               activities.every((a) => activityCompleted(a, entries)) && (
                 <div className="success-panel">
