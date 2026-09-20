@@ -2,8 +2,9 @@
 import {useEffect,useState} from 'react';
 import {ChevronDown,ChevronLeft,ChevronRight,ListVideo,Save,Trash2,Upload} from 'lucide-react';
 import {formatTime,parseTime} from '@/lib/course';
+import {segmentLabel,segmentOptions,type SegmentType} from '@/lib/course-flow';
 
-type Video={id:string;title:string;level:string;lessonNumber:number;lessonTitle:string;duration:number;videoUrl:string};
+type Video={id:string;title:string;level:string;lessonNumber:number;lessonTitle:string;duration:number;videoUrl:string;segmentType:SegmentType};
 type UploadSession={key:string;uploadId:string;url:string};
 type UploadedPart={partNumber:number;etag:string};
 const levels=['기초+초급1','초급2','초급회화','중급1','중급2','중급회화','TOPIK1','TOPIK2 3·4급','TOPIK2 5·6급'];
@@ -12,8 +13,10 @@ export function CourseBar({lang,teacher=false}:{lang:string;teacher?:boolean;ini
   const [videos,setVideos]=useState<Video[]>([]),[open,setOpen]=useState(teacher),[error,setError]=useState(''),[notice,setNotice]=useState('');
   const [busy,setBusy]=useState(false),[progress,setProgress]=useState(0),[level,setLevel]=useState('기초+초급1'),[videoUrl,setVideoUrl]=useState('');
   const [lessonNumber,setLessonNumber]=useState('1'),[lessonTitle,setLessonTitle]=useState(''),[clipTitle,setClipTitle]=useState(''),[duration,setDuration]=useState('');
+  const [segmentType,setSegmentType]=useState<SegmentType>('conversation-shadow');
   const [selected,setSelected]=useState('');
   const t=(ko:string,vi:string)=>lang==='ko'?ko:vi;
+  const flow=segmentOptions(level);
 
   useEffect(()=>{
     fetch('/api/course').then(r=>{if(!r.ok)throw Error();return r.json() as Promise<{videos:Video[]}>;})
@@ -89,7 +92,7 @@ export function CourseBar({lang,teacher=false}:{lang:string;teacher?:boolean;ini
     try{
       const seconds=parseTime(duration),number=Number(lessonNumber);
       if(!videoUrl||!lessonTitle.trim()||!clipTitle.trim()||!Number.isInteger(number)||number<1||!Number.isInteger(seconds)||seconds<10)throw Error('INVALID');
-      const response=await fetch('/api/course',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:clipTitle,level,lessonNumber:number,lessonTitle,videoUrl,duration:seconds})});
+      const response=await fetch('/api/course',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:clipTitle,level,lessonNumber:number,lessonTitle,videoUrl,duration:seconds,segmentType})});
       const data=await response.json() as {video?:Video;error?:string};
       if(!response.ok||!data.video){if(response.status===403)window.dispatchEvent(new Event('kross-teacher-locked'));throw Error(data.error||'SAVE_FAILED');}
       setVideos(list=>[...list,data.video!]);setClipTitle('');setDuration('');setVideoUrl('');setProgress(0);
@@ -108,7 +111,7 @@ export function CourseBar({lang,teacher=false}:{lang:string;teacher?:boolean;ini
       {groups.map(group=><section className="course-lesson-group" key={group.key}>
         <div className="course-lesson-heading"><strong>{t(`제${group.number}과`,`Bài ${group.number}`)} · {group.title}</strong><span>{group.videos.length}{t('개 영상',' video')}</span></div>
         <div className="course-video-list">{group.videos.map((video,videoIndex)=><article key={video.id} className={selected===video.id?'selected':''}>
-          <button className="course-video-open" onClick={()=>go(video.id)} aria-current={selected===video.id?'page':undefined}><span>{String(videoIndex+1).padStart(2,'0')}</span><strong>{video.title}</strong><small>{formatTime(video.duration)}</small></button>
+          <button className="course-video-open" onClick={()=>go(video.id)} aria-current={selected===video.id?'page':undefined}><span>{String(videoIndex+1).padStart(2,'0')}</span><strong>{video.title}</strong><small>{segmentLabel(video.segmentType,lang)} · {formatTime(video.duration)}</small></button>
           {teacher&&<button className="course-video-delete" disabled={busy} onClick={()=>remove(video)} aria-label={t(`${video.title} 삭제`,`Xóa ${video.title}`)}><Trash2 size={15}/></button>}
         </article>)}</div>
       </section>)}
@@ -118,14 +121,15 @@ export function CourseBar({lang,teacher=false}:{lang:string;teacher?:boolean;ini
     {teacher&&<form className="course-add" onSubmit={saveClip}>
       <h3>{t('과에 영상 1개 추가','Thêm một video vào bài')}</h3>
       <p>{t('같은 1과에 영상이 3개라면 이 저장 절차를 3번 반복하세요. 각 영상마다 과제를 따로 설정할 수 있습니다.','Nếu Bài 1 có 3 video, hãy lưu 3 lần. Mỗi video có thể đặt bài tập riêng.')}</p>
-      <label>{t('과정','Khóa học')}<select value={level} onChange={event=>setLevel(event.target.value)}>{levels.map(value=><option key={value}>{value}</option>)}</select></label>
+      <label>{t('과정','Khóa học')}<select value={level} onChange={event=>{const next=event.target.value;setLevel(next);setSegmentType(segmentOptions(next)[0].value);}}>{levels.map(value=><option key={value}>{value}</option>)}</select></label>
+      <label>{t('이 영상의 역할','Vai trò của video')}<select value={segmentType} onChange={event=>setSegmentType(event.target.value as SegmentType)}>{flow.map(option=><option value={option.value} key={option.value}>{lang==='ko'?option.ko:option.vi}</option>)}</select></label>
       <label>{t('과 번호','Số bài')}<input type="number" min="1" max="999" value={lessonNumber} onChange={event=>setLessonNumber(event.target.value)} required/></label>
       <label>{t('과 제목','Tên bài')}<input value={lessonTitle} onChange={event=>setLessonTitle(event.target.value)} placeholder={t('예: 자기소개','Ví dụ: Giới thiệu bản thân')} required maxLength={120}/></label>
       <label>{t('영상 제목','Tên video')}<input value={clipTitle} onChange={event=>setClipTitle(event.target.value)} placeholder={t('예: 회화 듣기 1','Ví dụ: Nghe hội thoại 1')} required maxLength={120}/></label>
       <label className="file-upload"><Upload size={16}/>{t('이 영상 파일 올리기','Tải tệp video này')}<input type="file" accept="video/mp4,video/webm" disabled={busy} onChange={event=>{const file=event.target.files?.[0];if(file)void upload(file);}}/><small>{busy?t(`업로드 중 ${progress}%`,`Đang tải lên ${progress}%`):videoUrl?t('업로드 완료 · 아래 저장 버튼을 누르세요','Đã tải lên · Nhấn nút lưu bên dưới'):t('MP4 또는 WebM · 영상마다 따로 업로드','MP4 hoặc WebM · tải riêng từng video')}</small>{busy&&<progress max="100" value={progress}/>}</label>
       <label>{t('이 영상의 길이 · 시:분:초','Thời lượng video · giờ:phút:giây')}<input value={duration} onChange={event=>setDuration(event.target.value)} placeholder="00:20:00" required/></label>
       <button className="primary" disabled={busy||!videoUrl}><Save size={16}/>{t('이 영상 저장','Lưu video này')}</button>
-      <p>{t('저장된 영상 카드를 선택하면 그 영상에 정지 시점과 과제를 넣을 수 있습니다.','Chọn thẻ video đã lưu để thêm điểm dừng và bài tập cho video đó.')}</p>
+      <p>{t('영상은 등록한 순서대로 표시됩니다. 저장된 영상을 선택하면 그 영상에 쉐도잉·PADLET·문제·번역 활동을 직접 넣을 수 있습니다.','Video hiển thị theo thứ tự đã đăng. Chọn video đã lưu để thêm shadowing, PADLET, câu hỏi hoặc bài dịch.')}</p>
     </form>}
   </section>;
 }

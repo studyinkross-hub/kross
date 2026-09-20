@@ -1,6 +1,7 @@
 'use client';
 import { ActivityTask, ActivityStudio } from './activities';
 import {CourseBar} from './course-bar';
+import {segmentLabel} from '@/lib/course-flow';
 import {
   getActivities,
   activityCompleted,
@@ -274,6 +275,7 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
       </div>
       <div className="classroom-toolbar">
         <div>
+          <span className="eyebrow green">{segmentLabel(config.segmentType,lang)}</span>
           <h1>{config.title || config.lessonTitle || t('Bài học', '수업')}</h1>
         </div>
         <button
