@@ -361,10 +361,10 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
           >
             {!activeActivity &&
               !point &&
-              !(
+              (points.length+activities.length===0||!(
                 done === points.length &&
                 activities.every((a) => activityCompleted(a, entries))
-              ) && (
+              )) && (
                 <div className="practice-waiting">
                   <span className="eyebrow green">
                     {t('ĐẾN LƯỢT BẠN', 'YOUR PRACTICE')}
@@ -519,13 +519,13 @@ export function Lesson({ lang, entries, mutate, busy, go }: Props) {
                     </strong>
                     <p>
                       {t(
-                        'Bây giờ, viết một đoạn hội thoại và gửi giáo viên.',
-                        '이제 짧은 대화를 작성해 선생님께 제출해 보세요.',
+                        'Chọn video tiếp theo ở thanh phía trên để tiếp tục.',
+                        '위 수업 단계에서 다음 영상을 선택해 이어서 학습하세요.',
                       )}
                     </p>
                   </div>
-                  <button className="primary" onClick={() => go('feedback')}>
-                    {t('Làm bài cuối', '마무리 과제')}
+                  <button className="primary" onClick={() => go('home')}>
+                    {t('Xem tất cả video', '전체 영상 보기')}
                   </button>
                 </div>
               )}

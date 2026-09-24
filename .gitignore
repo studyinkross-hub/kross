@@ -39,6 +39,8 @@ next-env.d.ts
 /work/
 
 /wrangler.local.json
+/kross-site-v*.tar.gz
+/.site-package-*/
 *.tsbuildinfo
 /supabase/.temp/
 /.cli-home/

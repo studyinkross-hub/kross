@@ -3,7 +3,21 @@ import {useEffect,useState,type ReactNode} from 'react';
 import {ArrowRight,BookOpenCheck,KeyRound,LogIn,ShieldCheck,UserPlus} from 'lucide-react';
 
 type StudentProfile={name:string;email:string;role:string;course:{title:string;level:string}|null};
-type AuthStatus={authenticated:boolean;profile?:StudentProfile|null;teacher?:boolean};
+export type AuthStatus={authenticated:boolean;profile?:StudentProfile|null;teacher?:boolean};
+
+export function LoginDialog({open,onClose,onAuthenticated,lang}:{open:boolean;onClose:()=>void;onAuthenticated:(status:AuthStatus)=>void;lang:string}){
+  const [mode,setMode]=useState<'student'|'signup'|'teacher'>('student'),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[name,setName]=useState(''),[code,setCode]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+  const t=(ko:string,vi:string)=>lang==='ko'?ko:vi;
+  useEffect(()=>{if(!open)return;const escape=(event:KeyboardEvent)=>{if(event.key==='Escape')onClose();};window.addEventListener('keydown',escape);return()=>window.removeEventListener('keydown',escape);},[open,onClose]);
+  if(!open)return null;
+  async function submit(event:React.FormEvent){event.preventDefault();setBusy(true);setError('');try{
+    const response=await fetch(mode==='teacher'?'/api/teacher':'/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(mode==='teacher'?{password}:{action:mode==='signup'?'signup':'login',email,password,name,code})});
+    const data=await response.json() as AuthStatus&{error?:string};if(!response.ok)throw Error(data.error||'UNAVAILABLE');
+    onAuthenticated(mode==='teacher'?{authenticated:false,teacher:true}:data);
+  }catch(e){const key=e instanceof Error?e.message:'';setError(key==='LOGIN_FAILED'?t('이메일 또는 비밀번호를 확인하세요.','Kiểm tra email hoặc mật khẩu.'):key==='INVITE_INVALID'?t('초대코드와 이메일을 확인하세요.','Kiểm tra email và mã mời.'):key==='PASSWORD'?t('강사 비밀번호를 확인하세요.','Kiểm tra mật khẩu giáo viên.'):t('로그인할 수 없습니다. 잠시 후 다시 시도하세요.','Không thể đăng nhập. Vui lòng thử lại.'));}finally{setBusy(false);}
+  }
+  return <div className="login-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)onClose();}}><section className="login-dialog" role="dialog" aria-modal="true" aria-labelledby="login-title"><div className="login-dialog-head"><span className="eyebrow">KROSS THE MASTER</span><button type="button" onClick={onClose} aria-label={t('닫기','Đóng')}>×</button></div><h2 id="login-title">{mode==='teacher'?t('강사 로그인','Đăng nhập giáo viên'):mode==='signup'?t('초대코드로 가입','Đăng ký bằng mã mời'):t('수업에 로그인','Đăng nhập để học')}</h2><div className="login-tabs"><button type="button" className={mode==='student'?'active':''} onClick={()=>{setMode('student');setError('')}}>{t('학생','Học viên')}</button><button type="button" className={mode==='teacher'?'active':''} onClick={()=>{setMode('teacher');setError('')}}>{t('선생님','Giáo viên')}</button></div><form onSubmit={submit}>{mode==='signup'&&<label>{t('이름','Họ tên')}<input value={name} onChange={event=>setName(event.target.value)} required minLength={2}/></label>}{mode!=='teacher'&&<label>{t('이메일','Email')}<input type="email" value={email} onChange={event=>setEmail(event.target.value)} required autoComplete="email"/></label>}<label>{t('비밀번호','Mật khẩu')}<input type="password" value={password} onChange={event=>setPassword(event.target.value)} required minLength={mode==='teacher'?1:8} autoComplete={mode==='signup'?'new-password':'current-password'}/></label>{mode==='signup'&&<label>{t('초대코드','Mã mời')}<input value={code} onChange={event=>setCode(event.target.value.toUpperCase())} required/></label>}{error&&<p role="alert" className="access-error">{error}</p>}<button className="primary" disabled={busy}>{busy?t('확인 중…','Đang kiểm tra…'):mode==='signup'?t('가입하기','Đăng ký'):t('로그인','Đăng nhập')}</button></form>{mode!=='teacher'&&<button className="signup-switch" onClick={()=>{setMode(mode==='signup'?'student':'signup');setError('')}}>{mode==='signup'?t('이미 계정이 있나요? 로그인','Đã có tài khoản? Đăng nhập'):t('초대코드가 있나요? 가입하기','Có mã mời? Đăng ký')}</button>}</section></div>;
+}
 
 export function StudentAccess({lang,children}:{lang:string;children:ReactNode}){
   const [status,setStatus]=useState<AuthStatus|null>(null),[mode,setMode]=useState<'login'|'signup'>('login');

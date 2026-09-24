@@ -3,7 +3,7 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'KROSS THE MASTER · Học cùng nhau',
   description:
-    '한국어 영상 수업과 미션, 단어 복습, 선생님 피드백을 연결하는 KROSS THE MASTER.',
+    'KROSS THE MASTER 한국어 온라인 영상 수업. 과정별 영상과 학생별 학습 진도를 한곳에서 확인하세요.',
 };
 export default function RootLayout({
   children,
