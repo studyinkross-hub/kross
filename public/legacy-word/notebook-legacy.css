@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
+:root{--ink:#1f2430;--paper:#fbfaf4;--card:#fff;--card-soft:#f8f7f1;--leaf:#2458c6;--leaf-deep:#2458c6;--leaf-tint:#dce8fb;--red:#bb523a;--red-tint:#fde2d6;--gold:#ffe066;--gold-tint:#fff1a8;--dim:#6a6e78;--line:#c9c3b1;--sh:rgba(31,36,48,.08);--bw:1px;--off:0px;--r:16px;--bg:#fbfaf4;--accent:#2458c6;--accent-2:#2458c6}
+body.dark{--ink:#f4f2e9;--paper:#171c27;--card:#252b38;--card-soft:#2b3240;--leaf:#94b5ff;--leaf-deep:#94b5ff;--leaf-tint:#303c55;--red:#ff9b85;--red-tint:#49333a;--gold:#ffe066;--gold-tint:#403b2d;--dim:#b8bdc8;--line:#586173;--sh:rgba(0,0,0,.16);--bg:#171c27;--accent:#94b5ff;--accent-2:#94b5ff}
+body{background-color:var(--paper)!important;background-image:linear-gradient(#e9e6da 1px,transparent 1px),linear-gradient(90deg,#e9e6da 1px,transparent 1px)!important;background-size:32px 32px!important;color:var(--ink)}
+body.dark{background-image:none!important}
+.header,.card,.level-card,.lesson-chip,.name-row,.flash-card,.study-abroad-cta,.homework-cta,.theme-toggle,.site-header,.home-btn,.nav-tabs button.active{box-shadow:0 12px 30px var(--sh)!important;border-color:var(--line)!important}
+.header,.card,.level-card,.lesson-chip,.name-row,.flash-card{border-width:1px!important}
+.header{background:var(--card)}
+.site-header{background:var(--paper)!important}
+button,.btn,.level-card,.lesson-chip{transition:transform .15s ease,background-color .15s ease}
+button:hover,.level-card:hover,.lesson-chip:hover{box-shadow:0 12px 30px var(--sh)}
+.study-abroad-cta{background:var(--ink)!important}.homework-cta{background:var(--leaf-deep)!important}.study-abroad-cta:hover,.homework-cta:hover{box-shadow:0 12px 30px var(--sh)!important}
